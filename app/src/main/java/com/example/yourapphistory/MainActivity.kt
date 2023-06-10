@@ -162,7 +162,9 @@ class MainActivity : ComponentActivity() {
 
         eventUsage.forEach { eventUsage ->  // 비정상 종료된 앱들
             if (launch_able_apps.any { it.activityInfo.packageName == eventUsage.key} ) {
-                totalUsage.add(eventUsage.value)
+                if (isRealUsedPackage(eventUsage.value)) {
+                    totalUsage.add(eventUsage.value)
+                }
             }
         }
         eventUsage.clear()
@@ -173,8 +175,8 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun isRealUsedPackage(packageUsageInfo: AppUsageInfo): Boolean {
-//        return (packageUsageInfo.endTime - packageUsageInfo.beginTime) > 1000L
-        return true
+        return (packageUsageInfo.endTime - packageUsageInfo.beginTime) > 1000L
+                && packageUsageInfo.endTime != 0L
     }
 
     private fun checkPermission() {

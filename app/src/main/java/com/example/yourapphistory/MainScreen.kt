@@ -87,22 +87,32 @@ fun MainScreen(
             }
         }
         Log.e("123chs", usageList.size.toString())
-        items(usageList) {
-            Text(
-                text = it.packageName,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = it.beginTime.toSimpleDateConvert(),
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = it.endTime.toSimpleDateConvert(),
-            )
-        }
 
+        if (usageList.isNotEmpty()) {
+            item {
+                UsageChart(
+                    usageInfoList = usageList,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(250.dp)
+                )
+            }
+        }
+//        items(usageList) {
+//            Text(
+//                text = it.packageName,
+//                maxLines = 1,
+//                overflow = TextOverflow.Ellipsis
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = it.beginTime.toSimpleDateConvert(),
+//            )
+//            Spacer(modifier = Modifier.height(4.dp))
+//            Text(
+//                text = it.endTime.toSimpleDateConvert(),
+//            )
+//        }
     }
 
     if (openDatePicker) {
