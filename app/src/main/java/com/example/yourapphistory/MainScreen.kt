@@ -3,6 +3,7 @@ package com.example.yourapphistory
 import android.content.Context
 import android.util.Log
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -53,8 +54,6 @@ import java.util.Locale
 
 @Composable
 fun MainScreen(
-    usageList: List<AppUsageInfo>,
-    onQueryUsage: (Long, Long) -> Unit,
     viewModel: MainViewModel = viewModel()
 ) {
     val context: Context = LocalContext.current
@@ -67,37 +66,12 @@ fun MainScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        item {
-            Column(
-              horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                ItemTime(start = state.startDate, end = state.endDate) {
-                    openDatePicker = true
-                }
-
-                Button(onClick = {
-                    if (state.startDate != null && state.endDate != null) {
-                        onQueryUsage(state.startDate!!, state.endDate!!)
-                    } else {
-                        Toast.makeText(context, "Please Select Date", Toast.LENGTH_SHORT).show()
-                    }
-                }) {
-                    Text(text = "Get App History")
-                }
+        items(Util.getLauncherAppList(context).toList()) {
+            Row {
+                Text(text = it.first)
             }
         }
-        Log.e("123chs", usageList.size.toString())
 
-        if (usageList.isNotEmpty()) {
-            item {
-                UsageChart(
-                    usageInfoList = usageList,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(250.dp)
-                )
-            }
-        }
 //        items(usageList) {
 //            Text(
 //                text = it.packageName,
