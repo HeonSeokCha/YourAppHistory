@@ -7,15 +7,51 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
+import java.time.LocalDateTime
+import java.time.LocalTime
 
 object Util {
 
-    fun getLauncherAppList(context: Context): HashMap<String, Drawable> {
-        val appInfoMap: HashMap<String, Drawable> = hashMapOf()
+    fun getLauncherAppInfoList(
+        context: Context,
+    ): List<AppInfo> {
+        val localDateTime: LocalDateTime = LocalDateTime.now()
 
-        val mainIntent = Intent(Intent.ACTION_MAIN, null)
-        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val appInfoMap: HashMap<String, Long> = hashMapOf()
+
+         getUsageEventList(
+            context = context,
+            launcherAppList = getLauncherPackageNameList(context),
+            beginDate = localDateTime.with(LocalTime.MIN).toMillis(),
+            endDate = localDateTime.with(LocalTime.MAX).toMillis()
+        ).forEach { appUsageInfo ->
+            if (appInfoMap.containsKey(appUsageInfo.packageName)) {
+                appInfoMap[appUsageInfo.packageName] =
+                    appInfoMap[appUsageInfo.packageName]!! + (appUsageInfo.endTime - appUsageInfo.beginTime)
+            } else {
+                appInfoMap[appUsageInfo.packageName] =
+                    appUsageInfo.endTime - appUsageInfo.beginTime
+            }
+         }
+
+        return appInfoMap.map {
+            AppInfo(
+                packageName = it.key,
+                appLabel = getApplicationLabel(context, it.key),
+                appIcon = getApplicationIcon(context, it.key),
+                todayUsageTime = it.value
+            )
+        }
+    }
+
+    private fun getLauncherPackageNameList(
+        context: Context,
+    ): List<String> {
+        val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
+            this.addCategory(Intent.CATEGORY_LAUNCHER)
+        }
+
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.queryIntentActivities(
                 mainIntent,
                 PackageManager.ResolveInfoFlags.of(0)
@@ -26,11 +62,8 @@ object Util {
                 PackageManager.GET_META_DATA
             )
         }.map {
-            appInfoMap[getApplicationLabel(context, it.activityInfo.packageName)] =
-                context.packageManager.getApplicationIcon(it.activityInfo.packageName)
+            it.activityInfo.packageName
         }
-
-        return appInfoMap
     }
 
     private fun getApplicationLabel(
@@ -54,32 +87,22 @@ object Util {
         }
     }
 
-    fun getPackageUsageList(
+    private fun getApplicationIcon(
         context: Context,
-        beginDate: Long,
-        endDate: Long,
-        targetPackageName: String? = null
-    ): List<AppUsageInfo> {
-
-        val packageNameSets: HashSet<String> = if (targetPackageName != null) {
-            getLauncherAppList(context).keys.filter { it == targetPackageName }.toHashSet()
-        } else {
-            getLauncherAppList(context).keys.toHashSet()
+        packageName: String
+    ): Drawable? {
+        return try {
+            context.packageManager.getApplicationIcon(packageName)
+        } catch (e: PackageManager.NameNotFoundException) {
+            null
         }
-
-        return getUsageEventList(
-            context = context,
-            beginDate = beginDate,
-            endDate = endDate,
-            packageNameSets = packageNameSets
-        )
     }
 
     private fun getUsageEventList(
         context: Context,
+        launcherAppList: List<String>,
         beginDate: Long,
-        endDate: Long,
-        packageNameSets: HashSet<String>
+        endDate: Long
     ): List<AppUsageInfo> {
 
         val usm: UsageStatsManager =
@@ -119,7 +142,7 @@ object Util {
                         }
 
                         if (eventUsage[prevEventPackageName]?.endTime == 0L) {
-                            if (packageNameSets.contains(prevEventPackageName)) {
+                            if (launcherAppList.contains(prevEventPackageName)) {
                                 unFinishedPackageList.add(prevEventPackageName)
                                 eventUsage[prevEventPackageName] =
                                     eventUsage[prevEventPackageName]!!.copy(
@@ -129,7 +152,7 @@ object Util {
                                 eventUsage.remove(prevEventPackageName)
                             }
                         } else {
-                            if (packageNameSets.contains(prevEventPackageName)) {
+                            if (launcherAppList.contains(prevEventPackageName)) {
                                 if (isRealUsedPackage(eventUsage[prevEventPackageName]!!)) {
                                     totalUsage.add(eventUsage[prevEventPackageName]!!)
                                 }
@@ -167,7 +190,7 @@ object Util {
         }
 
         eventUsage.forEach { eventUsage ->  // 비정상 종료된 앱들
-            if (packageNameSets.contains(eventUsage.key)) {
+            if (launcherAppList.contains(eventUsage.key)) {
                 if (isRealUsedPackage(eventUsage.value)) {
                     totalUsage.add(eventUsage.value)
                 }

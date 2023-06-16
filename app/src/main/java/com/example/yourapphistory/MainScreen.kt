@@ -60,33 +60,17 @@ fun MainScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     var openDatePicker by remember { mutableStateOf(false) }
 
+
+
     LazyColumn(
         modifier = Modifier
             .fillMaxSize(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
 
-        items(Util.getLauncherAppList(context).toList()) {
-            Row {
-                Text(text = it.first)
-            }
+        items(Util.getLauncherAppInfoList(context)) {
+            ItemAppInfoSmall(appInfo = it)
         }
-
-//        items(usageList) {
-//            Text(
-//                text = it.packageName,
-//                maxLines = 1,
-//                overflow = TextOverflow.Ellipsis
-//            )
-//            Spacer(modifier = Modifier.height(4.dp))
-//            Text(
-//                text = it.beginTime.toSimpleDateConvert(),
-//            )
-//            Spacer(modifier = Modifier.height(4.dp))
-//            Text(
-//                text = it.endTime.toSimpleDateConvert(),
-//            )
-//        }
     }
 
     if (openDatePicker) {
@@ -275,5 +259,3 @@ fun Long.toSimpleDateConvert(skipHour: Boolean = false): String {
         SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.KOREA).format(this)
     }
 }
-
-fun LocalDateTime.toMillis() = this.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
