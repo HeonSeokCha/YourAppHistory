@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.util.Log
 import java.time.LocalDateTime
 import java.time.LocalTime
 
@@ -122,6 +123,7 @@ object Util {
             val time: Long = currentEvent.timeStamp
 
             if (packageName == null) continue
+            Log.e("ALL123", "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} ")
 
             if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED
                 || currentEvent.eventType == UsageEvents.Event.ACTIVITY_PAUSED
@@ -198,6 +200,12 @@ object Util {
         }
         eventUsage.clear()
         unFinishedPackageList.clear()
+
+        totalUsage.forEach {
+            if (it.packageName == "com.kakao.talk") {
+                Log.e("KAKA", "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}")
+            }
+        }
 
         return totalUsage.sortedBy { it.beginTime }
     }

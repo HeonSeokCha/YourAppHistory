@@ -4,7 +4,10 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 
 fun Long.convertToRealUsageTime(): String {
-    return this.toString()
+    val hour: Long =  (this / 1000) / 60 / 60 % 24
+    val minutes: Long = (this / 1000) / 60 % 60
+    val second: Long = (this / 1000) % 60
+    return "${hour}시간 ${minutes}분 ${second}초"
 }
 
 
