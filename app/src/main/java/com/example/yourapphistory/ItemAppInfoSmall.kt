@@ -34,7 +34,7 @@ fun ItemAppInfoSmall(appInfo: AppInfo) {
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = appInfo.todayUsageTime.toString()
+            text = appInfo.todayUsageTime.convertToRealUsageTime()
         )
     }
 }

@@ -16,11 +16,11 @@ object Util {
     fun getLauncherAppInfoList(
         context: Context,
     ): List<AppInfo> {
-        val localDateTime: LocalDateTime = LocalDateTime.now()
+        val localDateTime: LocalDateTime = LocalDateTime.now().minusDays(2)
 
         val appInfoMap: HashMap<String, Long> = hashMapOf()
 
-         getUsageEventList(
+        getUsageEventList(
             context = context,
             launcherAppList = getLauncherPackageNameList(context),
             beginDate = localDateTime.with(LocalTime.MIN).toMillis(),
@@ -33,7 +33,7 @@ object Util {
                 appInfoMap[appUsageInfo.packageName] =
                     appUsageInfo.endTime - appUsageInfo.beginTime
             }
-         }
+        }
 
         return appInfoMap.map {
             AppInfo(
@@ -42,7 +42,7 @@ object Util {
                 appIcon = getApplicationIcon(context, it.key),
                 todayUsageTime = it.value
             )
-        }
+        }.sortedByDescending { it.todayUsageTime }
     }
 
     private fun getLauncherPackageNameList(
@@ -112,6 +112,7 @@ object Util {
         val eventUsage: HashMap<String, AppUsageInfo> = hashMapOf()
         val totalUsage: ArrayList<AppUsageInfo> = arrayListOf()
         var prevEventPackageName: String? = null
+        var screenOff: Boolean = false
         val unFinishedPackageList: ArrayList<String> = arrayListOf()
 
         while (usageEvents.hasNextEvent()) {
@@ -123,14 +124,24 @@ object Util {
             val time: Long = currentEvent.timeStamp
 
             if (packageName == null) continue
-            Log.e("ALL123", "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} ")
+
+            Log.e(
+                "ALL123",
+                "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} "
+            )
 
             if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED
-                || currentEvent.eventType == UsageEvents.Event.ACTIVITY_PAUSED
+                || currentEvent.eventType == UsageEvents.Event.ACTIVITY_STOPPED
+                || currentEvent.eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
             ) {
 
-                if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                if (currentEvent.eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE) {
+                    screenOff = true
+                    // 화면이 꺼졌을 경우, 모든 앱은 종료로 판단한다.
+                }
 
+                if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
+                    screenOff = false
                     if (prevEventPackageName != null
                         && prevEventPackageName != packageName
                         && eventUsage.containsKey(prevEventPackageName)
@@ -178,6 +189,12 @@ object Util {
                         eventUsage[packageName] = eventUsage[packageName]!!.copy(
                             endTime = time
                         )
+
+                        if (screenOff) {
+                            totalUsage.add(eventUsage[packageName]!!)
+                            eventUsage.remove(packageName)
+                            unFinishedPackageList.remove(packageName)
+                        }
                     }
 
                     if (unFinishedPackageList.any { it == packageName }) {
@@ -201,11 +218,18 @@ object Util {
         eventUsage.clear()
         unFinishedPackageList.clear()
 
+        var tempCnt = 0L
         totalUsage.forEach {
             if (it.packageName == "com.kakao.talk") {
-                Log.e("KAKA", "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}")
+                tempCnt += it.endTime - it.beginTime
+                Log.e(
+                    "KAKA",
+                    "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}"
+                )
             }
         }
+
+        Log.e("KAKA", tempCnt.convertToRealUsageTime())
 
         return totalUsage.sortedBy { it.beginTime }
     }
