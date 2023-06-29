@@ -58,10 +58,8 @@ fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
     val context: Context = LocalContext.current
-    val state by viewModel.state.collectAsStateWithLifecycle()
     var openDatePicker by remember { mutableStateOf(false) }
-
-
+    val usageList by remember { mutableStateOf(Util.getLauncherAppInfoList(context)) }
 
     LazyColumn(
         modifier = Modifier
@@ -72,9 +70,10 @@ fun MainScreen(
             vertical = 8.dp
         )
     ) {
+        items(usageList) {
+            ItemAppInfoSmall(appInfo = it) { packageName ->
 
-        items(Util.getLauncherAppInfoList(context)) {
-            ItemAppInfoSmall(appInfo = it)
+            }
         }
     }
 

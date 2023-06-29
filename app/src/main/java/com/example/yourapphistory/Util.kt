@@ -16,7 +16,7 @@ object Util {
     fun getLauncherAppInfoList(
         context: Context,
     ): List<AppInfo> {
-        val localDateTime: LocalDateTime = LocalDateTime.now().minusDays(2)
+        val localDateTime: LocalDateTime = LocalDateTime.now()
 
         val appInfoMap: HashMap<String, Long> = hashMapOf()
 
@@ -112,7 +112,6 @@ object Util {
         val eventUsage: HashMap<String, AppUsageInfo> = hashMapOf()
         val totalUsage: ArrayList<AppUsageInfo> = arrayListOf()
         var prevEventPackageName: String? = null
-        var screenOff: Boolean = false
         val unFinishedPackageList: ArrayList<String> = arrayListOf()
 
         while (usageEvents.hasNextEvent()) {
@@ -130,18 +129,8 @@ object Util {
                 "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} "
             )
 
-            if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED
-                || currentEvent.eventType == UsageEvents.Event.ACTIVITY_STOPPED
-                || currentEvent.eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
-            ) {
-
-                if (currentEvent.eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE) {
-                    screenOff = true
-                    // 화면이 꺼졌을 경우, 모든 앱은 종료로 판단한다.
-                }
-
-                if (currentEvent.eventType == UsageEvents.Event.ACTIVITY_RESUMED) {
-                    screenOff = false
+            when (currentEvent.eventType) {
+                UsageEvents.Event.ACTIVITY_RESUMED -> {
                     if (prevEventPackageName != null
                         && prevEventPackageName != packageName
                         && eventUsage.containsKey(prevEventPackageName)
@@ -183,18 +172,13 @@ object Util {
                     } else {
                         eventUsage[packageName] = eventUsage[packageName]!!.copy(endTime = 0L)
                     }
+                }
 
-                } else {
+                UsageEvents.Event.ACTIVITY_PAUSED -> {
                     if (eventUsage.containsKey(packageName)) {
                         eventUsage[packageName] = eventUsage[packageName]!!.copy(
                             endTime = time
                         )
-
-                        if (screenOff) {
-                            totalUsage.add(eventUsage[packageName]!!)
-                            eventUsage.remove(packageName)
-                            unFinishedPackageList.remove(packageName)
-                        }
                     }
 
                     if (unFinishedPackageList.any { it == packageName }) {
@@ -204,6 +188,25 @@ object Util {
                         }
                         unFinishedPackageList.remove(packageName)
                     }
+
+                }
+
+                UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
+                    eventUsage.forEach { packageInfo ->
+                        if (launcherAppList.contains(packageInfo.key)) {
+                            totalUsage.add(
+                                if (packageInfo.value.endTime == 0L) {
+                                    packageInfo.value.copy(
+                                        endTime = time
+                                    )
+                                } else {
+                                    packageInfo.value
+                                }
+                            )
+                        }
+                    }
+                    eventUsage.clear()
+                    unFinishedPackageList.clear()
                 }
             }
         }

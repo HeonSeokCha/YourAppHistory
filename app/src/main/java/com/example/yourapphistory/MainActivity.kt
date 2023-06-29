@@ -33,23 +33,28 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            val isUsagePermissionGranted by remember { mutableStateOf(checkPermission()) }
             YourAppHistoryTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
                     color = MaterialTheme.colorScheme.background
                 ) {
-                    MainScreen()
+                    if (isUsagePermissionGranted) {
+                        MainScreen()
+                    } else {
+                        startActivity(
+                            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
+                                this.addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION)
+                                this.data = Uri.parse("package:${packageName}")
+                            }
+                        )
+                    }
                 }
             }
         }
     }
 
-    override fun onResume() {
-        super.onResume()
-        checkPermission()
-    }
-
-    private fun checkPermission() {
+    private fun checkPermission(): Boolean {
         val appOps: AppOpsManager = getSystemService(APP_OPS_SERVICE) as AppOpsManager
         val mode: Int =
             appOps.unsafeCheckOpNoThrow(
@@ -58,12 +63,6 @@ class MainActivity : ComponentActivity() {
                 packageName
             )
 
-        if (mode != AppOpsManager.MODE_ALLOWED) {
-            startActivity(
-                Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS).apply {
-                    this.data = Uri.parse("package:${packageName}")
-                }
-            )
-        }
+        return mode == AppOpsManager.MODE_ALLOWED
     }
 }
