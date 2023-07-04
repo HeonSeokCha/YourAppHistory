@@ -1,4 +1,4 @@
-package com.example.yourapphistory
+package com.example.yourapphistory.presentation
 
 import androidx.lifecycle.ViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

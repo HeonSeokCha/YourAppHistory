@@ -2,6 +2,7 @@
 plugins {
     kotlin("kapt")
     kotlin("android")
+    alias(libs.plugins.hilt)
     alias(libs.plugins.android.application)
 }
 
@@ -60,4 +61,7 @@ dependencies {
     implementation(libs.androidX.navigation.compose)
     implementation(libs.androidX.paging.compose)
     implementation(libs.accompanist.drawablepainter)
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.navigation.compose)
+    kapt(libs.hilt.compiler)
 }

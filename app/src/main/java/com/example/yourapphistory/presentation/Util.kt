@@ -1,4 +1,4 @@
-package com.example.yourapphistory
+package com.example.yourapphistory.presentation
 
 import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
@@ -8,10 +8,23 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
+import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 
 object Util {
+
+    fun getLocalDateList(): List<LocalDate> {
+        val localDate = LocalDate.now()
+        val arr = arrayListOf<LocalDate>()
+        for (i in 0L .. 7L) {
+            arr.add(
+                localDate.minusDays(i)
+            )
+        }
+
+        return arr
+    }
 
     fun getLauncherAppInfoList(
         context: Context,
@@ -124,10 +137,10 @@ object Util {
 
             if (packageName == null) continue
 
-            Log.e(
-                "ALL123",
-                "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} "
-            )
+//            Log.e(
+//                "ALL123",
+//                "$packageName (${currentEvent.eventType}): ${time.toSimpleDateConvert()} "
+//            )
 
             when (currentEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {

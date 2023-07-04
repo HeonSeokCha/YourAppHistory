@@ -1,4 +1,4 @@
-package com.example.yourapphistory
+package com.example.yourapphistory.presentation
 
 data class AppUsageInfo(
     val packageName: String,

@@ -1,4 +1,4 @@
-package com.example.yourapphistory
+package com.example.yourapphistory.presentation
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.runtime.Composable

@@ -1,4 +1,4 @@
-package com.example.yourapphistory
+package com.example.yourapphistory.presentation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
