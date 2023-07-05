@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @Composable
@@ -20,7 +21,7 @@ fun ItemAppInfoSmall(
     appInfo: AppInfo,
     clickAble: (String) -> Unit
 ) {
-    Row (
+    Row(
         modifier = Modifier
             .clickable { clickAble(appInfo.packageName) },
         verticalAlignment = Alignment.CenterVertically

@@ -20,10 +20,10 @@ import java.time.LocalDate
 
 @Composable
 fun DateHeader(
+    localDate: List<LocalDate>,
     onClick: (LocalDate) -> Unit
 ) {
     var dateMoveCount by remember { mutableIntStateOf(0) }
-    val localDate by remember { mutableStateOf(Util.getLocalDateList()) }
 
     Row {
         IconButton(
