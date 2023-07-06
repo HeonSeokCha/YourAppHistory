@@ -8,16 +8,17 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
+import com.example.yourapphistory.common.Constants
+import com.example.yourapphistory.common.toSimpleDateConvert
 import com.example.yourapphistory.presentation.AppInfo
 import com.example.yourapphistory.presentation.AppUsageInfo
 import com.example.yourapphistory.presentation.convertToRealUsageTime
 import com.example.yourapphistory.presentation.toMillis
-import com.example.yourapphistory.presentation.toSimpleDateConvert
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
+
 
 @Singleton
 class ApplicationInfoSource @Inject constructor(
@@ -26,12 +27,9 @@ class ApplicationInfoSource @Inject constructor(
     fun getLocalDateList(): List<LocalDate> {
         val localDate = LocalDate.now()
         val arr = arrayListOf<LocalDate>()
-        for (i in 0L until 10L) {
-            arr.add(
-                localDate.minusDays(i)
-            )
+        for (i in Constants.COLLECT_DATE_RANGE) {
+            arr.add(localDate.minusDays(i))
         }
-
         return arr
     }
 
@@ -97,15 +95,15 @@ class ApplicationInfoSource @Inject constructor(
                     packageName,
                     PackageManager.ApplicationInfoFlags.of(0)
                 )
-            ).toString()
+            )
         } else {
             context.packageManager.getApplicationLabel(
                 context.packageManager.getApplicationInfo(
                     packageName,
                     0
                 )
-            ).toString()
-        }
+            )
+        }.toString()
     }
 
     private fun getApplicationIcon(
@@ -128,7 +126,8 @@ class ApplicationInfoSource @Inject constructor(
 
         val usm: UsageStatsManager =
             context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val usageEvents = usm.queryEvents(beginDate, endDate)
+        val usageEvents: UsageEvents = usm.queryEvents(beginDate, endDate)
+
         val eventUsage: HashMap<String, AppUsageInfo> = hashMapOf()
         val totalUsage: ArrayList<AppUsageInfo> = arrayListOf()
         var prevEventPackageName: String? = null
@@ -144,6 +143,8 @@ class ApplicationInfoSource @Inject constructor(
 
             if (packageName == null) continue
 
+            Log.e("ALL123", "$packageName - ${currentEvent.eventType}")
+
             when (currentEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
                     if (prevEventPackageName != null
@@ -151,7 +152,7 @@ class ApplicationInfoSource @Inject constructor(
                         && eventUsage.containsKey(prevEventPackageName)
                     ) {
                         if (eventUsage.containsKey(packageName)
-                            && unFinishedPackageList.any { it == packageName }
+                            && unFinishedPackageList.contains(packageName)
                         ) {
                             totalUsage.add(eventUsage[packageName]!!)
                             eventUsage.remove(packageName)
@@ -162,9 +163,7 @@ class ApplicationInfoSource @Inject constructor(
                             if (launcherAppList.contains(prevEventPackageName)) {
                                 unFinishedPackageList.add(prevEventPackageName)
                                 eventUsage[prevEventPackageName] =
-                                    eventUsage[prevEventPackageName]!!.copy(
-                                        endTime = time
-                                    )
+                                    eventUsage[prevEventPackageName]!!.copy(endTime = time)
                             } else {
                                 eventUsage.remove(prevEventPackageName)
                             }
@@ -203,58 +202,50 @@ class ApplicationInfoSource @Inject constructor(
                         }
                         unFinishedPackageList.remove(packageName)
                     }
-
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
-                    eventUsage.forEach { packageInfo ->
-                        if (launcherAppList.contains(packageInfo.key)) {
-                            totalUsage.add(
-                                if (packageInfo.value.endTime == 0L) {
-                                    packageInfo.value.copy(
-                                        endTime = time
-                                    )
-                                } else {
-                                    packageInfo.value
-                                }
-                            )
-                        }
+                    eventUsage.filter {
+                        launcherAppList.contains(it.key)
+                    }.forEach { packageInfo ->
+                        totalUsage.add(
+                            if (packageInfo.value.endTime == 0L) {
+                                packageInfo.value.copy(endTime = time)
+                            } else {
+                                packageInfo.value
+                            }
+                        )
                     }
+
                     eventUsage.clear()
                     unFinishedPackageList.clear()
                 }
             }
         }
 
-        eventUsage.forEach { eventUsage ->  // 비정상 종료된 앱들
-            if (launcherAppList.contains(eventUsage.key)) {
-                if (isRealUsedPackage(eventUsage.value)) {
-                    totalUsage.add(eventUsage.value)
-                }
-            }
+        eventUsage.filter {
+            launcherAppList.contains(it.key)
+                    && isRealUsedPackage(it.value)
+        }.forEach {  // 비정상 종료된 앱들
+            totalUsage.add(it.value)
         }
+
         eventUsage.clear()
         unFinishedPackageList.clear()
 
-        var tempCnt = 0L
         totalUsage.forEach {
-            if (it.packageName == "com.kakao.talk") {
-                tempCnt += it.endTime - it.beginTime
-                Log.e(
-                    "KAKA",
-                    "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}"
-                )
-            }
+            Log.e(
+                "KAKA",
+                "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}"
+            )
         }
-
-        Log.e("KAKA", tempCnt.convertToRealUsageTime())
 
         return totalUsage.sortedBy { it.beginTime }
     }
 
 
     private fun isRealUsedPackage(packageUsageInfo: AppUsageInfo): Boolean {
-        return (packageUsageInfo.endTime - packageUsageInfo.beginTime) > 1000L
-                && packageUsageInfo.endTime != 0L
+//        return (packageUsageInfo.endTime - packageUsageInfo.beginTime) > 1000L
+        return packageUsageInfo.endTime != 0L
     }
 }
