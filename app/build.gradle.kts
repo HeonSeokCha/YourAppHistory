@@ -1,9 +1,8 @@
-@Suppress("DSL_SCOPE_VIOLATION")
 plugins {
-    kotlin("kapt")
     kotlin("android")
     alias(libs.plugins.hilt)
     alias(libs.plugins.android.application)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -36,6 +35,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -50,18 +50,23 @@ android {
         kotlinCompilerExtensionVersion = libs.versions.composeCompiler.get()
     }
 
-    packagingOptions {
-        resources.excludes.add("/META-INF/{AL2.0,LGPL2.1}")
+    packaging {
+        resources {
+            excludes += "/META-INF/{AL2.0,LGPL2.1}"
+        }
     }
 }
 
 dependencies {
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.androidX.core.ktx)
     implementation(libs.bundles.compose)
     implementation(libs.androidX.navigation.compose)
-    implementation(libs.androidX.paging.compose)
     implementation(libs.accompanist.drawablepainter)
+    ksp(libs.hilt.compiler)
     implementation(libs.hilt.android)
     implementation(libs.hilt.navigation.compose)
-    kapt(libs.hilt.compiler)
+
+    ksp(libs.androidX.room.compiler)
+    implementation(libs.androidX.room.ktx)
 }

@@ -8,10 +8,9 @@ import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
-import com.example.yourapphistory.common.Constants
-import com.example.yourapphistory.common.toSimpleDateConvert
-import com.example.yourapphistory.presentation.AppInfo
-import com.example.yourapphistory.presentation.AppUsageInfo
+import com.example.yourapphistory.common.isZero
+import com.example.yourapphistory.data.db.entity.AppUsageEventEntity
+import com.example.yourapphistory.domain.model.AppUsageInfo
 import com.example.yourapphistory.presentation.convertToRealUsageTime
 import com.example.yourapphistory.presentation.toMillis
 import java.time.LocalDate
@@ -24,14 +23,6 @@ import javax.inject.Singleton
 class ApplicationInfoSource @Inject constructor(
     private val context: Context
 ) {
-    fun getLocalDateList(): List<LocalDate> {
-        val localDate = LocalDate.now()
-        val arr = arrayListOf<LocalDate>()
-        for (i in Constants.COLLECT_DATE_RANGE) {
-            arr.add(localDate.minusDays(i))
-        }
-        return arr
-    }
 
     fun getLauncherAppInfoList(
         localDate: LocalDate
@@ -117,132 +108,171 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    private fun getUsageEventList(
-        context: Context,
-        launcherAppList: List<String>,
-        beginDate: Long,
-        endDate: Long
-    ): List<AppUsageInfo> {
+    private suspend fun insertAppUsage(
+    appListPackageNames: List<String>,
+    usageEventList: List<AppUsageEventEntity>
+    ) {
+        var prevPackageName: String? = null
+        var prevActivityClassName: String? = null
+        val inCompletedUsageList: HashMap<String, AppUsageInfo> = hashMapOf()
+        var isScreenOff: Boolean = false
+        val completedUsageList: ArrayList<AppUsageInfo> = arrayListOf()
 
-        val usm: UsageStatsManager =
-            context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
-        val usageEvents: UsageEvents = usm.queryEvents(beginDate, endDate)
+        for (usageEvent in usageEventList) {
+            when (usageEvent.eventType) {
+                UsageEvents.Event.ACTIVITY_RESUMED -> {
+                    if (inCompletedUsageList[usageEvent.packageName] == null) {
+                        inCompletedUsageList[usageEvent.packageName] =
+                            AppUsageInfo(
+                                packageName = usageEvent.packageName,
+                                beginUseTime = usageEvent.eventTime
+                            )
+                    }
+                    prevPackageName = usageEvent.packageName
+                    prevActivityClassName = usageEvent.className
+                }
 
-        val eventUsage: HashMap<String, AppUsageInfo> = hashMapOf()
-        val totalUsage: ArrayList<AppUsageInfo> = arrayListOf()
-        var prevEventPackageName: String? = null
-        val unFinishedPackageList: ArrayList<String> = arrayListOf()
+                UsageEvents.Event.ACTIVITY_PAUSED -> {
+                    inCompletedUsageList.computeIfPresent(
+                        usageEvent.packageName
+                    ) { key, value ->
+                        value.copy(
+                            endTime = usageEvent.eventTime
+                        )
+                    }
+
+                    if (isScreenOff) {
+                        if (appListPackageNames.contains(usageEvent.packageName)) {
+                            if (inCompletedUsageList.containsKey(usageEvent.packageName)) {
+                                if (inCompletedUsageList[usageEvent.packageName]!!.endTime.isZero()) {
+                                    inCompletedUsageList[usageEvent.packageName] =
+                                        inCompletedUsageList[usageEvent.packageName]!!.copy(
+                                            endTime = usageEvent.eventTime
+                                        )
+                                }
+                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
+                            }
+                        }
+
+                        inCompletedUsageList.remove(usageEvent.packageName)
+                    }
+                }
+
+                UsageEvents.Event.ACTIVITY_STOPPED -> {
+                    if (inCompletedUsageList.containsKey(usageEvent.packageName)
+                        && (prevPackageName != usageEvent.packageName || prevActivityClassName == usageEvent.className)
+                    ) {
+                        if (appListPackageNames.contains(usageEvent.packageName)) {
+                            if (inCompletedUsageList[usageEvent.packageName]!!.endTime.isZero()) {
+                                inCompletedUsageList[usageEvent.packageName] =
+                                    inCompletedUsageList[usageEvent.packageName]!!.copy(
+                                        endTime = usageEvent.eventTime
+                                    )
+                            }
+
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
+                        }
+
+                        inCompletedUsageList.remove(usageEvent.packageName)
+                    }
+                }
+
+                // 화면 꺼짐
+                UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
+                    prevPackageName = usageEvent.packageName
+                    isScreenOff = true
+                }
+
+                UsageEvents.Event.SCREEN_INTERACTIVE -> {
+                    isScreenOff = false
+                }
+            }
+        }
+
+        appUsageDao.insert(
+            *completedUsageList.map {
+                AppUsageEntity(
+                    packageName = it.packageName,
+                    startUseTime = it.startUseTime,
+                    endUseTime = it.endUseTime,
+                    totalUsedTime = it.endUseTime - it.startUseTime,
+                    createTime = System.currentTimeMillis()
+                )
+            }.toTypedArray()
+        )
+
+
+        for (i in Const.FIRST_COLLECT_DAY downTo 0) {
+            val localDate = LocalDate.now().minusDays(i)
+            val range = localDate.atTime(LocalTime.MIN)..localDate.atTime(LocalTime.MAX)
+
+            appUsageSummaryDao.insert(
+                *completedUsageList.filter { range.contains(it.startUseTime.toLocalDateTime()) }
+                    .groupingBy { it.packageName }
+                    .fold(0L) { totalTime, usageInfo ->
+                        totalTime + (usageInfo.endUseTime - usageInfo.startUseTime)
+                    }.map {
+                        AppUsageSummaryEntity(
+                            date = localDate.toMillis(),
+                            packageName = it.key,
+                            totalUsageTime = it.value
+                        )
+                    }.toTypedArray()
+            )
+        }
+
+        if (inCompletedUsageList.isNotEmpty()) {
+            appUsageEventDao.deleteLegacy(
+                inCompletedUsageList.minBy { it.value.startUseTime }.value.startUseTime
+            )
+        } else {
+
+        }
+    }
+
+    private suspend fun insertUsageEvent(
+        beginTime: Long,
+        endTime: Long
+    ) {
+        val usageEvents: UsageEvents =
+            (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
+                queryEvents(beginTime, endTime)
+            }
+
+        val resultArr: ArrayList<AppUsageEventEntity> = arrayListOf()
 
         while (usageEvents.hasNextEvent()) {
             val currentEvent = UsageEvents.Event().apply {
                 usageEvents.getNextEvent(this)
             }
 
-            val packageName: String? = currentEvent.packageName
+            val packageName: String = currentEvent.packageName
             val time: Long = currentEvent.timeStamp
+            val eventType: Int = currentEvent.eventType
 
-            if (packageName == null) continue
+            if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
+                || eventType == UsageEvents.Event.ACTIVITY_PAUSED
+                || eventType == UsageEvents.Event.ACTIVITY_STOPPED
+                || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
+                || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
+            ) {
+//                Log.e(
+//                    "APP_CHS_123",
+//                    "${time.toSimpleDateConvert()}- $packageName : ${currentEvent.className}  -> $eventType"
+//                )
 
-            Log.e("ALL123", "$packageName - ${currentEvent.eventType}")
-
-            when (currentEvent.eventType) {
-                UsageEvents.Event.ACTIVITY_RESUMED -> {
-                    if (prevEventPackageName != null
-                        && prevEventPackageName != packageName
-                        && eventUsage.containsKey(prevEventPackageName)
-                    ) {
-                        if (eventUsage.containsKey(packageName)
-                            && unFinishedPackageList.contains(packageName)
-                        ) {
-                            totalUsage.add(eventUsage[packageName]!!)
-                            eventUsage.remove(packageName)
-                            unFinishedPackageList.remove(packageName)
-                        }
-
-                        if (eventUsage[prevEventPackageName]?.endTime == 0L) {
-                            if (launcherAppList.contains(prevEventPackageName)) {
-                                unFinishedPackageList.add(prevEventPackageName)
-                                eventUsage[prevEventPackageName] =
-                                    eventUsage[prevEventPackageName]!!.copy(endTime = time)
-                            } else {
-                                eventUsage.remove(prevEventPackageName)
-                            }
-                        } else {
-                            if (launcherAppList.contains(prevEventPackageName)) {
-                                if (isRealUsedPackage(eventUsage[prevEventPackageName]!!)) {
-                                    totalUsage.add(eventUsage[prevEventPackageName]!!)
-                                }
-                            }
-                            eventUsage.remove(prevEventPackageName)
-                        }
-                    }
-
-                    if (eventUsage[packageName] == null) {
-                        eventUsage[packageName] = AppUsageInfo(
-                            packageName = packageName,
-                            beginTime = time
-                        )
-                        prevEventPackageName = packageName
-                    } else {
-                        eventUsage[packageName] = eventUsage[packageName]!!.copy(endTime = 0L)
-                    }
-                }
-
-                UsageEvents.Event.ACTIVITY_PAUSED -> {
-                    if (eventUsage.containsKey(packageName)) {
-                        eventUsage[packageName] = eventUsage[packageName]!!.copy(
-                            endTime = time
-                        )
-                    }
-
-                    if (unFinishedPackageList.any { it == packageName }) {
-                        if (isRealUsedPackage(eventUsage[packageName]!!)) {
-                            totalUsage.add(eventUsage[packageName]!!)
-                            eventUsage.remove(packageName)
-                        }
-                        unFinishedPackageList.remove(packageName)
-                    }
-                }
-
-                UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
-                    eventUsage.filter {
-                        launcherAppList.contains(it.key)
-                    }.forEach { packageInfo ->
-                        totalUsage.add(
-                            if (packageInfo.value.endTime == 0L) {
-                                packageInfo.value.copy(endTime = time)
-                            } else {
-                                packageInfo.value
-                            }
-                        )
-                    }
-
-                    eventUsage.clear()
-                    unFinishedPackageList.clear()
-                }
+                resultArr.add(
+                    AppUsageEventEntity(
+                        eventTime = time,
+                        packageName = packageName,
+                        className = currentEvent.className,
+                        eventType = eventType
+                    )
+                )
             }
         }
-
-        eventUsage.filter {
-            launcherAppList.contains(it.key)
-                    && isRealUsedPackage(it.value)
-        }.forEach {  // 비정상 종료된 앱들
-            totalUsage.add(it.value)
-        }
-
-        eventUsage.clear()
-        unFinishedPackageList.clear()
-
-        totalUsage.forEach {
-            Log.e(
-                "KAKA",
-                "${it.packageName} - ${it.beginTime.toSimpleDateConvert()} ~ ${it.endTime.toSimpleDateConvert()}-> ${(it.endTime - it.beginTime).convertToRealUsageTime()}"
-            )
-        }
-
-        return totalUsage.sortedBy { it.beginTime }
+        appUsageEventDao.insert(*resultArr.toTypedArray())
     }
-
 
     private fun isRealUsedPackage(packageUsageInfo: AppUsageInfo): Boolean {
 //        return (packageUsageInfo.endTime - packageUsageInfo.beginTime) > 1000L

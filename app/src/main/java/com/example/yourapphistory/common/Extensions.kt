@@ -1,14 +1,47 @@
 package com.example.yourapphistory.common
 
 import java.text.SimpleDateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.ZoneId
 import java.util.Locale
 
 
-fun Long.toSimpleDateConvert(skipHour: Boolean = false): String {
-    return if (skipHour) {
-        SimpleDateFormat("yyyy-MM-dd", Locale.KOREA).format(this)
+fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
+    return if (targetDate == LocalDate.now()) {
+        listOf(targetDate)
     } else {
-        SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.KOREA).format(this)
+        targetDate.datesUntil(LocalDate.now().plusDays(1L))
+            .toList()
+            .sortedByDescending { it }
     }
+}
+
+fun Long?.isZero(): Boolean {
+    return this == null || this == 0L
+}
+
+fun Long.convertToRealUsageTime(): String {
+    val hour: Long = (this / 1000) / 60 / 60 % 24
+    val minutes: Long = (this / 1000) / 60 % 60
+    val second: Long = (this / 1000) % 60
+    return if (hour == 0L) {
+        if (minutes == 0L) {
+            "${second}초"
+        } else {
+            "${minutes}분 ${second}초"
+        }
+    } else {
+        "${hour}시간 ${minutes}분 ${second}초"
+    }
+}
+
+
+fun LocalDateTime.toMillis(zone: ZoneId = ZoneId.systemDefault()): Long {
+    return atZone(zone)?.toInstant()?.toEpochMilli() ?: 0L
+}
+
+fun LocalDate.toMillis(): Long {
+    return this.atStartOfDay().toMillis()
 }
 
