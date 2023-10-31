@@ -4,10 +4,10 @@ import androidx.room.Entity
 
 @Entity(
     tableName = "appUsage",
-    primaryKeys = ["packageName", "beginTime"]
+    primaryKeys = ["packageName", "beginUseTime"]
 )
 data class AppUsageEntity(
     val packageName: String,
-    val beginTime: Long,
-    val endTime: Long
+    val beginUseTime: Long,
+    val endUseTime: Long = 0L
 )

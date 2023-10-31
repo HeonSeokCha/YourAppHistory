@@ -7,6 +7,8 @@ import java.time.LocalDate
 
 interface AppRepository {
 
-    fun getAppUsageInfo(date: LocalDate): Flow<Map<AppInfo, List<AppUsageInfo>>>
+    suspend fun insertAppUsageInfo()
+
+    fun getAppUsageInfo(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>>
 
 }
