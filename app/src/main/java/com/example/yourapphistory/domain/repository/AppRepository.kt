@@ -11,4 +11,6 @@ interface AppRepository {
 
     fun getAppUsageInfo(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>>
 
+    suspend fun getOldestAppUsageCollectDay(): LocalDate
+
 }

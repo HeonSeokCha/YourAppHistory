@@ -28,16 +28,6 @@ class ApplicationInfoSource @Inject constructor(
     private val appUsageEventDao: AppUsageEventDao
 ) {
 
-    fun getApplicationInfoList(): List<AppInfo> {
-        return getInstalledLauncherPackageNameList().map { packageName ->
-            AppInfo(
-                packageName = packageName,
-                label = getApplicationLabel(packageName),
-                icon = getApplicationIcon(packageName)
-            )
-        }
-    }
-
     private fun getInstalledLauncherPackageNameList(): List<String> {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
             this.addCategory(Intent.CATEGORY_LAUNCHER)
@@ -58,7 +48,7 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    private fun getApplicationLabel(packageName: String): String {
+    fun getApplicationLabel(packageName: String): String {
         return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             context.packageManager.getApplicationLabel(
                 context.packageManager.getApplicationInfo(
@@ -76,7 +66,7 @@ class ApplicationInfoSource @Inject constructor(
         }.toString()
     }
 
-    private fun getApplicationIcon(packageName: String): Drawable? {
+    fun getApplicationIcon(packageName: String): Drawable? {
         return try {
             context.packageManager.getApplicationIcon(packageName)
         } catch (e: PackageManager.NameNotFoundException) {
