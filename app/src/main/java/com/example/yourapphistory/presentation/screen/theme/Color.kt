@@ -1,4 +1,4 @@
-package com.example.yourapphistory.presentation.theme
+package com.example.yourapphistory.presentation.screen.theme
 
 import androidx.compose.ui.graphics.Color
 

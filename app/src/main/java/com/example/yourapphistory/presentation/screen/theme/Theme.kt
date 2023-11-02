@@ -1,4 +1,4 @@
-package com.example.yourapphistory.presentation.theme
+package com.example.yourapphistory.presentation.screen.theme
 
 import android.app.Activity
 import android.os.Build

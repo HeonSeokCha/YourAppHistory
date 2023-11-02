@@ -1,4 +1,4 @@
-package com.example.yourapphistory.presentation
+package com.example.yourapphistory.presentation.screen
 
 import android.app.AppOpsManager
 import android.content.Intent
@@ -8,7 +8,6 @@ import android.os.Process
 import android.provider.Settings
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -16,7 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import com.example.yourapphistory.presentation.theme.YourAppHistoryTheme
+import com.example.yourapphistory.presentation.screen.theme.YourAppHistoryTheme
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

@@ -22,11 +22,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ApplicationInfoSource @Inject constructor(
-    private val context: Context,
-    private val appUsageDao: AppUsageDao,
-    private val appUsageEventDao: AppUsageEventDao
-) {
+class ApplicationInfoSource @Inject constructor(private val context: Context) {
 
     private fun getInstalledLauncherPackageNameList(): List<String> {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
@@ -74,10 +70,10 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    private suspend fun insertAppUsage(
+    suspend fun getAppUsageInfoList(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventEntity>
-    ) {
+    ): List<AppUsageEntity> {
         var prevPackageName: String? = null
         var prevActivityClassName: String? = null
         val inCompletedUsageList: HashMap<String, AppUsageEntity> = hashMapOf()
@@ -155,18 +151,10 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-        appUsageDao.insert(*completedUsageList.toTypedArray())
-
-        appUsageEventDao.deleteTempEvent(
-            if (inCompletedUsageList.isNotEmpty()) {
-                inCompletedUsageList.minBy { it.value.beginUseTime }.value.beginUseTime
-            } else {
-                System.currentTimeMillis()
-            }
-        )
+        return completedUsageList
     }
 
-    suspend fun insertUsageEvent(beginTime: Long) {
+    suspend fun getUsageEvent(beginTime: Long): List<AppUsageEventEntity> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
@@ -189,11 +177,6 @@ class ApplicationInfoSource @Inject constructor(
                 || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
                 || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
             ) {
-//                Log.e(
-//                    "APP_CHS_123",
-//                    "${time.toSimpleDateConvert()}- $packageName : ${currentEvent.className}  -> $eventType"
-//                )
-
                 resultArr.add(
                     AppUsageEventEntity(
                         eventTime = time,
@@ -204,6 +187,6 @@ class ApplicationInfoSource @Inject constructor(
                 )
             }
         }
-        appUsageEventDao.insert(*resultArr.toTypedArray())
+        return resultArr
     }
 }

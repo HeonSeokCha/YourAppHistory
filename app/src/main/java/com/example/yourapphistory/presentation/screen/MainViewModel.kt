@@ -1,9 +1,8 @@
-package com.example.yourapphistory.presentation
+package com.example.yourapphistory.presentation.screen
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.yourapphistory.common.getUntilDateList
-import com.example.yourapphistory.data.ApplicationInfoSource
 import com.example.yourapphistory.domain.usecase.GetDayAppUsageInfoUseCase
 import com.example.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel

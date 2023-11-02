@@ -1,4 +1,4 @@
-package com.example.yourapphistory.presentation
+package com.example.yourapphistory.presentation.screen
 
 import com.example.yourapphistory.domain.model.AppInfo
 import com.example.yourapphistory.domain.model.AppUsageInfo
