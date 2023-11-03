@@ -2,7 +2,7 @@
 androidGradlePlugin = "8.1.2"
 
 compileSdkVersion = "34"
-desugar_jdk_libs = "2.0.3"
+desugar_jdk_libs = "2.0.4"
 hiltWork = "1.1.0"
 minSdkVersion = "29"
 targetSdkVersion = "33"

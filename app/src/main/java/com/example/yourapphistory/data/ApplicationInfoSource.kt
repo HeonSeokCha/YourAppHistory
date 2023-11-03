@@ -70,10 +70,46 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
         }
     }
 
-    suspend fun getAppUsageInfoList(
-        installPackageNames: List<String>,
-        usageEventList: List<AppUsageEventEntity>
-    ): List<AppUsageEntity> {
+    fun getUsageEvent(beginTime: Long): List<AppUsageEventEntity> {
+        val usageEvents: UsageEvents =
+            (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
+                queryEvents(beginTime, System.currentTimeMillis())
+            }
+
+        val resultArr: ArrayList<AppUsageEventEntity> = arrayListOf()
+
+        while (usageEvents.hasNextEvent()) {
+            val currentEvent = UsageEvents.Event().apply {
+                usageEvents.getNextEvent(this)
+            }
+
+            val packageName: String = currentEvent.packageName
+            val time: Long = currentEvent.timeStamp
+            val eventType: Int = currentEvent.eventType
+
+            if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
+                || eventType == UsageEvents.Event.ACTIVITY_PAUSED
+                || eventType == UsageEvents.Event.ACTIVITY_STOPPED
+                || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
+                || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
+                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
+            ) {
+                resultArr.add(
+                    AppUsageEventEntity(
+                        eventTime = time,
+                        packageName = packageName,
+                        className = currentEvent.className,
+                        eventType = eventType
+                    )
+                )
+            }
+        }
+        return resultArr
+    }
+
+    fun getAppUsageInfoList(usageEventList: List<AppUsageEventEntity>): List<AppUsageEntity> {
+        val installPackageNames: List<String> = getInstalledLauncherPackageNameList()
         var prevPackageName: String? = null
         var prevActivityClassName: String? = null
         val inCompletedUsageList: HashMap<String, AppUsageEntity> = hashMapOf()
@@ -148,45 +184,14 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
                 UsageEvents.Event.SCREEN_INTERACTIVE -> {
                     isScreenOff = false
                 }
+
+                UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
+                    Log.e("USAGE", usageEvent.toString())
+                }
             }
         }
 
         return completedUsageList
     }
 
-    suspend fun getUsageEvent(beginTime: Long): List<AppUsageEventEntity> {
-        val usageEvents: UsageEvents =
-            (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-                queryEvents(beginTime, System.currentTimeMillis())
-            }
-
-        val resultArr: ArrayList<AppUsageEventEntity> = arrayListOf()
-
-        while (usageEvents.hasNextEvent()) {
-            val currentEvent = UsageEvents.Event().apply {
-                usageEvents.getNextEvent(this)
-            }
-
-            val packageName: String = currentEvent.packageName
-            val time: Long = currentEvent.timeStamp
-            val eventType: Int = currentEvent.eventType
-
-            if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
-                || eventType == UsageEvents.Event.ACTIVITY_PAUSED
-                || eventType == UsageEvents.Event.ACTIVITY_STOPPED
-                || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
-                || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
-            ) {
-                resultArr.add(
-                    AppUsageEventEntity(
-                        eventTime = time,
-                        packageName = packageName,
-                        className = currentEvent.className,
-                        eventType = eventType
-                    )
-                )
-            }
-        }
-        return resultArr
-    }
 }

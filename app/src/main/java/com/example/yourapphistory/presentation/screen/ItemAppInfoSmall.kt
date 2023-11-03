@@ -14,14 +14,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.example.yourapphistory.common.convertToRealUsageTime
+import com.example.yourapphistory.common.toMillis
+import com.example.yourapphistory.domain.model.AppInfo
+import com.example.yourapphistory.domain.model.AppUsageInfo
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @Composable
 fun ItemAppInfoSmall(
-    appInfo: AppInfo,
+    appUsagePair: Pair<AppInfo, List<AppUsageInfo>>,
     clickAble: (String) -> Unit
 ) {
+    val appInfo = appUsagePair.first
+    val appUsageInfoList = appUsagePair.second
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -32,20 +37,22 @@ fun ItemAppInfoSmall(
             modifier = Modifier
                 .size(48.dp)
                 .clip(CircleShape),
-            painter = rememberDrawablePainter(drawable = appInfo.appIcon),
+            painter = rememberDrawablePainter(drawable = appInfo.icon),
             contentDescription = null
         )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = appInfo.appLabel
+            text = appInfo.label
         )
 
         Spacer(modifier = Modifier.width(8.dp))
 
         Text(
-            text = appInfo.todayUsageTime.convertToRealUsageTime()
+            text = appUsageInfoList.sumOf {
+                it.endUseTime.toMillis() - it.beginUseTime.toMillis()
+            }.convertToRealUsageTime()
         )
     }
 }

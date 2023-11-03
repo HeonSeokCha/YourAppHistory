@@ -72,4 +72,5 @@ dependencies {
 
     ksp(libs.androidX.room.compiler)
     implementation(libs.androidX.room.ktx)
+    implementation(libs.kotlin.coroutine.android)
 }

@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun MainScreen(
     viewModel: MainViewModel = viewModel()
@@ -31,18 +30,19 @@ fun MainScreen(
     val coroutineScope = rememberCoroutineScope()
 
     LaunchedEffect(state.targetDate) {
-        if (state.targetDate != null) {
-            viewModel.getAppInfoList(state.targetDate!!)
-        }
+        viewModel.getAppInfoList()
     }
 
     Column {
-        DateHeader(state.localDateList) {
-            viewModel.changeDate(it)
-            coroutineScope.launch {
-                scrollState.scrollToItem(0, 0)
+        if (state.localDateList.isNotEmpty()) {
+            DateHeader(state.localDateList) {
+                viewModel.changeDate(it)
+                coroutineScope.launch {
+                    scrollState.scrollToItem(0, 0)
+                }
             }
         }
+
 
         LazyColumn(
             modifier = Modifier
@@ -55,7 +55,7 @@ fun MainScreen(
             )
         ) {
             items(state.appInfoList) {
-                ItemAppInfoSmall(appInfo = it) { packageName ->
+                ItemAppInfoSmall(it) { packageName ->
 
                 }
             }
