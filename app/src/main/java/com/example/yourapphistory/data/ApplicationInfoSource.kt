@@ -9,22 +9,15 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
 import com.example.yourapphistory.common.isZero
-import com.example.yourapphistory.common.toMillis
-import com.example.yourapphistory.data.db.dao.AppUsageDao
-import com.example.yourapphistory.data.db.dao.AppUsageEventDao
 import com.example.yourapphistory.data.db.entity.AppUsageEntity
-import com.example.yourapphistory.data.db.entity.AppUsageEventEntity
-import com.example.yourapphistory.domain.model.AppInfo
-import com.example.yourapphistory.domain.model.AppUsageInfo
-import java.time.LocalDate
-import java.time.LocalTime
+import com.example.yourapphistory.data.db.model.AppUsageEventRawInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
 class ApplicationInfoSource @Inject constructor(private val context: Context) {
 
-    private fun getInstalledLauncherPackageNameList(): List<String> {
+    fun getInstalledLauncherPackageNameList(): List<String> {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
             this.addCategory(Intent.CATEGORY_LAUNCHER)
         }
@@ -70,13 +63,13 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
         }
     }
 
-    fun getUsageEvent(beginTime: Long): List<AppUsageEventEntity> {
+    fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
             }
 
-        val resultArr: ArrayList<AppUsageEventEntity> = arrayListOf()
+        val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
 
         while (usageEvents.hasNextEvent()) {
             val currentEvent = UsageEvents.Event().apply {
@@ -96,11 +89,11 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
                 || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
             ) {
                 resultArr.add(
-                    AppUsageEventEntity(
-                        eventTime = time,
+                    AppUsageEventRawInfo(
                         packageName = packageName,
                         className = currentEvent.className,
-                        eventType = eventType
+                        eventType = eventType,
+                        eventTime = time
                     )
                 )
             }
@@ -108,7 +101,7 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
         return resultArr
     }
 
-    fun getAppUsageInfoList(usageEventList: List<AppUsageEventEntity>): List<AppUsageEntity> {
+    fun getAppUsageInfoList(usageEventList: List<AppUsageEventRawInfo>): List<AppUsageEntity> {
         val installPackageNames: List<String> = getInstalledLauncherPackageNameList()
         var prevPackageName: String? = null
         var prevActivityClassName: String? = null

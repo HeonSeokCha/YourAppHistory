@@ -48,7 +48,8 @@ class MainViewModel @Inject constructor(
     fun changeDate(localDate: LocalDate) {
         _state.update {
             it.copy(
-                targetDate = localDate
+                targetDate = localDate,
+                appInfoList = emptyList()
             )
         }
     }

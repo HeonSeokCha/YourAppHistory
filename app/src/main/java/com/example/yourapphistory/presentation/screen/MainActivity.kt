@@ -3,7 +3,6 @@ package com.example.yourapphistory.presentation.screen
 import android.app.AppOpsManager
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.Bundle
 import android.os.Process
 import android.provider.Settings
@@ -12,20 +11,23 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Modifier
-import com.example.yourapphistory.presentation.screen.theme.YourAppHistoryTheme
+import com.example.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject lateinit var insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -42,6 +44,7 @@ class MainActivity : ComponentActivity() {
             }
             LaunchedEffect(Unit) {
                 if (getUsagePermission()) {
+                    insertAppUsageInfoUseCase()
                     hasPermission = true
                 } else {
                     usageStateLauncher.launch(
@@ -56,6 +59,13 @@ class MainActivity : ComponentActivity() {
             if (hasPermission) {
                 MainScreen()
             }
+        }
+    }
+
+    override fun onRestart() {
+        super.onRestart()
+        CoroutineScope(Dispatchers.IO).launch {
+            insertAppUsageInfoUseCase()
         }
     }
 

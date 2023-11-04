@@ -15,15 +15,16 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getOldestCollectTime(): Long
 
     @Query(
-        "SELECT IFNULL(MAX(endUseTime), 0) " +
-          "FROM appUsage "
+        "SELECT *" +
+          "FROM appUsage " +
+         "ORDER BY beginUseTime DESC LIMIT 1"
     )
-    abstract suspend fun getLastEndUseTime(): Long
+    abstract suspend fun getLastEndUseTime(): AppUsageEntity?
 
     @Query(
         "SELECT * " +
           "FROM appUsage " +
-         "WHERE beginUseTime BETWEEN :date AND (:date + 86399999)"
+         "WHERE beginUseTime BETWEEN :date AND (:date + 86399999) "
     )
     abstract fun getDayUsageInfoList(date: Long): Flow<List<AppUsageEntity>>
 }
