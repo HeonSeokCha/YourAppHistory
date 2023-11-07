@@ -1,6 +1,7 @@
 package com.example.yourapphistory.data.db.dao
 
 import androidx.room.Dao
+import androidx.room.MapColumn
 import androidx.room.Query
 import com.example.yourapphistory.data.db.entity.AppUsageEntity
 import kotlinx.coroutines.flow.Flow
@@ -22,9 +23,14 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getLastEndUseTime(): AppUsageEntity?
 
     @Query(
-        "SELECT * " +
-          "FROM appUsage " +
-         "WHERE beginUseTime BETWEEN :date AND (:date + 86399999) "
+        "SELECT A.packageName, B.* " +
+          "FROM appUsage AS A " +
+         "INNER JOIN appUsage AS B " +
+            "ON A.packageName = B.packageName " +
+           "AND A.beginUseTime = B.beginUseTime " +
+           "AND A.endUseTime = B.endUseTime " +
+         "WHERE A.beginUseTime BETWEEN :date AND (:date + 86399999) " +
+         "ORDER BY A.packageName, B.beginUseTime ASC"
     )
-    abstract fun getDayUsageInfoList(date: Long): Flow<List<AppUsageEntity>>
+    abstract fun getDayUsageInfoList(date: Long): Flow<Map<@MapColumn("packageName")String, List<AppUsageEntity>>>
 }

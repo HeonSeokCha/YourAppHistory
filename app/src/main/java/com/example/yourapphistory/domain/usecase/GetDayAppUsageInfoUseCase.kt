@@ -11,7 +11,7 @@ import javax.inject.Inject
 class GetDayAppUsageInfoUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    operator fun invoke(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
+    suspend operator fun invoke(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
         return repository.getAppUsageInfo(date)
     }
 }

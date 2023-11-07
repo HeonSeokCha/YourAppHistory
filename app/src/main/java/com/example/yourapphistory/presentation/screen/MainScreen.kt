@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import kotlinx.coroutines.launch
 
@@ -30,7 +31,8 @@ import kotlinx.coroutines.launch
 fun MainScreen(
     viewModel: MainViewModel = viewModel()
 ) {
-    val state by viewModel.state.collectAsState()
+    val context: Context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val scrollState = rememberLazyListState()
     var expandPos by remember { mutableIntStateOf(-1) }
 
@@ -58,11 +60,14 @@ fun MainScreen(
                 vertical = 8.dp
             )
         ) {
-            if (state.appInfoList.isEmpty()) {
-                item {
-                    CircularProgressIndicator()
-                }
+            item {
+                CircularProgressIndicator()
             }
+//            if (state.appInfoList.isEmpty()) {
+//                item {
+//                    CircularProgressIndicator()
+//                }
+//            }
             itemsIndexed(state.appInfoList) { idx, list ->
                 val expanded: Boolean = expandPos == idx
                 ItemAppInfoSmall(

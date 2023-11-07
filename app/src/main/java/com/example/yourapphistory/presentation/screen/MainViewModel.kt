@@ -8,6 +8,7 @@ import com.example.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -35,7 +36,7 @@ class MainViewModel @Inject constructor(
 
     fun getAppInfoList() {
         viewModelScope.launch {
-            getDayAppUsageInfoUseCase(state.value.targetDate).collect { appUsageSummaryList ->
+            getDayAppUsageInfoUseCase(state.value.targetDate).collectLatest { appUsageSummaryList ->
                 _state.update {
                     it.copy(
                         appInfoList = appUsageSummaryList
@@ -48,8 +49,7 @@ class MainViewModel @Inject constructor(
     fun changeDate(localDate: LocalDate) {
         _state.update {
             it.copy(
-                targetDate = localDate,
-                appInfoList = emptyList()
+                targetDate = localDate
             )
         }
     }
