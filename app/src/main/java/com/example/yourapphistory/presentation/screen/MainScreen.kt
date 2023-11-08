@@ -63,11 +63,6 @@ fun MainScreen(
             item {
                 CircularProgressIndicator()
             }
-//            if (state.appInfoList.isEmpty()) {
-//                item {
-//                    CircularProgressIndicator()
-//                }
-//            }
             itemsIndexed(state.appInfoList) { idx, list ->
                 val expanded: Boolean = expandPos == idx
                 ItemAppInfoSmall(

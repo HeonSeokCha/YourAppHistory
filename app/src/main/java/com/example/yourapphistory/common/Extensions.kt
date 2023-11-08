@@ -27,7 +27,11 @@ fun Long.convertToRealUsageTime(): String {
     val second: Long = (this / 1000) % 60
     return if (hour == 0L) {
         if (minutes == 0L) {
-            "${second}초"
+            if (second == 0L) {
+                "< 1초"
+            } else {
+                "${second}초"
+            }
         } else {
             "${minutes}분 ${second}초"
         }

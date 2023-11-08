@@ -1,7 +1,9 @@
 package com.example.yourapphistory.data.repository
 
 import android.util.Log
+import androidx.annotation.WorkerThread
 import com.example.yourapphistory.common.Constants
+import com.example.yourapphistory.common.Resource
 import com.example.yourapphistory.common.isZero
 import com.example.yourapphistory.common.toLocalDate
 import com.example.yourapphistory.common.toLocalDateTime
@@ -14,8 +16,10 @@ import com.example.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -45,30 +49,32 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getAppUsageInfo(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
-        return withContext(Dispatchers.IO) {
-            Log.e("TEST", LocalDate.now().toMillis().toString())
-            appUsageDao.getDayUsageInfoList(date.toMillis())
-                .map {
-                    it.map {
-                        Log.e("TEST", "${it.key}, ${it.value.first().beginUseTime.toLocalDate()}")
-                        AppInfo(
-                            packageName = it.key,
-                            label = applicationInfoSource.getApplicationLabel(it.key),
-                            icon = applicationInfoSource.getApplicationIcon(it.key)
-                        ) to it.value.map { appUSageEntity ->
-                            AppUsageInfo(
-                                packageName = appUSageEntity.packageName,
-                                beginUseTime = appUSageEntity.beginUseTime.toLocalDateTime(),
-                                endUseTime = appUSageEntity.endUseTime.toLocalDateTime()
-                            )
-                        }
-                    }.sortedByDescending {
-                        it.second.sumOf { appUSageInfo ->
-                            appUSageInfo.endUseTime.toMillis() - appUSageInfo.beginUseTime.toMillis()
-                        }
+    override suspend fun getAppUsageInfo(
+        date: LocalDate
+    ): Flow<Resource<List<Pair<AppInfo, List<AppUsageInfo>>>>> {
+        return withContext(Dispatchers.Default) {
+            flow {
+                emit(Resource.Loading())
+                val a = appUsageDao.getDayUsageInfoList(date.toMillis())
+                val b = a.map {
+                    AppInfo(
+                        packageName = it.key,
+                        label = applicationInfoSource.getApplicationLabel(it.key),
+                        icon = applicationInfoSource.getApplicationIcon(it.key)
+                    ) to it.value.map { appUSageEntity ->
+                        AppUsageInfo(
+                            packageName = appUSageEntity.packageName,
+                            beginUseTime = appUSageEntity.beginUseTime.toLocalDateTime(),
+                            endUseTime = appUSageEntity.endUseTime.toLocalDateTime()
+                        )
+                    }
+                }.sortedByDescending {
+                    it.second.sumOf { appUSageInfo ->
+                        appUSageInfo.endUseTime.toMillis() - appUSageInfo.beginUseTime.toMillis()
                     }
                 }
+                emit(Resource.Success(b))
+            }
         }
     }
 

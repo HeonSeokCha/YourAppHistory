@@ -1,5 +1,6 @@
 package com.example.yourapphistory.domain.usecase
 
+import com.example.yourapphistory.common.Resource
 import com.example.yourapphistory.domain.model.AppInfo
 import com.example.yourapphistory.domain.model.AppUsageInfo
 import com.example.yourapphistory.domain.repository.AppRepository
@@ -11,7 +12,9 @@ import javax.inject.Inject
 class GetDayAppUsageInfoUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    suspend operator fun invoke(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
+    suspend operator fun invoke(
+        date: LocalDate
+    ): Flow<Resource<List<Pair<AppInfo, List<AppUsageInfo>>>>> {
         return repository.getAppUsageInfo(date)
     }
 }

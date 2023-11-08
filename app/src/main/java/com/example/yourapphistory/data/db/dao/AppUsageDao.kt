@@ -32,5 +32,5 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
          "WHERE A.beginUseTime BETWEEN :date AND (:date + 86399999) " +
          "ORDER BY A.packageName, B.beginUseTime ASC"
     )
-    abstract fun getDayUsageInfoList(date: Long): Flow<Map<@MapColumn("packageName")String, List<AppUsageEntity>>>
+    abstract suspend fun getDayUsageInfoList(date: Long): Map<@MapColumn("packageName")String, List<AppUsageEntity>>
 }
