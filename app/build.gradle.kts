@@ -63,15 +63,8 @@ dependencies {
     implementation(libs.androidX.core.ktx)
     implementation(libs.bundles.compose)
     implementation(libs.androidX.navigation.compose)
-    implementation(libs.accompanist.drawablepainter)
+    implementation(libs.bundles.room)
+    implementation(libs.bundles.hilt)
     ksp(libs.hilt.compiler)
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.navigation.compose)
-    implementation(libs.work.runtime.ktx)
-    implementation(libs.hilt.work)
-    ksp(libs.androidx.hilt.compiler)
-
     ksp(libs.androidX.room.compiler)
-    implementation(libs.androidX.room.ktx)
-    implementation(libs.kotlin.coroutine.android)
 }

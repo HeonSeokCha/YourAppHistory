@@ -4,6 +4,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -16,6 +17,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Card
@@ -28,6 +30,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -36,7 +40,6 @@ import com.example.yourapphistory.common.convertToRealUsageTime
 import com.example.yourapphistory.common.toMillis
 import com.example.yourapphistory.domain.model.AppInfo
 import com.example.yourapphistory.domain.model.AppUsageInfo
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
 
 @Composable
 fun ItemAppInfoSmall(
@@ -72,13 +75,24 @@ fun ItemAppInfoSmall(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Image(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape),
-                    painter = rememberDrawablePainter(drawable = appInfo.icon),
-                    contentDescription = null
-                )
+                if (appInfo.icon != null) {
+                    Image(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape),
+                        bitmap = appInfo.icon.asImageBitmap(),
+                        contentDescription = null
+                    )
+                } else {
+                    Image(
+                        modifier = Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(Color.LightGray),
+                        imageVector = Icons.Filled.Android,
+                        contentDescription = null
+                    )
+                }
 
                 Spacer(modifier = Modifier.width(8.dp))
 

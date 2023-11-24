@@ -1,7 +1,5 @@
 package com.example.yourapphistory.data.repository
 
-import android.util.Log
-import androidx.annotation.WorkerThread
 import com.example.yourapphistory.common.Constants
 import com.example.yourapphistory.common.Resource
 import com.example.yourapphistory.common.isZero
@@ -9,28 +7,32 @@ import com.example.yourapphistory.common.toLocalDate
 import com.example.yourapphistory.common.toLocalDateTime
 import com.example.yourapphistory.common.toMillis
 import com.example.yourapphistory.data.ApplicationInfoSource
+import com.example.yourapphistory.data.db.dao.AppInfoDao
 import com.example.yourapphistory.data.db.dao.AppUsageDao
+import com.example.yourapphistory.data.toEntity
 import com.example.yourapphistory.domain.model.AppInfo
 import com.example.yourapphistory.domain.model.AppUsageInfo
 import com.example.yourapphistory.domain.repository.AppRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import java.time.LocalDateTime
 import javax.inject.Inject
 
 class AppRepositoryImpl @Inject constructor(
     private val applicationInfoSource: ApplicationInfoSource,
-    private val appUsageDao: AppUsageDao
+    private val appUsageDao: AppUsageDao,
+    private val appInfoDao: AppInfoDao
 ) : AppRepository {
+
+    override suspend fun insertAppInfo(list: List<AppInfo>) {
+        appInfoDao.insert(
+            *list.map {
+                it.toEntity()
+            }.toTypedArray()
+        )
+    }
 
     override suspend fun insertAppUsageInfo() {
         appUsageDao.insert(
@@ -41,18 +43,23 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     private suspend fun getLastUsageEventTime(): Long {
-        val localEndUseTime: Long = appUsageDao.getLastEndUseTime()?.endUseTime ?: 0L
-        return if (localEndUseTime == 0L) {
-            LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
-        } else {
-            localEndUseTime
+        return appUsageDao.getLastEndUseTime().run {
+            if (this == 0L) {
+                LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
+            } else {
+                this
+            }
         }
+    }
+
+    override suspend fun getDayUsedAppInfoList(): List<AppInfo> {
+
     }
 
     override suspend fun getAppUsageInfo(
         date: LocalDate
     ): Flow<Resource<List<Pair<AppInfo, List<AppUsageInfo>>>>> {
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             flow {
                 emit(Resource.Loading())
                 val a = appUsageDao.getDayUsageInfoList(date.toMillis())

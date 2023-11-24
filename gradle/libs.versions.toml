@@ -1,15 +1,14 @@
 [versions]
-androidGradlePlugin = "8.1.3"
+androidGradlePlugin = "8.1.4"
 
 compileSdkVersion = "34"
 desugar_jdk_libs = "2.0.4"
-hiltWork = "1.1.0"
 minSdkVersion = "29"
 targetSdkVersion = "33"
 versionCode = "1"
 versionName = "1.0"
 
-activity = "1.8.0"
+activity = "1.8.1"
 compose-ui = "1.5.4"
 composeCompiler = "1.5.4"
 lifecycle = "2.6.2"
@@ -18,7 +17,6 @@ hilt = "2.48.1"
 kotlin = "1.9.20"
 ksp = "1.9.20-1.0.14"
 kotlin-coroutine = "1.7.1"
-workRuntimeKtx = "2.8.1"
 
 [libraries]
 # AndroidX
@@ -29,7 +27,6 @@ androidX-compose-material-icon-extend = { module = "androidx.compose.material:ma
 androidX-compose-material3 = "androidx.compose.material3:material3:1.1.2"
 androidX-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
-androidx-hilt-compiler = { module = "androidx.hilt:hilt-compiler", version.ref = "hiltWork" }
 androidX-navigation-compose = "androidx.navigation:navigation-compose:2.7.5"
 androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
 androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
@@ -45,17 +42,8 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 hilt-navigation-compose = "androidx.hilt:hilt-navigation-compose:1.1.0"
 
 ## Kotlin
-hilt-work = { module = "androidx.hilt:hilt-work", version.ref = "hiltWork" }
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-coroutine-test = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-test", version.ref = "kotlin-coroutine" }
-
-## etc
-accompanist-drawablepainter = "com.google.accompanist:accompanist-drawablepainter:0.33.2-alpha"
-junit = "junit:junit:4.13.2"
-assertJ = "org.assertj:assertj-core:3.23.1"
-mockito = "org.mockito:mockito-core:4.8.0"
-work-runtime-ktx = { module = "androidx.work:work-runtime-ktx", version.ref = "workRuntimeKtx" }
 
 [bundles]
 compose = [
@@ -67,6 +55,16 @@ compose = [
     "androidX-compose-ui-tooling",
     "androidX-lifecycle-viewmodel-compose",
     "androidX-lifecycle-runtime-compose"
+]
+
+hilt = [
+    "hilt-android",
+    "hilt-navigation-compose"
+]
+
+room = [
+    "androidX-room-ktx",
+    "androidX-room-runtime"
 ]
 
 [plugins]

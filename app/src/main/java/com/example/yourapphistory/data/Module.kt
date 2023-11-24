@@ -2,6 +2,7 @@ package com.example.yourapphistory.data
 
 import android.content.Context
 import com.example.yourapphistory.data.db.YourAppHistoryDatabase
+import com.example.yourapphistory.data.db.dao.AppInfoDao
 import com.example.yourapphistory.data.db.dao.AppUsageDao
 import dagger.Module
 import dagger.Provides
@@ -30,5 +31,11 @@ object Module {
     @Provides
     fun provideAppUsageDao(db: YourAppHistoryDatabase): AppUsageDao {
         return db.appUsageDao
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppInfoDao(db: YourAppHistoryDatabase): AppInfoDao {
+        return db.appInfoDao
     }
 }

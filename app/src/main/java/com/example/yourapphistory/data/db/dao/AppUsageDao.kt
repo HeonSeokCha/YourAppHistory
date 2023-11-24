@@ -16,11 +16,11 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getOldestCollectTime(): Long
 
     @Query(
-        "SELECT *" +
+        "SELECT IFNULL(endUseTime, 0)" +
           "FROM appUsage " +
          "ORDER BY beginUseTime DESC LIMIT 1"
     )
-    abstract suspend fun getLastEndUseTime(): AppUsageEntity?
+    abstract suspend fun getLastEndUseTime(): Long
 
     @Query(
         "SELECT A.packageName, B.* " +

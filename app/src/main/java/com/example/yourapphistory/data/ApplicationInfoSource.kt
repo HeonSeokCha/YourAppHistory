@@ -5,9 +5,11 @@ import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
+import androidx.core.graphics.drawable.toBitmap
 import com.example.yourapphistory.common.isZero
 import com.example.yourapphistory.data.db.entity.AppUsageEntity
 import com.example.yourapphistory.data.db.model.AppUsageEventRawInfo
@@ -55,9 +57,9 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
         }.toString()
     }
 
-    fun getApplicationIcon(packageName: String): Drawable? {
+    fun getApplicationIcon(packageName: String): Bitmap? {
         return try {
-            context.packageManager.getApplicationIcon(packageName)
+            context.packageManager.getApplicationIcon(packageName).toBitmap()
         } catch (e: PackageManager.NameNotFoundException) {
             null
         }

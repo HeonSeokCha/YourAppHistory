@@ -1,9 +1,9 @@
 package com.example.yourapphistory.domain.model
 
-import android.graphics.drawable.Drawable
+import android.graphics.Bitmap
 
 data class AppInfo(
     val packageName: String,
     val label: String,
-    val icon: Drawable? = null
+    val icon: Bitmap? = null
 )
