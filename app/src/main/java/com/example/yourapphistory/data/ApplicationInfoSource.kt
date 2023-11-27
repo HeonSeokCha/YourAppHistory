@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
@@ -17,7 +16,9 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 @Singleton
-class ApplicationInfoSource @Inject constructor(private val context: Context) {
+class ApplicationInfoSource @Inject constructor(
+    private val context: Context
+) {
 
     fun getInstalledLauncherPackageNameList(): List<String> {
         val mainIntent = Intent(Intent.ACTION_MAIN, null).apply {
@@ -170,7 +171,6 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
                     }
                 }
 
-                // 화면 꺼짐
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
                     prevPackageName = usageEvent.packageName
                     isScreenOff = true
@@ -180,13 +180,11 @@ class ApplicationInfoSource @Inject constructor(private val context: Context) {
                     isScreenOff = false
                 }
 
-                UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
-                    Log.e("USAGE", usageEvent.toString())
-                }
+//                UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
+//                    Log.e("USAGE", usageEvent.toString())
+//                }
             }
         }
-
         return completedUsageList
     }
-
 }

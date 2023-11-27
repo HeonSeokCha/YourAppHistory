@@ -39,7 +39,7 @@ fun MainScreen(
     LaunchedEffect(state.targetDate) {
         expandPos = -1
         scrollState.scrollToItem(0, 0)
-        viewModel.getAppInfoList()
+        viewModel.getDayUseAppInfoList(state.targetDate)
     }
 
     Column {
@@ -66,16 +66,18 @@ fun MainScreen(
             itemsIndexed(state.appInfoList) { idx, list ->
                 val expanded: Boolean = expandPos == idx
                 ItemAppInfoSmall(
-                    appUsagePair = list,
-                    expanded = expanded
+                    usedAppInfo = list,
+                    expanded = expanded,
+                    isLoading = state.isLoading,
+                    appUsageInfoList = state.appUsageList
                 ) { packageName ->
-                    expandPos = if (expandPos == -1) {
+                    expandPos = if (expandPos != idx) {
+                        viewModel.getDayAppUsageInfoList(
+                            date = state.targetDate,
+                            packageName = packageName
+                        )
                         idx
-                    } else {
-                        if (expandPos == idx) {
-                            -1
-                        } else idx
-                    }
+                    } else -1
                 }
             }
         }

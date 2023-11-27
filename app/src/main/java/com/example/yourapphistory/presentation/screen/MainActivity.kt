@@ -16,7 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.lifecycleScope
 import com.example.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
+import com.example.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +29,7 @@ import javax.inject.Inject
 class MainActivity : ComponentActivity() {
 
     @Inject lateinit var insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
+    @Inject lateinit var insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,9 +45,13 @@ class MainActivity : ComponentActivity() {
                     Toast.makeText(this, "Usage NOT OK", Toast.LENGTH_SHORT).show()
                 }
             }
+
             LaunchedEffect(Unit) {
                 if (getUsagePermission()) {
-                    insertAppUsageInfoUseCase()
+                    lifecycleScope.launch {
+                        insertAppUsageInfoUseCase()
+                        insertAppUsageInfoUseCase()
+                    }
                     hasPermission = true
                 } else {
                     usageStateLauncher.launch(
@@ -64,8 +71,9 @@ class MainActivity : ComponentActivity() {
 
     override fun onRestart() {
         super.onRestart()
-        CoroutineScope(Dispatchers.IO).launch {
+        lifecycleScope.launch(Dispatchers.IO) {
             insertAppUsageInfoUseCase()
+            insertInstallAppInfoUseCase()
         }
     }
 

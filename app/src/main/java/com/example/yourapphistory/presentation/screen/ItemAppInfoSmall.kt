@@ -43,12 +43,14 @@ import com.example.yourapphistory.domain.model.AppUsageInfo
 
 @Composable
 fun ItemAppInfoSmall(
-    appUsagePair: Pair<AppInfo, List<AppUsageInfo>>,
+    usedAppInfo: Pair<AppInfo, String>,
     expanded: Boolean,
+    isLoading: Boolean = false,
+    appUsageInfoList: List<AppUsageInfo>,
     clickAble: (String) -> Unit
 ) {
-    val appInfo = appUsagePair.first
-    val appUsageInfoList = appUsagePair.second
+    val appInfo = usedAppInfo.first
+    val dayAppUsedTime = usedAppInfo.second
 
     Card(
         colors = CardDefaults.cardColors(
@@ -102,11 +104,7 @@ fun ItemAppInfoSmall(
 
                 Spacer(modifier = Modifier.width(8.dp))
 
-                Text(
-                    text = appUsageInfoList.sumOf {
-                        it.endUseTime.toMillis() - it.beginUseTime.toMillis()
-                    }.convertToRealUsageTime()
-                )
+                Text(text = dayAppUsedTime)
             }
 
             IconButton(onClick = { clickAble(appInfo.packageName) }) {

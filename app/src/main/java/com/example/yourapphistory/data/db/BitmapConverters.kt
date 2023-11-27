@@ -8,9 +8,9 @@ import java.io.ByteArrayOutputStream
 class BitmapConverters {
 
     @TypeConverter
-    fun toByteArray(icon: Bitmap): ByteArray {
+    fun toByteArray(icon: Bitmap?): ByteArray {
         val outputStream: ByteArrayOutputStream = ByteArrayOutputStream()
-        icon.compress(
+        icon?.compress(
             Bitmap.CompressFormat.PNG,
             100,
             outputStream
@@ -19,7 +19,7 @@ class BitmapConverters {
     }
 
     @TypeConverter
-    fun toDrawable(bytes: ByteArray): Bitmap {
+    fun toDrawable(bytes: ByteArray): Bitmap? {
         return BitmapFactory.decodeByteArray(
             bytes,
             0,

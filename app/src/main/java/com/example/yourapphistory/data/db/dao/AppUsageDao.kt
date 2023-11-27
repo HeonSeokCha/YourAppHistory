@@ -1,10 +1,8 @@
 package com.example.yourapphistory.data.db.dao
 
 import androidx.room.Dao
-import androidx.room.MapColumn
 import androidx.room.Query
 import com.example.yourapphistory.data.db.entity.AppUsageEntity
-import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class AppUsageDao : BaseDao<AppUsageEntity> {
@@ -16,21 +14,20 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getOldestCollectTime(): Long
 
     @Query(
-        "SELECT IFNULL(endUseTime, 0)" +
-          "FROM appUsage " +
-         "ORDER BY beginUseTime DESC LIMIT 1"
+        "SELECT IFNULL(MAX(endUseTime), 0)" +
+          "FROM appUsage "
     )
     abstract suspend fun getLastEndUseTime(): Long
 
     @Query(
-        "SELECT A.packageName, B.* " +
-          "FROM appUsage AS A " +
-         "INNER JOIN appUsage AS B " +
-            "ON A.packageName = B.packageName " +
-           "AND A.beginUseTime = B.beginUseTime " +
-           "AND A.endUseTime = B.endUseTime " +
-         "WHERE A.beginUseTime BETWEEN :date AND (:date + 86399999) " +
-         "ORDER BY A.packageName, B.beginUseTime ASC"
+        "SELECT * " +
+          "FROM appUsage " +
+         "WHERE beginUseTime BETWEEN :beginTime AND :endTime " +
+           "AND packageName = :packageName"
     )
-    abstract suspend fun getDayUsageInfoList(date: Long): Map<@MapColumn("packageName")String, List<AppUsageEntity>>
+    abstract suspend fun getUsageInfoList(
+        beginTime: Long,
+        endTime: Long,
+        packageName: String,
+    ): List<AppUsageEntity>
 }

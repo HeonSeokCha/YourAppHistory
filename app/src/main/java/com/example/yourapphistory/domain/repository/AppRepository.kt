@@ -8,13 +8,16 @@ import java.time.LocalDate
 
 interface AppRepository {
 
-    suspend fun insertAppInfo(list: List<AppInfo>)
-
     suspend fun insertAppUsageInfo()
 
-    suspend fun getDayUsedAppInfoList(): List<AppInfo>
+    suspend fun insertInstallAppInfo()
 
-    suspend fun getAppUsageInfo(date: LocalDate): Flow<Resource<List<Pair<AppInfo, List<AppUsageInfo>>>>>
+    suspend fun getDayUsedAppInfoList(date: LocalDate): Flow<Resource<List<Pair<AppInfo, String>>>>
+
+    suspend fun getAppUsageInfoList(
+        date: LocalDate,
+        packageName: String
+    ): Flow<Resource<List<AppUsageInfo>>>
 
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 

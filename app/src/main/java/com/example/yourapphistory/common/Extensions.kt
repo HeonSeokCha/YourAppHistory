@@ -1,11 +1,10 @@
 package com.example.yourapphistory.common
 
-import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.ZoneId
-import java.util.Locale
 
 fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
     return if (targetDate == LocalDate.now()) {
@@ -55,4 +54,12 @@ fun Long.toLocalDateTime(): LocalDateTime {
 
 fun Long.toLocalDate(): LocalDate {
     return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
+}
+
+fun LocalDate.atStartOfDayToMillis(): Long {
+    return this.atStartOfDay().toMillis()
+}
+
+fun LocalDate.atEndOfDayToMillis(): Long {
+    return this.atTime(LocalTime.MAX).toMillis()
 }
