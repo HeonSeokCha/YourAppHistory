@@ -6,11 +6,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.yourapphistory"
+    namespace = "com.chs.yourapphistory"
     compileSdk = libs.versions.compileSdkVersion.get().toInt()
 
     defaultConfig {
-        applicationId = "com.example.yourapphistory"
+        applicationId = "com.chs.yourapphistory"
         minSdk = libs.versions.minSdkVersion.get().toInt()
         targetSdk = libs.versions.targetSdkVersion.get().toInt()
         versionCode = libs.versions.versionCode.get().toInt()
