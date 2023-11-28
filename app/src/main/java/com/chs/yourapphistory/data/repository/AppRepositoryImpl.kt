@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
+import android.util.Log
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.atEndOfDayToMillis
@@ -17,8 +18,13 @@ import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -64,36 +70,47 @@ class AppRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getDayUsedAppInfoList(
+    override fun getDayUsedAppInfoList(
         date: LocalDate
     ): Flow<Resource<List<Pair<AppInfo, String>>>> {
         return flow {
             emit(Resource.Loading())
-            val result = appInfoDao.getDayUsedAppInfoList(
-                    beginTime = date.atStartOfDayToMillis(),
-                    endTime = date.atEndOfDayToMillis()
-                ).map {
-                    it.key.toAppInfo() to it.value.convertToRealUsageTime()
-                }
-
-            emit(Resource.Success(result))
+            appInfoDao.getDayUsedAppInfoList(
+                beginTime = date.atStartOfDayToMillis(),
+                endTime = date.atEndOfDayToMillis()
+            ).collect {
+                emit(
+                    Resource.Success(
+                        it.map {
+                            it.key.toAppInfo() to it.value.convertToRealUsageTime()
+                        }
+                    )
+                )
+            }
+        }.catch {
+            Log.e("A123", it.message.toString())
         }
     }
 
-    override suspend fun getAppUsageInfoList(
+    override fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
     ): Flow<Resource<List<AppUsageInfo>>> {
         return flow {
             emit(Resource.Loading())
-            val result = appUsageDao.getUsageInfoList(
+            appUsageDao.getUsageInfoList(
                 beginTime = date.atStartOfDayToMillis(),
                 endTime = date.atEndOfDayToMillis(),
                 packageName = packageName
-            ).map {
-                it.toAppUsageInfo()
+            ).collect {
+                emit(
+                    Resource.Success(
+                        it.map { it.toAppUsageInfo() }
+                    )
+                )
             }
-            emit(Resource.Success(result))
+        }.catch {
+            Log.e("A123", it.message.toString())
         }
     }
 

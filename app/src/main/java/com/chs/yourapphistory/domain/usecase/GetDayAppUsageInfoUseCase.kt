@@ -10,7 +10,7 @@ import javax.inject.Inject
 class GetDayAppUsageInfoUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    suspend operator fun invoke(
+    operator fun invoke(
         date: LocalDate,
         packageName: String
     ): Flow<Resource<List<AppUsageInfo>>> {

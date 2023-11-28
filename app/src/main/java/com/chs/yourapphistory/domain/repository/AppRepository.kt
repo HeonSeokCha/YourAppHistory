@@ -12,9 +12,9 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    suspend fun getDayUsedAppInfoList(date: LocalDate): Flow<Resource<List<Pair<AppInfo, String>>>>
+    fun getDayUsedAppInfoList(date: LocalDate): Flow<Resource<List<Pair<AppInfo, String>>>>
 
-    suspend fun getAppUsageInfoList(
+    fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
     ): Flow<Resource<List<AppUsageInfo>>>

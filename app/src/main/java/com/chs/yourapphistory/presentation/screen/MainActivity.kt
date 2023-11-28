@@ -69,8 +69,10 @@ class MainActivity : ComponentActivity() {
     override fun onRestart() {
         super.onRestart()
         lifecycleScope.launch(Dispatchers.IO) {
-            insertAppUsageInfoUseCase()
-            insertInstallAppInfoUseCase()
+            if (getUsagePermission()) {
+                insertAppUsageInfoUseCase()
+                insertInstallAppInfoUseCase()
+            }
         }
     }
 

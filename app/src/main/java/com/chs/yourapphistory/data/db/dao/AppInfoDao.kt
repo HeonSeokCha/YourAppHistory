@@ -4,23 +4,25 @@ import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
+    @Query("SELECT packageName FROM appInfo")
+    abstract suspend fun getAllPackageNames(): List<String>
+
     @Query(
         "SELECT appInfo.*, " +
-               "(appUsage.endUseTime - appUsage.beginUseTime) AS time " +
+               "SUM((appUsage.endUseTime - appUsage.beginUseTime)) AS time " +
           "FROM appInfo " +
          "INNER JOIN appUsage ON appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
            "AND appUsage.packageName = appInfo.packageName " +
+         "GROUP BY appInfo.packageName " +
          "ORDER BY time DESC"
     )
-    abstract suspend fun getDayUsedAppInfoList(
+    abstract fun getDayUsedAppInfoList(
         beginTime: Long,
         endTime: Long
-    ): Map<AppInfoEntity, @MapColumn("time")Long>
-
-    @Query("SELECT packageName FROM appInfo")
-    abstract suspend fun getAllPackageNames(): List<String>
+    ): Flow<Map<AppInfoEntity, @MapColumn("time") Long>>
 }

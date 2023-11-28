@@ -7,8 +7,12 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
+import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.db.model.AppUsageEventRawInfo
 import javax.inject.Inject
@@ -87,8 +91,6 @@ class ApplicationInfoSource @Inject constructor(
                 || eventType == UsageEvents.Event.ACTIVITY_STOPPED
                 || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
                 || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
-                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
-                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
             ) {
                 resultArr.add(
                     AppUsageEventRawInfo(
@@ -99,6 +101,10 @@ class ApplicationInfoSource @Inject constructor(
                     )
                 )
             }
+        }
+
+        resultArr.map {
+            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
         }
         return resultArr
     }
