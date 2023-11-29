@@ -74,21 +74,25 @@ class AppRepositoryImpl @Inject constructor(
         date: LocalDate
     ): Flow<Resource<List<Pair<AppInfo, String>>>> {
         return flow {
-            emit(Resource.Loading())
+            emit(Resource.Loading)
             appInfoDao.getDayUsedAppInfoList(
                 beginTime = date.atStartOfDayToMillis(),
                 endTime = date.atEndOfDayToMillis()
             ).collect {
-                emit(
-                    Resource.Success(
-                        it.map {
-                            it.key.toAppInfo() to it.value.convertToRealUsageTime()
-                        }
+                if (it.isEmpty()) {
+                    emit(Resource.Loading)
+                } else {
+                    emit(
+                        Resource.Success(
+                            it.map {
+                                it.key.toAppInfo() to it.value.convertToRealUsageTime()
+                            }
+                        )
                     )
-                )
+                }
             }
         }.catch {
-            Log.e("A123", it.message.toString())
+            emit(Resource.Error(it.message.toString()))
         }
     }
 
@@ -97,7 +101,7 @@ class AppRepositoryImpl @Inject constructor(
         packageName: String
     ): Flow<Resource<List<AppUsageInfo>>> {
         return flow {
-            emit(Resource.Loading())
+            emit(Resource.Loading)
             appUsageDao.getUsageInfoList(
                 beginTime = date.atStartOfDayToMillis(),
                 endTime = date.atEndOfDayToMillis(),
@@ -110,7 +114,7 @@ class AppRepositoryImpl @Inject constructor(
                 )
             }
         }.catch {
-            Log.e("A123", it.message.toString())
+            emit(Resource.Error(it.message.toString()))
         }
     }
 

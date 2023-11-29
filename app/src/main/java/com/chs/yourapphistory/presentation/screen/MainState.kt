@@ -10,5 +10,6 @@ data class MainState(
     val appInfoList: List<Pair<AppInfo, String>> = emptyList(),
     val targetPackageName: String? = null,
     val appUsageList: List<AppUsageInfo> = emptyList(),
-    val isLoading: Boolean = false
+    val isLoading: Boolean = false,
+    val errorMessage: String? = null
 )

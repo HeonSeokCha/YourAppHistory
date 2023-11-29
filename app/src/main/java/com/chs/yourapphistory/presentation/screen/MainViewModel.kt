@@ -62,6 +62,13 @@ class MainViewModel @Inject constructor(
                                 appInfoList = resource.data ?: emptyList()
                             )
                         }
+
+                        is Resource.Error -> {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.exception
+                            )
+                        }
                     }
                 }
             }
@@ -89,6 +96,13 @@ class MainViewModel @Inject constructor(
                             it.copy(
                                 isLoading = false,
                                 appUsageList = resource.data ?: emptyList()
+                            )
+                        }
+
+                        is Resource.Error -> {
+                            it.copy(
+                                isLoading = false,
+                                errorMessage = resource.exception
                             )
                         }
                     }

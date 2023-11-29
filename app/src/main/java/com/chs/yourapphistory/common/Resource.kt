@@ -1,9 +1,7 @@
 package com.chs.yourapphistory.common
 
-sealed class Resource<T>(
-    val data: T? = null,
-    val message: String? = null
-) {
-    class Success<T>(data: T?) : Resource<T>(data)
-    class Loading<T>(val isLoading: Boolean = true) : Resource<T>(null)
+sealed class Resource<out T> {
+    data object Loading : Resource<Nothing>()
+    data class Success<T>(val data: T) : Resource<T>()
+    data class Error(val exception: String) : Resource<Nothing>()
 }

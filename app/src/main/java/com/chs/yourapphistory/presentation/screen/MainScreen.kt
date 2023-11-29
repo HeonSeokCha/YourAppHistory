@@ -37,6 +37,11 @@ fun MainScreen(
         viewModel.getDayUseAppInfoList(state.targetDate)
     }
 
+    LaunchedEffect(state.appInfoList) {
+        expandPos = -1
+        scrollState.scrollToItem(0, 0)
+    }
+
     Column {
         if (state.localDateList.isNotEmpty()) {
             DateHeader(state.localDateList) {
@@ -55,9 +60,12 @@ fun MainScreen(
                 vertical = 8.dp
             )
         ) {
-            item {
-                CircularProgressIndicator()
+            if (state.isLoading) {
+                item {
+                    CircularProgressIndicator()
+                }
             }
+
             itemsIndexed(state.appInfoList) { idx, list ->
                 val expanded: Boolean = expandPos == idx
                 ItemAppInfoSmall(
