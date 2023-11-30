@@ -1,37 +1,29 @@
-package com.chs.yourapphistory.presentation.screen
+package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.getUntilDateList
-import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.usecase.GetDayAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.combine
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class MainViewModel @Inject constructor(
+class UsedAppListViewModel @Inject constructor(
     private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
     private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
     private val getDayAppUsageInfoUseCase: GetDayAppUsageInfoUseCase,
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(MainState())
+    private val _state = MutableStateFlow(UsedAppLIstState())
     val state = _state.asStateFlow()
 
     init {

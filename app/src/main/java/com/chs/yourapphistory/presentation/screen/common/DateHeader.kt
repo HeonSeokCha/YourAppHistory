@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.presentation.screen
+package com.chs.yourapphistory.presentation.screen.common
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons

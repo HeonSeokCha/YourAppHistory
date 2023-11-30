@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.data.db.model
+package com.chs.yourapphistory.data.model
 
 data class AppUsageEventRawInfo(
     val packageName: String,

@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.presentation.screen
+package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
@@ -21,12 +21,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.chs.yourapphistory.presentation.screen.common.DateHeader
 
 @Composable
-fun MainScreen(
-    viewModel: MainViewModel = viewModel()
+fun UsedAppListScreenScreen(
+    viewModel: UsedAppListViewModel = viewModel()
 ) {
-    val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scrollState = rememberLazyListState()
     var expandPos by remember { mutableIntStateOf(-1) }

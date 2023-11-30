@@ -14,7 +14,7 @@ import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
-import com.chs.yourapphistory.data.db.model.AppUsageEventRawInfo
+import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import javax.inject.Inject
 import javax.inject.Singleton
 

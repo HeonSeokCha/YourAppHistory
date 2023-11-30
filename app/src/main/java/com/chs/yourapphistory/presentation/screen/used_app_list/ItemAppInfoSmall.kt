@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.presentation.screen
+package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring

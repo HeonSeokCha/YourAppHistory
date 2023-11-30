@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.presentation.screen
+package com.chs.yourapphistory.presentation.screen.main
 
 import android.app.AppOpsManager
 import android.content.Intent
@@ -16,12 +16,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.lifecycle.lifecycleScope
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -60,22 +57,8 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            if (hasPermission) {
-                MainScreen()
-            }
         }
     }
-
-    override fun onRestart() {
-        super.onRestart()
-        lifecycleScope.launch(Dispatchers.IO) {
-            if (getUsagePermission()) {
-                insertAppUsageInfoUseCase()
-                insertInstallAppInfoUseCase()
-            }
-        }
-    }
-
 
     private fun getUsagePermission(): Boolean {
         val appOps: AppOpsManager = getSystemService(APP_OPS_SERVICE) as AppOpsManager

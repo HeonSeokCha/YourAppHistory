@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.data.repository
 
-import android.util.Log
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.atEndOfDayToMillis
@@ -18,13 +17,9 @@ import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 
