@@ -6,7 +6,7 @@ import java.time.LocalDate
 @Composable
 fun AppUsageDetailScreen(
     packageName: String,
-    date: LocalDate = LocalDate.now()
+    date: LocalDate
 ) {
 
 }

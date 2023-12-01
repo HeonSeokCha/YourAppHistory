@@ -51,7 +51,7 @@ class UsedAppListViewModel @Inject constructor(
                         is Resource.Success -> {
                             it.copy(
                                 isLoading = false,
-                                appInfoList = resource.data ?: emptyList()
+                                appInfoList = resource.data
                             )
                         }
 
@@ -87,7 +87,7 @@ class UsedAppListViewModel @Inject constructor(
                         is Resource.Success -> {
                             it.copy(
                                 isLoading = false,
-                                appUsageList = resource.data ?: emptyList()
+                                appUsageList = resource.data
                             )
                         }
 
