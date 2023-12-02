@@ -37,6 +37,8 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
+    fun insert
+
     fun getDayUseAppInfoList(date: LocalDate) {
         viewModelScope.launch {
             getDayUseAppListUseCase(date).collect { resource ->
