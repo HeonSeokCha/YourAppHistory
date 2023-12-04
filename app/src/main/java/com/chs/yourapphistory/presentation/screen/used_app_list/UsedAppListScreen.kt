@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.DateHeader
 import java.time.LocalDate
@@ -77,7 +78,7 @@ fun UsedAppListScreenScreen(
                     appUsageInfoList = state.appUsageList
                 ) { packageName ->
                     navController.navigate(
-                        "${Screen.ScreenAppUsageDetail.route}/${packageName}"
+                        "${Screen.ScreenAppUsageDetail.route}/${packageName}/${state.targetDate.toMillis()}"
                     )
                 }
             }

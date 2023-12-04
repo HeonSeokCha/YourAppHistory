@@ -1,5 +1,7 @@
 package com.chs.yourapphistory.common
 
+import android.util.Log
+import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -14,6 +16,37 @@ fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
             .toList()
             .sortedByDescending { it }
     }
+}
+
+fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
+    val usageMap = object : HashMap<Int, Long>() {
+        init {
+            repeat(24) {
+                put(it, 0L)
+            }
+        }
+    }
+
+    list.forEach { appUsageInfo ->
+        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
+            if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
+                val nextHourTime = LocalDateTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
+
+                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
+                    value + (appUsageInfo.endUseTime.toMillis( )- nextHourTime.toMillis())
+                }
+                (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+            } else {
+                (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+            }
+        }
+    }
+
+    val a =  usageMap.toList().sortedBy { it.first }
+    a.forEach {
+        Log.e("ABCD", "${it.first} -> ${it.second.convertToRealUsageTime()}")
+    }
+    return a
 }
 
 fun Long?.isZero(): Boolean {
@@ -62,4 +95,10 @@ fun LocalDate.atStartOfDayToMillis(): Long {
 
 fun LocalDate.atEndOfDayToMillis(): Long {
     return this.atTime(LocalTime.MAX).toMillis()
+}
+
+fun calculateScale(viewHeightPx: Int, values: List<Int>): Double {
+    return values.maxOrNull()?.let { max ->
+        viewHeightPx.times(0.8).div(max)
+    } ?: 1.0
 }
