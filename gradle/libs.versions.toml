@@ -16,7 +16,7 @@ room = "2.6.1"
 hilt = "2.48.1"
 kotlin = "1.9.20"
 ksp = "1.9.20-1.0.14"
-kotlin-coroutine = "1.7.1"
+kotlin-coroutine = "1.7.3"
 
 [libraries]
 # AndroidX
@@ -47,14 +47,21 @@ kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-
 
 [bundles]
 compose = [
+    "androidX-core-ktx",
     "androidX-compose-ui",
     "androidX-activity-compose",
     "androidX-compose-material-icon-extend",
     "androidX-compose-material3",
     "androidX-compose-ui-tooling-preview",
     "androidX-compose-ui-tooling",
+    "androidX-navigation-compose",
     "androidX-lifecycle-viewmodel-compose",
     "androidX-lifecycle-runtime-compose"
+]
+
+kotlin = [
+    "kotlin-coroutine-android",
+    "kotlin-coroutine-core"
 ]
 
 hilt = [

@@ -60,11 +60,10 @@ android {
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
-    implementation(libs.androidX.core.ktx)
     implementation(libs.bundles.compose)
-    implementation(libs.androidX.navigation.compose)
     implementation(libs.bundles.room)
     implementation(libs.bundles.hilt)
+    implementation(libs.bundles.kotlin)
     ksp(libs.hilt.compiler)
     ksp(libs.androidX.room.compiler)
 }

@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -16,7 +17,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -28,11 +31,16 @@ import java.time.LocalDate
 @Composable
 fun UsedAppListScreenScreen(
     navController: NavHostController,
-    viewModel: UsedAppListViewModel = viewModel()
+    viewModel: UsedAppListViewModel = hiltViewModel()
 ) {
+    val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scrollState = rememberLazyListState()
     var expandPos by remember { mutableIntStateOf(-1) }
+
+    LaunchedEffect(context, viewModel) {
+
+    }
 
     LaunchedEffect(state.targetDate) {
         expandPos = -1
