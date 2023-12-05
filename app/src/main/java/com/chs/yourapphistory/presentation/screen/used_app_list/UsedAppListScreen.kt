@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.CircularProgressIndicator
@@ -26,6 +27,8 @@ import androidx.navigation.NavHostController
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.DateHeader
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 @Composable
@@ -36,21 +39,17 @@ fun UsedAppListScreenScreen(
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
     val scrollState = rememberLazyListState()
-    var expandPos by remember { mutableIntStateOf(-1) }
 
     LaunchedEffect(context, viewModel) {
-
-    }
-
-    LaunchedEffect(state.targetDate) {
-        expandPos = -1
-        scrollState.scrollToItem(0, 0)
+        withContext(Dispatchers.IO) {
+            viewModel.insertInfo()
+        }
         viewModel.getDayUseAppInfoList(state.targetDate)
     }
 
-    LaunchedEffect(state.appInfoList) {
-        expandPos = -1
+    LaunchedEffect(state.targetDate) {
         scrollState.scrollToItem(0, 0)
+        viewModel.getDayUseAppInfoList(state.targetDate)
     }
 
     Column {
@@ -77,13 +76,9 @@ fun UsedAppListScreenScreen(
                 }
             }
 
-            itemsIndexed(state.appInfoList) { idx, list ->
-                val expanded: Boolean = expandPos == idx
+            items(state.appInfoList) { appInfo ->
                 ItemAppInfoSmall(
-                    usedAppInfo = list,
-                    expanded = expanded,
-                    isLoading = state.isLoading,
-                    appUsageInfoList = state.appUsageList
+                    usedAppInfo = appInfo,
                 ) { packageName ->
                     navController.navigate(
                         "${Screen.ScreenAppUsageDetail.route}/${packageName}/${state.targetDate.toMillis()}"

@@ -4,15 +4,21 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.getUntilDateList
-import com.chs.yourapphistory.domain.usecase.GetDayAppUsageInfoUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
+import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
+import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -20,10 +26,11 @@ import javax.inject.Inject
 class UsedAppListViewModel @Inject constructor(
     private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
     private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
-    private val getDayAppUsageInfoUseCase: GetDayAppUsageInfoUseCase,
+    private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
+    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UsedAppLIstState())
+    private val _state = MutableStateFlow(UsedAppListState())
     val state = _state.asStateFlow()
 
     init {
@@ -37,7 +44,13 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
-    fun insert
+    suspend fun insertInfo() {
+        withContext(Dispatchers.IO) {
+            val appInfo = async { insertInstallAppInfoUseCase() }
+            val appUsage = async { insertAppUsageInfoUseCase() }
+            awaitAll(appInfo, appUsage)
+        }
+    }
 
     fun getDayUseAppInfoList(date: LocalDate) {
         viewModelScope.launch {
@@ -54,42 +67,6 @@ class UsedAppListViewModel @Inject constructor(
                             it.copy(
                                 isLoading = false,
                                 appInfoList = resource.data
-                            )
-                        }
-
-                        is Resource.Error -> {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = resource.exception
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun getDayAppUsageInfoList(
-        date: LocalDate,
-        packageName: String
-    ) {
-        viewModelScope.launch {
-            getDayAppUsageInfoUseCase(
-                date = date,
-                packageName = packageName
-            ).collectLatest { resource ->
-                _state.update {
-                    when (resource) {
-                        is Resource.Loading -> {
-                            it.copy(
-                                isLoading = true
-                            )
-                        }
-
-                        is Resource.Success -> {
-                            it.copy(
-                                isLoading = false,
-                                appUsageList = resource.data
                             )
                         }
 

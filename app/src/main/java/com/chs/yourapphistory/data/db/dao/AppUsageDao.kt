@@ -26,9 +26,9 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
          "WHERE beginUseTime BETWEEN :beginTime AND :endTime " +
            "AND packageName = :packageName"
     )
-    abstract fun getUsageInfoList(
+    abstract suspend fun getUsageInfoList(
         beginTime: Long,
         endTime: Long,
-        packageName: String,
-    ): Flow<List<AppUsageEntity>>
+        packageName: String
+    ): List<AppUsageEntity>
 }

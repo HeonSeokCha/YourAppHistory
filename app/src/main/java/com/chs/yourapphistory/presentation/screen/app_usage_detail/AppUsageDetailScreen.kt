@@ -1,12 +1,58 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import android.content.Context
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
+import androidx.compose.ui.platform.LocalContext
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.presentation.screen.common.ItemVerticalChart
 import java.time.LocalDate
 
 @Composable
 fun AppUsageDetailScreen(
     packageName: String,
-    date: LocalDate
+    date: LocalDate,
+    viewModel: AppUsageDetailViewModel = hiltViewModel()
 ) {
+    val context: Context = LocalContext.current
+    val state by viewModel.state.collectAsStateWithLifecycle()
 
+    LaunchedEffect(viewModel, context) {
+        viewModel.changeDate(date)
+    }
+
+    LaunchedEffect(state.targetDate) {
+        viewModel.getDayAppUsageList(
+            packageName = packageName,
+            state.targetDate
+        )
+    }
+
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
+        item {
+            ItemVerticalChart(usageList = state.dayUsageList) {
+
+            }
+        }
+        items(state.dayUsageList) {
+            Text(
+                text = "${it.beginUseTime.format(Constants.SIMPLE_TIME_FORMAT)}" +
+                        " ~ " +
+                        "${it.endUseTime.format(Constants.SIMPLE_TIME_FORMAT)}"
+            )
+        }
+    }
 }

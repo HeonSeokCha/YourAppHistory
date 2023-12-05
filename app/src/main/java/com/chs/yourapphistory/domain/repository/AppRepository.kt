@@ -14,10 +14,10 @@ interface AppRepository {
 
     fun getDayUsedAppInfoList(date: LocalDate): Flow<Resource<List<Pair<AppInfo, String>>>>
 
-    fun getAppUsageInfoList(
+    suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): Flow<Resource<List<AppUsageInfo>>>
+    ): List<AppUsageInfo>
 
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 

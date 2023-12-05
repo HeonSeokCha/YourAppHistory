@@ -43,7 +43,9 @@ class AppRepositoryImpl @Inject constructor(
         val localList: List<String> = appInfoDao.getAllPackageNames()
         val launcherList: List<String> = applicationInfoSource.getInstalledLauncherPackageNameList()
         appInfoDao.insert(
-            *launcherList.filterNot { launcherPackageName ->
+            *launcherList
+                .asSequence()
+                .filterNot { launcherPackageName ->
                 localList.any { it == launcherPackageName }
             }.map { packageName ->
                 AppInfoEntity(
@@ -51,7 +53,7 @@ class AppRepositoryImpl @Inject constructor(
                     label = applicationInfoSource.getApplicationLabel(packageName),
                     icon = applicationInfoSource.getApplicationIcon(packageName)
                 )
-            }.toTypedArray()
+            }.toList().toTypedArray()
         )
     }
 
@@ -91,26 +93,15 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getAppUsageInfoList(
+    override suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): Flow<Resource<List<AppUsageInfo>>> {
-        return flow {
-            emit(Resource.Loading)
-            appUsageDao.getUsageInfoList(
-                beginTime = date.atStartOfDayToMillis(),
-                endTime = date.atEndOfDayToMillis(),
-                packageName = packageName
-            ).collect {
-                emit(
-                    Resource.Success(
-                        it.map { it.toAppUsageInfo() }
-                    )
-                )
-            }
-        }.catch {
-            emit(Resource.Error(it.message.toString()))
-        }
+    ): List<AppUsageInfo> {
+        return appUsageDao.getUsageInfoList(
+            beginTime = date.atStartOfDayToMillis(),
+            endTime = date.atEndOfDayToMillis(),
+            packageName = packageName
+        ).map { it.toAppUsageInfo() }
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {
