@@ -42,11 +42,7 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
         }
     }
 
-    val a =  usageMap.toList().sortedBy { it.first }
-    a.forEach {
-        Log.e("ABCD", "${it.first} -> ${it.second}")
-    }
-    return a
+    return usageMap.toList().sortedByDescending { it.first }
 }
 
 fun Long?.isZero(): Boolean {
@@ -97,7 +93,7 @@ fun LocalDate.atEndOfDayToMillis(): Long {
     return this.atTime(LocalTime.MAX).toMillis()
 }
 
-fun calculateScale(viewHeightPx: Int, values: List<Int>): Double {
+fun calculateScale(viewHeightPx: Int, values: List<Long>): Double {
     return values.maxOrNull()?.let { max ->
         viewHeightPx.times(0.8).div(max)
     } ?: 1.0

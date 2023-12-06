@@ -15,6 +15,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.presentation.screen.common.ItemVerticalChart
 import java.time.LocalDate
 
@@ -43,16 +44,9 @@ fun AppUsageDetailScreen(
             .fillMaxSize()
     ) {
         item {
-            ItemVerticalChart(usageList = state.dayUsageList) {
+            ItemVerticalChart(hourUsageList = state.dayUsageList) {
 
             }
-        }
-        items(state.dayUsageList) {
-            Text(
-                text = "${it.beginUseTime.format(Constants.SIMPLE_TIME_FORMAT)}" +
-                        " ~ " +
-                        "${it.endUseTime.format(Constants.SIMPLE_TIME_FORMAT)}"
-            )
         }
     }
 }

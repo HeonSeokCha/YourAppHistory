@@ -14,8 +14,13 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableDoubleStateOf
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -29,19 +34,32 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.LocalDate
 import java.time.LocalDateTime
+import kotlin.math.roundToInt
 
 @Composable
 fun ItemVerticalChart(
-    usageList: List<AppUsageInfo>,
+    hourUsageList: List<Pair<Int, Long>>,
     onSelected: (LocalDateTime) -> Unit
 ) {
     val density = LocalDensity.current
-    val height = with(density) { 300.dp.toPx() }
+    val height = with(density) { 250.dp.toPx() }
     var selectIdx by rememberSaveable { mutableIntStateOf(0) }
     val scrollState = rememberLazyListState()
+    var scaleValue by remember { mutableDoubleStateOf(1.0) }
+
+    LaunchedEffect(hourUsageList.size) {
+        scaleValue = calculateScale(
+            height.roundToInt(),
+            hourUsageList.map { it.second }
+        )
+    }
+
+
 
     LazyRow(
         modifier = Modifier
@@ -59,7 +77,7 @@ fun ItemVerticalChart(
         reverseLayout = true,
         state = scrollState
     ) {
-        itemsIndexed(usageList) { idx, item ->
+        itemsIndexed(hourUsageList) { idx, item ->
             Column(
                 modifier = Modifier
                     .drawBehind {
@@ -78,11 +96,11 @@ fun ItemVerticalChart(
                     }
                     .clickable {
                         selectIdx = idx
-                        onSelected(item.beginUseTime)
                     },
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-//                ItemVerticalCharBar(barHeight = (item.endUseTime - item.beginUseTime).times(scaleValue).toFloat())
+                ItemVerticalCharBar(barHeight = (item.second).times(scaleValue).toFloat())
+                Text(text = item.first.toString())
 //
 //                ItemTimeInfo(
 //                    date = date,
@@ -97,13 +115,13 @@ fun ItemVerticalChart(
 fun ItemVerticalCharBar(barHeight: Float) {
     Canvas(
         modifier = Modifier
-            .width(30.dp)
-            .height(300.dp)
+            .width(16.dp)
+            .height(250.dp)
     ) {
         drawRect(
             color = Color.LightGray,
-            topLeft = Offset(3.dp.toPx(), 300.dp.toPx() - barHeight),
-            size = Size(24.dp.toPx(), barHeight),
+            topLeft = Offset(4.dp.toPx(), 250.dp.toPx() - barHeight),
+            size = Size(8.dp.toPx(), barHeight),
         )
     }
 }
