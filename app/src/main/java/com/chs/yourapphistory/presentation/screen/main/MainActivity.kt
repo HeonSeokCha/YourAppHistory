@@ -5,10 +5,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
-import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
+import com.chs.yourapphistory.common.getUsagePermission
 import dagger.hilt.android.AndroidEntryPoint
-import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -18,7 +16,7 @@ class MainActivity : ComponentActivity() {
             val navController: NavHostController = rememberNavController()
             MainNavHost(
                 navController = navController,
-                isGrantPermission = Constants.getUsagePermission(this)
+                isGrantPermission = getUsagePermission(this)
             )
         }
     }

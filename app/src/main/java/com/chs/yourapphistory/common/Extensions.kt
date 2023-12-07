@@ -1,6 +1,10 @@
 package com.chs.yourapphistory.common
 
+import android.app.AppOpsManager
+import android.content.Context
+import android.os.Process
 import android.util.Log
+import androidx.activity.ComponentActivity
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.Instant
 import java.time.LocalDate
@@ -35,9 +39,9 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
                 usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
                     value + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
                 }
-                (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                value + (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
             } else {
-                (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
             }
         }
     }
@@ -97,4 +101,19 @@ fun calculateScale(viewHeightPx: Int, values: List<Long>): Double {
     return values.maxOrNull()?.let { max ->
         viewHeightPx.times(0.8).div(max)
     } ?: 1.0
+}
+
+fun getUsagePermission(context: Context): Boolean {
+    val appOps: AppOpsManager = context.getSystemService(ComponentActivity.APP_OPS_SERVICE) as AppOpsManager
+    return try {
+        val mode: Int =
+            appOps.unsafeCheckOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(),
+                context.packageName
+            )
+        mode == AppOpsManager.MODE_ALLOWED
+    } catch (e: Exception) {
+        false
+    }
 }
