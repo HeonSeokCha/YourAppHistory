@@ -60,9 +60,5 @@ fun AppUsageDetailScreen(
                 selectHourUsageTime = it
             }
         }
-
-        item {
-            Text(selectHourUsageTime.convertToRealUsageTime())
-        }
     }
 }

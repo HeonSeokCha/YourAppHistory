@@ -25,8 +25,8 @@ fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
 fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
     val usageMap = object : HashMap<Int, Long>() {
         init {
-            repeat(24) {
-                put(it, 0L)
+            for (i in 1 .. 24) {
+                put(i, 0L)
             }
         }
     }
@@ -46,7 +46,9 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
         }
     }
 
-    return usageMap.toList().sortedByDescending { it.first }
+    Log.e("TEST", usageMap.toList().toString())
+
+    return usageMap.toList()
 }
 
 fun Long?.isZero(): Boolean {
