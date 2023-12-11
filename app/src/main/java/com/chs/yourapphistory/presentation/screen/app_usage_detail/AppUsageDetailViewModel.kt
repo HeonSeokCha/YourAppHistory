@@ -36,7 +36,6 @@ class AppUsageDetailViewModel @Inject constructor(
                             date = date
                         )
                     )
-
                 )
             }
         }
