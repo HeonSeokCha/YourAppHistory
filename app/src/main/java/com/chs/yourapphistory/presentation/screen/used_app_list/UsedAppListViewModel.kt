@@ -37,8 +37,7 @@ class UsedAppListViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    localDateList = getUntilDateList(getLastCollectDayUseCase()),
-                    targetDate = LocalDate.now()
+                    localDateList = getUntilDateList(getLastCollectDayUseCase())
                 )
             }
         }
@@ -82,10 +81,10 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
-    fun changeDate(localDate: LocalDate) {
+    fun changeDate(idx: Int) {
         _state.update {
             it.copy(
-                targetDate = localDate
+                targetDate = it.localDateList[idx]
             )
         }
     }

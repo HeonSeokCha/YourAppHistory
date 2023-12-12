@@ -17,7 +17,7 @@ interface AppRepository {
     suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): List<AppUsageInfo>
+    ): List<Pair<Int, Long>>
 
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 

@@ -30,11 +30,9 @@ class AppUsageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    dayUsageList = calculateSplitHourUsage(
-                        getDayAppUsageListUseCase(
-                            packageName = packageName,
-                            date = date
-                        )
+                    dayUsageList = getDayAppUsageListUseCase(
+                        packageName = packageName,
+                        date = date
                     )
                 )
             }

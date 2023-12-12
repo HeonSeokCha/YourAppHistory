@@ -11,7 +11,7 @@ class GetDayAppUsageListUseCase @Inject constructor(
     suspend operator fun invoke(
         date: LocalDate,
         packageName: String
-    ): List<AppUsageInfo> {
+    ): List<Pair<Int, Long>> {
         return repository.getAppUsageInfoList(
             date = date,
             packageName = packageName

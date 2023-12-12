@@ -4,6 +4,7 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
@@ -96,12 +97,14 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): List<AppUsageInfo> {
-        return appUsageDao.getUsageInfoList(
+    ): List<Pair<Int, Long>> {
+        val usageList = appUsageDao.getUsageInfoList(
             beginTime = date.atStartOfDayToMillis(),
             endTime = date.atEndOfDayToMillis(),
             packageName = packageName
         ).map { it.toAppUsageInfo() }
+
+        return calculateSplitHourUsage(usageList)
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {

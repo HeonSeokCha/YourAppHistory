@@ -4,8 +4,8 @@ import android.util.Log
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.forEachGesture
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Row
@@ -26,7 +26,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.consumeDownChange
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -36,7 +35,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
 import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -45,6 +43,7 @@ fun ItemVerticalChart(
     hourUsageList: List<Pair<Int, Long>>,
     selectHour: (Pair<Int, Long>) -> Unit
 ) {
+    Log.e("LIST", hourUsageList.size.toString())
     val density = LocalDensity.current
     val textSize = with(density) { 10.sp.toPx() }
     val smallPadding = with(density) { 4.dp.toPx() }
@@ -54,9 +53,8 @@ fun ItemVerticalChart(
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 16).div(hourUsageList.size).dp.toPx()
     }
-    val horizontalPadding = (distance - barWidth)
 
-    Log.e("WIDTHSIZE", distance.toString())
+    val horizontalPadding = (distance - barWidth)
 
     Row(
         modifier = Modifier
@@ -125,9 +123,7 @@ fun ItemVerticalChart(
                             selectedPos = it
                             animatable.snapTo(tempAnimatable.value)
                             selectedBar?.idx?.let { value ->
-                                if (selectedBar?.value != 0L) {
-                                    selectHour(selectedBar!!.idx to selectedBar!!.value)
-                                }
+                                selectHour(selectedBar!!.idx to selectedBar!!.value)
                             }
 
                             async {
@@ -167,8 +163,8 @@ fun ItemVerticalChart(
             )
             val chartAreaBottom = size.height - labelSectionHeight
 
-            hourUsageList.forEachIndexed { idx, pair ->
-                val barHeight = pair.second.times(scale).toFloat()
+            barAreas.forEachIndexed { idx, info ->
+                val barHeight = info.value.times(scale).toFloat()
                 drawRoundRect(
                     color = Color.LightGray,
                     topLeft = Offset(
@@ -179,10 +175,10 @@ fun ItemVerticalChart(
                     cornerRadius = CornerRadius(4.dp.toPx())
                 )
 
-                if (pair.first % 6 == 0 || pair.first == 23) {
+                if (info.idx % 6 == 0 || info.idx == 23) {
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = "${pair.first}",
+                        text = "${info.idx}",
                         topLeft = Offset(
                             horizontalPadding + distance.times(idx) - distance.div(2),
                             y = chartAreaBottom
@@ -201,20 +197,16 @@ fun Modifier.tapOrPress(
 ): Modifier = composed {
     val interactionSource = remember { MutableInteractionSource() }
     this.pointerInput(interactionSource) {
-        forEachGesture {
-            coroutineScope {
-                awaitPointerEventScope {
-                    val tap = awaitFirstDown()
-                        .also { it.consumeDownChange() }
-                    onStart(tap.position.x)
-                    val up = waitForUpOrCancellation()
-                    if (up == null) {
-                        onCancel(tap.position.x)
-                    } else {
-                        up.consumeDownChange()
-                        onCompleted(tap.position.x)
-                    }
-                }
+        awaitEachGesture {
+            val tap = awaitFirstDown()
+                .also { if (it.pressed != it.previousPressed) it.consume() }
+            onStart(tap.position.x)
+            val up = waitForUpOrCancellation()
+            if (up == null) {
+                onCancel(tap.position.x)
+            } else {
+                if (up.pressed != up.previousPressed) up.consume()
+                onCompleted(tap.position.x)
             }
         }
     }

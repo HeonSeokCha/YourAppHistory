@@ -18,7 +18,7 @@ fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
     } else {
         targetDate.datesUntil(LocalDate.now().plusDays(1L))
             .toList()
-            .sortedByDescending { it }
+            .reversed()
     }
 }
 
@@ -36,8 +36,8 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
             if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
                 val nextHourTime = LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
                     .atDate(appUsageInfo.endUseTime.toLocalDate())
-                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
-                    value + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
+                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key1, value1 ->
+                    value1 + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
                 }
                 value + (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
             } else {
@@ -45,6 +45,7 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
             }
         }
     }
+    Log.e("LIST", usageMap.toList().toString())
     return usageMap.toList()
 }
 
