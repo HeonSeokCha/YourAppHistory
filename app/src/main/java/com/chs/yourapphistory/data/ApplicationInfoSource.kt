@@ -91,6 +91,8 @@ class ApplicationInfoSource @Inject constructor(
                 || eventType == UsageEvents.Event.ACTIVITY_STOPPED
                 || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
                 || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
+//                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+//                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
             ) {
                 resultArr.add(
                     AppUsageEventRawInfo(

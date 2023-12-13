@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -16,7 +17,8 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
         "SELECT appInfo.*, " +
                "SUM((appUsage.endUseTime - appUsage.beginUseTime)) AS time " +
           "FROM appInfo " +
-         "INNER JOIN appUsage ON appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
+         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
+            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
            "AND appUsage.packageName = appInfo.packageName " +
          "GROUP BY appInfo.packageName " +
          "ORDER BY time DESC"

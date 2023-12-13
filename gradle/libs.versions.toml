@@ -10,12 +10,12 @@ versionName = "1.0"
 
 activity = "1.8.1"
 compose-ui = "1.5.4"
-composeCompiler = "1.5.5"
+composeCompiler = "1.5.6"
 lifecycle = "2.6.2"
 room = "2.6.1"
 hilt = "2.48.1"
-kotlin = "1.9.20"
-ksp = "1.9.20-1.0.14"
+kotlin = "1.9.21"
+ksp = "1.9.21-1.0.15"
 kotlin-coroutine = "1.7.3"
 
 [libraries]

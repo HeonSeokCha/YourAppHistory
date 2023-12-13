@@ -33,19 +33,23 @@ fun calculateSplitHourUsage(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
 
     list.forEach { appUsageInfo ->
         usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-            if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                val nextHourTime = LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
-                    .atDate(appUsageInfo.endUseTime.toLocalDate())
-                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key1, value1 ->
-                    value1 + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
-                }
-                value + (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+            if (appUsageInfo.beginUseTime.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
+                val splitNextHour = appUsageInfo.endUseTime.toLocalDate().atStartOfDay()
+                value + (splitNextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
             } else {
-                value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
+                    val nextHourTime = LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
+                        .atDate(appUsageInfo.endUseTime.toLocalDate())
+                    usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key1, value1 ->
+                        value1 + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
+                    }
+                    value + (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                } else {
+                    value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                }
             }
         }
     }
-    Log.e("LIST", usageMap.toList().toString())
     return usageMap.toList()
 }
 

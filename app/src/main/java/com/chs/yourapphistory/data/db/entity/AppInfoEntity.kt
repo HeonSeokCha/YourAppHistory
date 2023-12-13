@@ -10,4 +10,10 @@ data class AppInfoEntity(
     val packageName: String,
     val label: String,
     val icon: Bitmap? = null
-)
+) {
+    override fun equals(other: Any?): Boolean {
+        if (other == null || other !is AppInfoEntity) return false
+
+        return this.packageName == other.packageName
+    }
+}

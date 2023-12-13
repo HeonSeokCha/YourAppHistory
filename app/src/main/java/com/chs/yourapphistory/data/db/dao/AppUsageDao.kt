@@ -23,7 +23,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT * " +
           "FROM appUsage " +
-         "WHERE beginUseTime BETWEEN :beginTime AND :endTime " +
+         "WHERE (beginUseTime BETWEEN :beginTime AND :endTime " +
+           " OR endUseTime BETWEEN :beginTime AND :endTime) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getUsageInfoList(
