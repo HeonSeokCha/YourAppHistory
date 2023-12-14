@@ -16,7 +16,6 @@ import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -42,20 +41,27 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertInstallAppInfo() {
         val localList: List<String> = appInfoDao.getAllPackageNames()
-        val launcherList: List<String> = applicationInfoSource.getInstalledLauncherPackageNameList()
+        val currentLauncherList: List<String> =
+            applicationInfoSource.getInstalledLauncherPackageNameList()
         appInfoDao.insert(
-            *launcherList
-                .asSequence()
+            *currentLauncherList
                 .filterNot { launcherPackageName ->
-                localList.any { it == launcherPackageName }
-            }.map { packageName ->
-                AppInfoEntity(
-                    packageName = packageName,
-                    label = applicationInfoSource.getApplicationLabel(packageName),
-                    icon = applicationInfoSource.getApplicationIcon(packageName)
-                )
-            }.toList().toTypedArray()
+                    localList.any { it == launcherPackageName }
+                }.map { packageName ->
+                    AppInfoEntity(
+                        packageName = packageName,
+                        label = applicationInfoSource.getApplicationLabel(packageName),
+                    )
+                }.toTypedArray()
         )
+
+        localList.filterNot { launcherPackageName ->
+            currentLauncherList.any { it == launcherPackageName }
+        }.map { packageName ->
+            packageName
+        }.forEach {
+            appInfoDao.deleteAppInfo(it)
+        }
     }
 
     override suspend fun insertAppUsageInfo() {
@@ -83,7 +89,25 @@ class AppRepositoryImpl @Inject constructor(
                     emit(
                         Resource.Success(
                             it.map {
-                                it.key.toAppInfo() to it.value.convertToRealUsageTime()
+                                it.key.toAppInfo(
+                                    applicationInfoSource.getApplicationIcon(it.key.packageName)
+                                ) to (
+                                    it.value.map {
+                                        if (date.dayOfMonth < it.endUseTime.toLocalDate().dayOfMonth) {
+                                            val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
+                                            return@map (nextDayStartMilli - it.beginUseTime)
+                                        }
+
+                                        if (date.dayOfMonth > it.beginUseTime.toLocalDate().dayOfMonth) {
+                                            val dayStartMilli = date.atStartOfDayToMillis()
+                                            return@map (it.endUseTime - dayStartMilli)
+                                        }
+
+                                        (it.endUseTime - it.beginUseTime)
+                                    }.sum()
+                                )
+                            }.sortedByDescending { it.second }.map {
+                                it.first to it.second.convertToRealUsageTime()
                             }
                         )
                     )

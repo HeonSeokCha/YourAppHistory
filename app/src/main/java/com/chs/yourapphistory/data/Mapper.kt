@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data
 
+import android.graphics.Bitmap
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
@@ -7,19 +8,11 @@ import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 
-fun AppInfo.toEntity(): AppInfoEntity {
-    return AppInfoEntity(
-        packageName = this.packageName,
-        label = this.label,
-        icon = this.icon
-    )
-}
-
-fun AppInfoEntity.toAppInfo(): AppInfo {
+fun AppInfoEntity.toAppInfo(icon: Bitmap?): AppInfo {
     return AppInfo(
         packageName = this.packageName,
         label = this.label,
-        icon = this.icon
+        icon = icon
     )
 }
 

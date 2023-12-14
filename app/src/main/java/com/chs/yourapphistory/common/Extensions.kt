@@ -2,10 +2,14 @@ package com.chs.yourapphistory.common
 
 import android.app.AppOpsManager
 import android.content.Context
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.os.Process
-import android.util.Log
+import android.util.Base64
+import android.util.Base64.DEFAULT
 import androidx.activity.ComponentActivity
 import com.chs.yourapphistory.domain.model.AppUsageInfo
+import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
