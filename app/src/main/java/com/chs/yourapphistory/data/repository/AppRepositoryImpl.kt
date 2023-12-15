@@ -128,7 +128,10 @@ class AppRepositoryImpl @Inject constructor(
             packageName = packageName
         ).map { it.toAppUsageInfo() }
 
-        return calculateSplitHourUsage(usageList)
+        return calculateSplitHourUsage(
+            date = date,
+            list = usageList
+        )
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {

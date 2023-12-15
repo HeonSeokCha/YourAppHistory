@@ -2,8 +2,6 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.compose.viewModel
-import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
