@@ -2,14 +2,9 @@ package com.chs.yourapphistory.common
 
 import android.app.AppOpsManager
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.os.Process
-import android.util.Base64
-import android.util.Base64.DEFAULT
 import androidx.activity.ComponentActivity
 import com.chs.yourapphistory.domain.model.AppUsageInfo
-import java.io.ByteArrayOutputStream
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -39,20 +34,27 @@ fun calculateSplitHourUsage(
     }
 
     list.forEach { appUsageInfo ->
-        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-            if (date.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
+        if (date.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
+            usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
                 val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
-                return@computeIfPresent (nextDayStartMilli - appUsageInfo.beginUseTime.toMillis())
+                value + (nextDayStartMilli - appUsageInfo.beginUseTime.toMillis())
             }
+            return@forEach
+        }
 
-            if (date.dayOfMonth > appUsageInfo.beginUseTime.dayOfMonth) {
+        if (date.dayOfMonth > appUsageInfo.beginUseTime.dayOfMonth) {
+            usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
                 val dayStartMilli = date.atStartOfDayToMillis()
-                return@computeIfPresent (appUsageInfo.endUseTime.toMillis() - dayStartMilli)
+                value + (appUsageInfo.endUseTime.toMillis() - dayStartMilli)
             }
+            return@forEach
+        }
 
+        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
             if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                val nextHourTime = LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
-                    .atDate(appUsageInfo.endUseTime.toLocalDate())
+                val nextHourTime =
+                    LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
+                        .atDate(appUsageInfo.endUseTime.toLocalDate())
                 usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key1, value1 ->
                     value1 + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
                 }
