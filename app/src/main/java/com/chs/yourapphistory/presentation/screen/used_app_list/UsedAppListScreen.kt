@@ -64,7 +64,10 @@ fun UsedAppListScreenScreen(
         }
     }
 
-    Column {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+    ) {
         if (state.localDateList.isNotEmpty()) {
             Row {
                 Text(

@@ -42,11 +42,6 @@ fun AppUsageDetailScreen(
             date
         )
     }
-//
-//    LaunchedEffect(state.targetDate) {
-//
-//    }
-
 
     LazyColumn(
         modifier = Modifier
@@ -76,8 +71,10 @@ fun AppUsageDetailScreen(
             item {
                 ItemVerticalChart(state.dayUsageList) {
                     selectHourUsageTime =
-                        "${it.first} ~ ${it.first + 1} : ${it.second.convertToRealUsageTime()}"
+                        "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
 
                 if (selectHourUsageTime.isNotEmpty()) {
                     Text(text = selectHourUsageTime)

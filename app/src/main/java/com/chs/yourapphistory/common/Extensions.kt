@@ -10,6 +10,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import kotlin.time.Duration.Companion.hours
 
 fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
     return if (targetDate == LocalDate.now()) {
@@ -52,13 +53,18 @@ fun calculateSplitHourUsage(
 
         usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
             if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                val nextHourTime =
-                    LocalTime.MIN.plusHours(appUsageInfo.endUseTime.hour.toLong())
-                        .atDate(appUsageInfo.endUseTime.toLocalDate())
-                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key1, value1 ->
-                    value1 + (appUsageInfo.endUseTime.toMillis() - nextHourTime.toMillis())
+                for (i in appUsageInfo.beginUseTime.hour + 1 .. appUsageInfo.endUseTime.hour) {
+                    val targetHour = date.atStartOfDay().plusHours(i.toLong())
+                    usageMap.computeIfPresent(i) { key1, value1 ->
+                        if (i == appUsageInfo.endUseTime.hour) {
+                            value1 + (appUsageInfo.endUseTime.toMillis() - targetHour.toMillis())
+                        } else {
+                            1.hours.inWholeMilliseconds
+                        }
+                    }
                 }
-                value + (nextHourTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                val nextHour = date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
+                value + (nextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
             } else {
                 value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
             }
@@ -75,19 +81,28 @@ fun Long.convertToRealUsageTime(): String {
     val hour: Long = (this / 1000) / 60 / 60 % 24
     val minutes: Long = (this / 1000) / 60 % 60
     val second: Long = (this / 1000) % 60
-    return if (hour == 0L) {
-        if (minutes == 0L) {
-            if (second == 0L) {
-                "< 1초"
-            } else {
-                "${second}초"
-            }
-        } else {
-            "${minutes}분 ${second}초"
-        }
-    } else {
-        "${hour}시간 ${minutes}분 ${second}초"
+    val milliSec: Long = (this / 1000)
+    var result: String = ""
+    if (hour != 0L) {
+        result += "${hour}시간 "
     }
+
+    if (minutes != 0L) {
+        result += "${minutes}분 "
+    }
+
+    if (second != 0L) {
+       result += "${second}초"
+    } else {
+        if (hour == 0L && minutes == 0L) {
+            result = if (milliSec != 0L) {
+                "1초 미만"
+            } else {
+                "0초"
+            }
+        }
+    }
+    return result
 }
 
 

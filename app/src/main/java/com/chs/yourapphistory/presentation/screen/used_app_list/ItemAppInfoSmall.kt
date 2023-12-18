@@ -43,12 +43,6 @@ fun ItemAppInfoSmall(
         ),
         modifier = Modifier
             .padding(4.dp)
-            .animateContentSize(
-                animationSpec = spring(
-                    dampingRatio = Spring.DampingRatioNoBouncy,
-                    stiffness = Spring.StiffnessLow
-                )
-            )
     ) {
         Row(
             modifier = Modifier
