@@ -83,6 +83,7 @@ fun Long.convertToRealUsageTime(): String {
     val second: Long = (this / 1000) % 60
     val milliSec: Long = (this / 1000)
     var result: String = ""
+
     if (hour != 0L) {
         result += "${hour}시간 "
     }

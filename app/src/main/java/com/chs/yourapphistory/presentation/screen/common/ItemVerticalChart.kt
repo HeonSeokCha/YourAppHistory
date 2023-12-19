@@ -14,9 +14,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -43,7 +45,6 @@ fun ItemVerticalChart(
     hourUsageList: List<Pair<Int, Long>>,
     selectHour: (Pair<Int, Long>) -> Unit
 ) {
-    Log.e("LIST", hourUsageList.size.toString())
     val density = LocalDensity.current
     val textSize = with(density) { 10.sp.toPx() }
     val smallPadding = with(density) { 4.dp.toPx() }
@@ -51,10 +52,34 @@ fun ItemVerticalChart(
     val barWidth = with(density) { 6.dp.toPx() }
     val textMeasurer = rememberTextMeasurer()
     val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 16).div(hourUsageList.size).dp.toPx()
+        (LocalConfiguration.current.screenWidthDp - 16).div(24).dp.toPx()
     }
 
     val horizontalPadding = (distance - barWidth)
+
+    val barAreas = hourUsageList.mapIndexed { idx, pair ->
+        BarArea(
+            idx = idx,
+            value = pair.second,
+            xStart = horizontalPadding + distance.times(idx) - distance.div(2),
+            xEnd = horizontalPadding + distance.times(idx) + distance.div(2)
+        )
+    }
+    var selectedBar: BarArea? by remember { mutableStateOf(null) }
+    var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
+    var tempPosition by remember { mutableFloatStateOf(-1000f) }
+    LaunchedEffect(selectedPos, barAreas) {
+        selectedBar = barAreas.find { it.xStart < selectedPos && selectedPos < it.xEnd }
+    }
+//    val selectedBar by remember(selectedPos, barAreas) {
+//        derivedStateOf {
+//        }
+//    }
+
+    LaunchedEffect(selectedBar) {
+        selectHour(selectedBar!!.idx to selectedBar!!.value)
+        Log.e("ABCD", "${selectedBar?.idx} - ${selectedBar?.value}")
+    }
 
     Row(
         modifier = Modifier
@@ -65,27 +90,6 @@ fun ItemVerticalChart(
                 end = 8.dp
             )
     ) {
-        val barAreas = hourUsageList.mapIndexed { idx, pair ->
-            BarArea(
-                idx = idx,
-                value = pair.second,
-                xStart = horizontalPadding + distance.times(idx) - distance.div(2),
-                xEnd = horizontalPadding + distance.times(idx) + distance.div(2)
-            )
-        }
-
-        var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
-        var tempPosition by remember { mutableFloatStateOf(-1000f) }
-        val selectedBar by remember(selectedPos, barAreas) {
-            derivedStateOf {
-                barAreas.find { it.xStart < selectedPos && selectedPos < it.xEnd }
-            }
-        }
-        val tempBar by remember(tempPosition, barAreas) {
-            derivedStateOf {
-                barAreas.find { it.xStart < tempPosition && tempPosition < it.xEnd }
-            }
-        }
 
         val scope = rememberCoroutineScope()
         val animatable = remember { Animatable(1f) }
@@ -112,39 +116,35 @@ fun ItemVerticalChart(
                         }
                     },
                     onCancel = { position ->
-                        tempPosition = -Int.MAX_VALUE.toFloat()
-                        scope.launch {
-                            tempAnimatable.animateTo(0f)
-                        }
+//                        tempPosition = -Int.MAX_VALUE.toFloat()
+//                        scope.launch {
+//                            tempAnimatable.animateTo(0f)
+//                        }
                     },
                     onCompleted = {
-                        val currentSelected = selectedBar
+//                        val currentSelected = selectedBar
                         scope.launch {
                             selectedPos = it
-                            animatable.snapTo(tempAnimatable.value)
-                            selectedBar?.idx?.let { value ->
-                                selectHour(selectedBar!!.idx to selectedBar!!.value)
-                            }
-
-                            async {
-                                animatable.animateTo(
-                                    1f,
-                                    animationSpec = tween(
-                                        300
-                                            .times(1f - tempAnimatable.value)
-                                            .roundToInt()
-                                    )
-                                )
-                            }
-
-                            async {
-                                tempAnimatable.snapTo(0f)
-                                currentSelected?.let {
-                                    tempPosition = currentSelected.xStart.plus(1f)
-                                    tempAnimatable.snapTo(1f)
-                                    tempAnimatable.animateTo(0f, tween(300))
-                                }
-                            }
+//                            animatable.snapTo(tempAnimatable.value)
+//                            async {
+//                                animatable.animateTo(
+//                                    1f,
+//                                    animationSpec = tween(
+//                                        300
+//                                            .times(1f - tempAnimatable.value)
+//                                            .roundToInt()
+//                                    )
+//                                )
+//                            }
+//
+//                            async {
+//                                tempAnimatable.snapTo(0f)
+//                                currentSelected?.let {
+//                                    tempPosition = currentSelected.xStart.plus(1f)
+//                                    tempAnimatable.snapTo(1f)
+//                                    tempAnimatable.animateTo(0f, tween(300))
+//                                }
+//                            }
                         }
                     }
 

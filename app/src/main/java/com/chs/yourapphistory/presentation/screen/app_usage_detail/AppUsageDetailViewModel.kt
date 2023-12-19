@@ -2,7 +2,9 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
+import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +16,23 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppUsageDetailViewModel @Inject constructor(
+    private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
     private val getDayAppUsageListUseCase: GetDayAppUsageListUseCase
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<AppUsageDetailState> =
         MutableStateFlow(AppUsageDetailState())
     val state: StateFlow<AppUsageDetailState> = _state.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    localDateList = getUntilDateList(getLastCollectDayUseCase())
+                )
+            }
+        }
+    }
 
     fun getDayAppUsageList(
         packageName: String,
@@ -37,10 +50,10 @@ class AppUsageDetailViewModel @Inject constructor(
         }
     }
 
-    fun changeDate(date: LocalDate) {
+    fun changeDate(idx: Int) {
         _state.update {
             it.copy(
-                targetDate = date
+                targetDate = it.localDateList[idx]
             )
         }
     }

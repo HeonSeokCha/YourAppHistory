@@ -48,7 +48,6 @@ fun UsedAppListScreenScreen(
     
     LaunchedEffect(context, viewModel) {
         viewModel.insertInfo()
-        viewModel.getDayUseAppInfoList(state.targetDate)
     }
 
     LaunchedEffect(state.targetDate) {
