@@ -117,9 +117,11 @@ fun AppUsageDetailScreen(
 
                     item {
                         ItemVerticalChart(state.dayUsageList) {
-                            Log.e("ABCD1", "${it.first} - ${it.second}")
-                            selectHourUsageTime =
-                                "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
+                            if (it != null) {
+                                Log.e("ABCD1", "${it.first} - ${it.second}")
+                                selectHourUsageTime =
+                                    "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
+                            }
                         }
 
                         Spacer(modifier = Modifier.height(32.dp))

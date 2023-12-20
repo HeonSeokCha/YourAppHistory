@@ -14,14 +14,12 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.CornerRadius
@@ -43,7 +41,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ItemVerticalChart(
     hourUsageList: List<Pair<Int, Long>>,
-    selectHour: (Pair<Int, Long>) -> Unit
+    selectHour: (Pair<Int, Long>?) -> Unit
 ) {
     val density = LocalDensity.current
     val textSize = with(density) { 10.sp.toPx() }
@@ -65,20 +63,25 @@ fun ItemVerticalChart(
             xEnd = horizontalPadding + distance.times(idx) + distance.div(2)
         )
     }
+
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
     var tempPosition by remember { mutableFloatStateOf(-1000f) }
-    LaunchedEffect(selectedPos, barAreas) {
+
+    LaunchedEffect(barAreas) {
+        selectedBar = null
+        selectHour(null)
+    }
+
+    LaunchedEffect(selectedPos) {
         selectedBar = barAreas.find { it.xStart < selectedPos && selectedPos < it.xEnd }
     }
-//    val selectedBar by remember(selectedPos, barAreas) {
-//        derivedStateOf {
-//        }
-//    }
 
     LaunchedEffect(selectedBar) {
-        selectHour(selectedBar!!.idx to selectedBar!!.value)
-        Log.e("ABCD", "${selectedBar?.idx} - ${selectedBar?.value}")
+        if (selectedBar != null) {
+            selectHour(selectedBar!!.idx to selectedBar!!.value)
+            Log.e("ABCD", "${selectedBar?.idx} - ${selectedBar?.value}")
+        }
     }
 
     Row(
