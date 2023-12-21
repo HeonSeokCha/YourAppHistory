@@ -34,6 +34,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.convert24HourString
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -66,7 +67,6 @@ fun ItemVerticalChart(
 
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
-    var tempPosition by remember { mutableFloatStateOf(-1000f) }
 
     LaunchedEffect(barAreas) {
         selectedBar = null
@@ -80,7 +80,6 @@ fun ItemVerticalChart(
     LaunchedEffect(selectedBar) {
         if (selectedBar != null) {
             selectHour(selectedBar!!.idx to selectedBar!!.value)
-            Log.e("ABCD", "${selectedBar?.idx} - ${selectedBar?.value}")
         }
     }
 
@@ -103,20 +102,20 @@ fun ItemVerticalChart(
                 .fillMaxSize()
                 .tapOrPress(
                     onStart = { position ->
-                        scope.launch {
-                            selectedBar?.let { selected ->
-                                if (position in selected.xStart..selected.xEnd) {
-                                    // click in selected area - do nothing
-                                } else {
-                                    tempPosition = position
-                                    scope.launch {
-                                        tempAnimatable.snapTo(0f)
-                                        tempAnimatable.animateTo(1f, animationSpec = tween(300))
-                                    }
-                                }
-
-                            }
-                        }
+//                        scope.launch {
+//                            selectedBar?.let { selected ->
+//                                if (position in selected.xStart..selected.xEnd) {
+//                                    // click in selected area - do nothing
+//                                } else {
+//                                    tempPosition = position
+//                                    scope.launch {
+//                                        tempAnimatable.snapTo(0f)
+//                                        tempAnimatable.animateTo(1f, animationSpec = tween(300))
+//                                    }
+//                                }
+//
+//                            }
+//                        }
                     },
                     onCancel = { position ->
 //                        tempPosition = -Int.MAX_VALUE.toFloat()
@@ -188,6 +187,22 @@ fun ItemVerticalChart(
                         )
                     )
                 }
+            }
+
+            if (selectedBar != null) {
+                val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() -smallPadding - labelSectionHeight)
+                drawLine(
+                    color = Color.Black,
+                    start = Offset(selectedBar!!.xStart + 21f, 50f),
+                    end = Offset(selectedBar!!.xStart + 21f, barHeight),
+                    strokeWidth = 4f
+                )
+
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = selectedBar!!.idx.convert24HourString(),
+                    topLeft = Offset(selectedBar!!.xStart + 21f, 0f)
+                )
             }
         }
     }

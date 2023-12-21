@@ -22,6 +22,13 @@ fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
     }
 }
 
+fun Int.convert24HourString(): String {
+    val localTime: LocalTime = LocalTime.MIDNIGHT
+    return "${localTime.plusHours(this.toLong()).format(Constants.SIMPLE_HOUR_FORMAT)}" +
+            " ~ " +
+            "${localTime.plusHours(this + 1L).format(Constants.SIMPLE_HOUR_FORMAT_SIMPLE)}"
+}
+
 fun calculateSplitHourUsage(
     date: LocalDate,
     list: List<AppUsageInfo>
