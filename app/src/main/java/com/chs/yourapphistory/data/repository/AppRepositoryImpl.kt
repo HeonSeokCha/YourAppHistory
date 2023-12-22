@@ -16,6 +16,7 @@ import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -121,17 +122,12 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): List<Pair<Int, Long>> {
-        val usageList = appUsageDao.getUsageInfoList(
+    ): List<AppUsageInfo> {
+        return appUsageDao.getUsageInfoList(
             beginTime = date.atStartOfDayToMillis(),
             endTime = date.atEndOfDayToMillis(),
             packageName = packageName
         ).map { it.toAppUsageInfo() }
-
-        return calculateSplitHourUsage(
-            date = date,
-            list = usageList
-        )
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {

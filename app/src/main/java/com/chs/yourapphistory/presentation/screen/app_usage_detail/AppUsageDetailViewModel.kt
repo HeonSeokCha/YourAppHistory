@@ -2,6 +2,7 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
@@ -41,9 +42,12 @@ class AppUsageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    dayUsageList = getDayAppUsageListUseCase(
-                        packageName = packageName,
-                        date = date
+                    dayUsageList = calculateSplitHourUsage(
+                        date = date,
+                        list = getDayAppUsageListUseCase(
+                            packageName = packageName,
+                            date = date
+                        )
                     )
                 )
             }

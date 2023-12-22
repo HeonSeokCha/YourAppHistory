@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
@@ -49,13 +50,11 @@ fun ItemVerticalChart(
     val smallPadding = with(density) { 4.dp.toPx() }
     val labelSectionHeight = smallPadding.times(2) + textSize
     val barWidth = with(density) { 6.dp.toPx() }
-    val textMeasurer = rememberTextMeasurer()
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 16).div(24).dp.toPx()
     }
 
     val horizontalPadding = (distance - barWidth)
-
     val barAreas = hourUsageList.mapIndexed { idx, pair ->
         BarArea(
             idx = idx,
@@ -68,13 +67,19 @@ fun ItemVerticalChart(
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
 
+    val textMeasurer = rememberTextMeasurer()
+    val style = TextStyle(
+        fontSize = 12.sp,
+        color = Color.Black
+    )
+
     LaunchedEffect(barAreas) {
         selectedBar = null
         selectHour(null)
     }
 
     LaunchedEffect(selectedPos) {
-        selectedBar = barAreas.find { it.xStart < selectedPos && selectedPos < it.xEnd }
+        selectedBar = barAreas.find { selectedPos in it.xStart .. it.xEnd }
     }
 
     LaunchedEffect(selectedBar) {
@@ -190,18 +195,34 @@ fun ItemVerticalChart(
             }
 
             if (selectedBar != null) {
-                val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() -smallPadding - labelSectionHeight)
+                val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() - smallPadding - labelSectionHeight)
+                val textResult = textMeasurer.measure(selectedBar!!.idx.convert24HourString())
+
                 drawLine(
                     color = Color.Black,
-                    start = Offset(selectedBar!!.xStart + 21f, 50f),
-                    end = Offset(selectedBar!!.xStart + 21f, barHeight),
+                    start = Offset(selectedBar!!.xStart + 20f, 50f),
+                    end = Offset(selectedBar!!.xStart + 20f, barHeight),
                     strokeWidth = 4f
+                )
+
+                drawRoundRect(
+                    color = Color.LightGray,
+                    topLeft = Offset(
+                        selectedBar!!.xStart - (selectedBar!!.idx * 12f) - 20f,
+                        0f
+                    ),
+                    size = Size(textResult.size.width.toFloat(), textResult.size.height.toFloat()),
+                    cornerRadius = CornerRadius(15f)
                 )
 
                 drawText(
                     textMeasurer = textMeasurer,
                     text = selectedBar!!.idx.convert24HourString(),
-                    topLeft = Offset(selectedBar!!.xStart + 21f, 0f)
+                    style = style,
+                    topLeft = Offset(
+                        selectedBar!!.xStart - (selectedBar!!.idx * 12f),
+                        3f
+                    )
                 )
             }
         }
