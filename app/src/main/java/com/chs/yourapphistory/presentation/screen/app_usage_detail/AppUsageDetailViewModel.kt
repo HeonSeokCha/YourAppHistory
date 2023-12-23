@@ -40,15 +40,17 @@ class AppUsageDetailViewModel @Inject constructor(
         date: LocalDate
     ) {
         viewModelScope.launch {
+            val dayUsageList = getDayAppUsageListUseCase(
+                packageName = packageName,
+                date = date
+            )
             _state.update {
                 it.copy(
                     dayUsageList = calculateSplitHourUsage(
                         date = date,
-                        list = getDayAppUsageListUseCase(
-                            packageName = packageName,
-                            date = date
-                        )
-                    )
+                        list = dayUsageList
+                    ),
+                    dayLaunchCount = dayUsageList.size
                 )
             }
         }

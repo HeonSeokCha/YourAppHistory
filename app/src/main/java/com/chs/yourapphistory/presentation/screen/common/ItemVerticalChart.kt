@@ -197,6 +197,7 @@ fun ItemVerticalChart(
             if (selectedBar != null) {
                 val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() - smallPadding - labelSectionHeight)
                 val textResult = textMeasurer.measure(selectedBar!!.idx.convert24HourString())
+                val textRectPadding = selectedBar!!.xStart - (textResult.size.width.div(24) * selectedBar!!.idx)
 
                 drawLine(
                     color = Color.Black,
@@ -208,11 +209,14 @@ fun ItemVerticalChart(
                 drawRoundRect(
                     color = Color.LightGray,
                     topLeft = Offset(
-                        selectedBar!!.xStart - (selectedBar!!.idx * 12f) - 20f,
+                        textRectPadding - 0f,
                         0f
                     ),
-                    size = Size(textResult.size.width.toFloat(), textResult.size.height.toFloat()),
-                    cornerRadius = CornerRadius(15f)
+                    size = Size(
+                        textResult.size.width.toFloat(),
+                        textResult.size.height.toFloat()
+                    ),
+                    cornerRadius = CornerRadius(50f)
                 )
 
                 drawText(
@@ -220,7 +224,7 @@ fun ItemVerticalChart(
                     text = selectedBar!!.idx.convert24HourString(),
                     style = style,
                     topLeft = Offset(
-                        selectedBar!!.xStart - (selectedBar!!.idx * 12f),
+                        textRectPadding + 20f,
                         3f
                     )
                 )

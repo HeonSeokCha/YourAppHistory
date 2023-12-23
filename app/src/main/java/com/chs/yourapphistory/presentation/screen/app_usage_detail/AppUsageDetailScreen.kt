@@ -118,7 +118,6 @@ fun AppUsageDetailScreen(
                     item {
                         ItemVerticalChart(state.dayUsageList) {
                             if (it != null) {
-                                Log.e("ABCD1", "${it.first} - ${it.second}")
                                 selectHourUsageTime =
                                     "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
                             }
@@ -129,6 +128,15 @@ fun AppUsageDetailScreen(
                         if (selectHourUsageTime.isNotEmpty()) {
                             Text(text = selectHourUsageTime)
                         }
+
+
+                        Spacer(modifier = Modifier.height(32.dp))
+
+                        Text(
+                            text = "총 실행 횟수 ${state.dayLaunchCount}회",
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 16.sp
+                        )
                     }
                 }
             }
