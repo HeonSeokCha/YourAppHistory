@@ -36,6 +36,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.convert24HourString
+import com.chs.yourapphistory.common.convertBetweenHourString
+import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -68,6 +70,11 @@ fun ItemVerticalChart(
     var selectedPos by remember { mutableFloatStateOf(barAreas.first().xStart.plus(1f)) }
 
     val textMeasurer = rememberTextMeasurer()
+
+    val style1 = TextStyle(
+        fontSize = 10.sp,
+        color = Color.Black
+    )
     val style = TextStyle(
         fontSize = 12.sp,
         color = Color.Black
@@ -79,7 +86,10 @@ fun ItemVerticalChart(
     }
 
     LaunchedEffect(selectedPos) {
-        selectedBar = barAreas.find { selectedPos in it.xStart .. it.xEnd }
+        val findBar = barAreas.find { selectedPos in it.xStart .. it.xEnd }
+        selectedBar = if (findBar?.value.isZero()) {
+            null
+        } else findBar
     }
 
     LaunchedEffect(selectedBar) {
@@ -183,26 +193,33 @@ fun ItemVerticalChart(
                 )
 
                 if (info.idx % 6 == 0 || info.idx == 23) {
+                    val textResult = textMeasurer.measure(info.idx.convert24HourString(true))
+                    val textRectPadding = info.xStart - (textResult.size.width.div(48) * info.idx)
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = "${info.idx}",
+                        text = if (info.idx == 23) {
+                            (info.idx + 1).convert24HourString(true)
+                        } else {
+                            info.idx.convert24HourString(true)
+                       },
                         topLeft = Offset(
-                            horizontalPadding + distance.times(idx) - distance.div(2),
+                            x = textRectPadding,
                             y = chartAreaBottom
-                        )
+                        ),
+                        style = style1
                     )
                 }
             }
 
             if (selectedBar != null) {
                 val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() - smallPadding - labelSectionHeight)
-                val textResult = textMeasurer.measure(selectedBar!!.idx.convert24HourString())
+                val textResult = textMeasurer.measure(selectedBar!!.idx.convertBetweenHourString())
                 val textRectPadding = selectedBar!!.xStart - (textResult.size.width.div(24) * selectedBar!!.idx)
 
                 drawLine(
                     color = Color.Black,
-                    start = Offset(selectedBar!!.xStart + 20f, 50f),
-                    end = Offset(selectedBar!!.xStart + 20f, barHeight),
+                    start = Offset(selectedBar!!.xStart + distance.div(2), 50f),
+                    end = Offset(selectedBar!!.xStart + distance.div(2), barHeight),
                     strokeWidth = 4f
                 )
 
@@ -221,7 +238,7 @@ fun ItemVerticalChart(
 
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = selectedBar!!.idx.convert24HourString(),
+                    text = selectedBar!!.idx.convertBetweenHourString(),
                     style = style,
                     topLeft = Offset(
                         textRectPadding + 20f,

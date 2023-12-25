@@ -22,11 +22,22 @@ fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
     }
 }
 
-fun Int.convert24HourString(): String {
+fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT
-    return localTime.plusHours(this.toLong()).format(Constants.SIMPLE_HOUR_FORMAT) +
+    return localTime.plusHours(this.toLong())
+        .format(
+            if (isShowAMPM) {
+                Constants.SIMPLE_HOUR_FORMAT
+            } else {
+                Constants.SIMPLE_HOUR_FORMAT_SIMPLE
+            }
+        )
+}
+
+fun Int.convertBetweenHourString(): String {
+    return this.convert24HourString(true) +
             " ~ " +
-            localTime.plusHours(this + 1L).format(Constants.SIMPLE_HOUR_FORMAT_SIMPLE)
+            (this + 1).convert24HourString(false)
 }
 
 fun calculateSplitHourUsage(
@@ -35,7 +46,7 @@ fun calculateSplitHourUsage(
 ): List<Pair<Int, Long>> {
     val usageMap = object : HashMap<Int, Long>() {
         init {
-            for (i in 0.. 23) {
+            for (i in 0..23) {
                 put(i, 0L)
             }
         }
@@ -60,7 +71,7 @@ fun calculateSplitHourUsage(
 
         usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
             if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                for (i in appUsageInfo.beginUseTime.hour + 1 .. appUsageInfo.endUseTime.hour) {
+                for (i in appUsageInfo.beginUseTime.hour + 1..appUsageInfo.endUseTime.hour) {
                     val targetHour = date.atStartOfDay().plusHours(i.toLong())
                     usageMap.computeIfPresent(i) { key1, value1 ->
                         if (i == appUsageInfo.endUseTime.hour) {
@@ -70,7 +81,8 @@ fun calculateSplitHourUsage(
                         }
                     }
                 }
-                val nextHour = date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
+                val nextHour =
+                    date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
                 value + (nextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
             } else {
                 value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
@@ -100,7 +112,7 @@ fun Long.convertToRealUsageTime(): String {
     }
 
     if (second != 0L) {
-       result += "${second}초"
+        result += "${second}초"
     } else {
         if (hour == 0L && minutes == 0L) {
             result = if (milliSec != 0L) {
@@ -145,7 +157,8 @@ fun calculateScale(viewHeightPx: Int, values: List<Long>): Double {
 }
 
 fun getUsagePermission(context: Context): Boolean {
-    val appOps: AppOpsManager = context.getSystemService(ComponentActivity.APP_OPS_SERVICE) as AppOpsManager
+    val appOps: AppOpsManager =
+        context.getSystemService(ComponentActivity.APP_OPS_SERVICE) as AppOpsManager
     return try {
         val mode: Int =
             appOps.unsafeCheckOpNoThrow(
