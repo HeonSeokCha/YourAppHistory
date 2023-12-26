@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.getUntilDateList
-import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
@@ -15,7 +14,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

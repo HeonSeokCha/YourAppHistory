@@ -1,11 +1,8 @@
 package com.chs.yourapphistory.data.repository
 
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
-import com.chs.yourapphistory.common.calculateSplitHourUsage
-import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
@@ -19,8 +16,7 @@ import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -75,47 +71,18 @@ class AppRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getDayUsedAppInfoList(
-        date: LocalDate
-    ): Flow<Resource<List<Pair<AppInfo, String>>>> {
-        return flow {
-            emit(Resource.Loading)
-            appInfoDao.getDayUsedAppInfoList(
-                beginTime = date.atStartOfDayToMillis(),
-                endTime = date.atEndOfDayToMillis()
-            ).collect {
-                if (it.isEmpty()) {
-                    emit(Resource.Loading)
-                } else {
-                    emit(
-                        Resource.Success(
-                            it.map {
-                                it.key.toAppInfo(
-                                    applicationInfoSource.getApplicationIcon(it.key.packageName)
-                                ) to (
-                                    it.value.map {
-                                        if (date.dayOfMonth < it.endUseTime.toLocalDate().dayOfMonth) {
-                                            val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
-                                            return@map (nextDayStartMilli - it.beginUseTime)
-                                        }
-
-                                        if (date.dayOfMonth > it.beginUseTime.toLocalDate().dayOfMonth) {
-                                            val dayStartMilli = date.atStartOfDayToMillis()
-                                            return@map (it.endUseTime - dayStartMilli)
-                                        }
-
-                                        (it.endUseTime - it.beginUseTime)
-                                    }.sum()
-                                )
-                            }.sortedByDescending { it.second }.map {
-                                it.first to it.second.convertToRealUsageTime()
-                            }
-                        )
-                    )
+    override fun getDayUsedAppInfoList(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
+        return appInfoDao.getDayUsedAppInfoList(
+            beginTime = date.atStartOfDayToMillis(),
+            endTime = date.atEndOfDayToMillis()
+        ).map {
+            it.map {
+                it.key.toAppInfo(
+                    applicationInfoSource.getApplicationIcon(it.key.packageName)
+                ) to it.value.map {
+                    it.toAppUsageInfo()
                 }
             }
-        }.catch {
-            emit(Resource.Error(it.message.toString()))
         }
     }
 

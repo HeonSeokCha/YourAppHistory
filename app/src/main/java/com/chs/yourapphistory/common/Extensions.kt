@@ -40,7 +40,7 @@ fun Int.convertBetweenHourString(): String {
             (this + 1).convert24HourString(false)
 }
 
-fun calculateSplitHourUsage(
+fun calculateTimeZoneUsage(
     date: LocalDate,
     list: List<AppUsageInfo>
 ): List<Pair<Int, Long>> {

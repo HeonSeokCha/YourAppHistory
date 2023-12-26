@@ -2,9 +2,9 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.chs.yourapphistory.common.calculateSplitHourUsage
 import com.chs.yourapphistory.common.getUntilDateList
-import com.chs.yourapphistory.domain.usecase.GetDayAppUsageListUseCase
+import com.chs.yourapphistory.domain.usecase.GetAppLaunchCountUseCase
+import com.chs.yourapphistory.domain.usecase.GetAppUsageTimeZoneInfoUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +18,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AppUsageDetailViewModel @Inject constructor(
     private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
-    private val getDayAppUsageListUseCase: GetDayAppUsageListUseCase
+    private val getAppUsageTimeZoneInfoUseCase: GetAppUsageTimeZoneInfoUseCase,
+    private val getAppLaunchCountUseCase: GetAppLaunchCountUseCase
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<AppUsageDetailState> =
@@ -40,17 +41,16 @@ class AppUsageDetailViewModel @Inject constructor(
         date: LocalDate
     ) {
         viewModelScope.launch {
-            val dayUsageList = getDayAppUsageListUseCase(
-                packageName = packageName,
-                date = date
-            )
             _state.update {
                 it.copy(
-                    dayUsageList = calculateSplitHourUsage(
+                    dayUsageList = getAppUsageTimeZoneInfoUseCase(
                         date = date,
-                        list = dayUsageList
+                        packageName = packageName
                     ),
-                    dayLaunchCount = dayUsageList.size
+                    dayLaunchCount = getAppLaunchCountUseCase(
+                        date = date,
+                        packageName = packageName
+                    )
                 )
             }
         }
