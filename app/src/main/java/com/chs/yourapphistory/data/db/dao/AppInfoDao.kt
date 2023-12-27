@@ -10,8 +10,8 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
-    @Query("SELECT packageName FROM appInfo")
-    abstract suspend fun getAllPackageNames(): List<String>
+    @Query("SELECT * FROM appInfo")
+    abstract suspend fun getAllPackage(): List<AppInfoEntity>
 
     @Query(
         "DELETE " +
@@ -20,15 +20,15 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     )
     abstract suspend fun deleteAppInfo(packageName: String)
 
-    @Query(
-        "SELECT * " +
-          "FROM appInfo " +
-         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
-            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
-           "AND appUsage.packageName = appInfo.packageName "
-    )
-    abstract fun getDayUsedAppInfoList(
-        beginTime: Long,
-        endTime: Long
-    ): Flow<Map<AppInfoEntity, List<AppUsageEntity>>>
+//    @Query(
+//        "SELECT * " +
+//          "FROM appInfo " +
+//         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
+//            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
+//           "AND appUsage.packageName = appInfo.packageName "
+//    )
+//    abstract suspend fun getDayUsedAppInfoList(
+//        beginTime: Long,
+//        endTime: Long
+//    ): Map<AppInfoEntity, List<AppUsageEntity>>
 }

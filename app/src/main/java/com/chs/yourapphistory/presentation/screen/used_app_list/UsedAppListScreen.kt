@@ -27,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
@@ -41,66 +42,59 @@ fun UsedAppListScreenScreen(
 ) {
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pagingData = state.appInfoList?.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState(pageCount = {
-        state.localDateList.size
+        pagingData?.itemCount ?: 0
     })
     
     LaunchedEffect(context, viewModel) {
         viewModel.insertInfo()
-    }
-
-    LaunchedEffect(state.targetDate) {
-        viewModel.getDayUseAppInfoList(state.targetDate)
-    }
-
-
-    if (state.localDateList.isNotEmpty()) {
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect {
-                viewModel.changeDate(it)
-            }
-        }
+        viewModel.getDayUseAppInfoList()
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (state.localDateList.isNotEmpty()) {
-            Row {
-                Text(
+        if (pagingData != null) {
+            HorizontalPager(
+                state = pagerState,
+                reverseLayout = true,
+                userScrollEnabled = true,
+            ) { page ->
+                LazyColumn(
                     modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    text = state.targetDate.toString(),
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
-        HorizontalPager(
-            state = pagerState,
-            reverseLayout = true,
-            userScrollEnabled = true
-        ) { page ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(8.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                contentPadding = PaddingValues(
-                    horizontal = 8.dp,
-                    vertical = 8.dp
-                )
-            ) {
-                items(state.appInfoList) { appInfo ->
-                    ItemAppInfoSmall(
-                        usedAppInfo = appInfo,
-                    ) { packageName ->
-                        navController.navigate(
-                            "${Screen.ScreenAppUsageDetail.route}/${packageName}/${state.targetDate.toMillis()}"
-                        )
+                        .fillMaxSize(),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    contentPadding = PaddingValues(
+                        horizontal = 8.dp,
+                        vertical = 8.dp
+                    )
+                ) {
+                    item {
+                        Row {
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .align(Alignment.CenterVertically),
+                                text = pagingData[page]?.first.toString(),
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                    items(
+                        items = pagingData[page]?.second ?: emptyList(),
+                        key = { it.first.packageName }
+                    ) { appInfo ->
+                        ItemAppInfoSmall(
+                            usedAppInfo = appInfo,
+                        ) { packageName ->
+                            navController.navigate(
+                                "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"
+                            )
+                        }
                     }
                 }
             }

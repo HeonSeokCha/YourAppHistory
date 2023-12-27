@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.domain.repository
 
+import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Resource
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
@@ -12,7 +13,7 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    fun getDayUsedAppInfoList(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>>
+    fun getDayPagingUsedAppInfo(): Flow<PagingData<Pair<LocalDate, Map<AppInfo, List<AppUsageInfo>>>>>
 
     suspend fun getAppUsageInfoList(
         date: LocalDate,

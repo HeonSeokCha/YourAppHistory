@@ -10,4 +10,6 @@ object Constants {
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")
     val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
 
+    const val PAGING_OFFSET: Int = 5
+
 }

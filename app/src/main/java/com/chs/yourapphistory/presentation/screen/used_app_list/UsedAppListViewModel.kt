@@ -2,9 +2,9 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.Resource
-import com.chs.yourapphistory.common.getUntilDateList
-import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayPagingUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
@@ -22,24 +22,13 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsedAppListViewModel @Inject constructor(
-    private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
-    private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
+    private val getDayPagingUseAppListUseCase: GetDayPagingUseAppListUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UsedAppListState())
     val state = _state.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    localDateList = getUntilDateList(getLastCollectDayUseCase())
-                )
-            }
-        }
-    }
 
     suspend fun insertInfo() {
         withContext(Dispatchers.IO) {
@@ -49,40 +38,10 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
-    fun getDayUseAppInfoList(date: LocalDate) {
-        viewModelScope.launch {
-            getDayUseAppListUseCase(date).collect { resource ->
-                _state.update {
-                    when (resource) {
-                        is Resource.Loading -> {
-                            it.copy(
-                                isLoading = true
-                            )
-                        }
-
-                        is Resource.Success -> {
-                            it.copy(
-                                isLoading = false,
-                                appInfoList = resource.data
-                            )
-                        }
-
-                        is Resource.Error -> {
-                            it.copy(
-                                isLoading = false,
-                                errorMessage = resource.exception
-                            )
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    fun changeDate(idx: Int) {
+    fun getDayUseAppInfoList() {
         _state.update {
             it.copy(
-                targetDate = it.localDateList[idx]
+                appInfoList = getDayPagingUseAppListUseCase().cachedIn(viewModelScope)
             )
         }
     }
