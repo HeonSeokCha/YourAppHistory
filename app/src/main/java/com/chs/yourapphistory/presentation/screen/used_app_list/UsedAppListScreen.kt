@@ -1,6 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -21,6 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -42,59 +44,77 @@ fun UsedAppListScreenScreen(
 ) {
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val pagingData = state.appInfoList?.collectAsLazyPagingItems()
 
     val pagerState = rememberPagerState(pageCount = {
-        pagingData?.itemCount ?: 0
+        state.localDateList.size
     })
-    
+
     LaunchedEffect(context, viewModel) {
         viewModel.insertInfo()
-        viewModel.getDayUseAppInfoList()
+    }
+
+    LaunchedEffect(state.targetDate) {
+        viewModel.getDayUseAppInfoList(state.targetDate)
+    }
+
+
+    if (state.localDateList.isNotEmpty()) {
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }.collect {
+                viewModel.changeDate(it)
+            }
+        }
     }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (pagingData != null) {
-            HorizontalPager(
-                state = pagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-            ) { page ->
-                LazyColumn(
+        if (state.localDateList.isNotEmpty()) {
+            Row {
+                Text(
                     modifier = Modifier
-                        .fillMaxSize(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    contentPadding = PaddingValues(
-                        horizontal = 8.dp,
-                        vertical = 8.dp
-                    )
-                ) {
-                    item {
-                        Row {
-                            Text(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically),
-                                text = pagingData[page]?.first.toString(),
-                                textAlign = TextAlign.Center
-                            )
-                        }
-                    }
-                    items(
-                        items = pagingData[page]?.second ?: emptyList(),
-                        key = { it.first.packageName }
-                    ) { appInfo ->
-                        ItemAppInfoSmall(
-                            usedAppInfo = appInfo,
-                        ) { packageName ->
-                            navController.navigate(
-                                "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"
-                            )
-                        }
+                        .weight(1f)
+                        .align(Alignment.CenterVertically),
+                    text = state.targetDate.toString(),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+
+        if (state.isLoading) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                CircularProgressIndicator()
+            }
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            reverseLayout = true,
+            userScrollEnabled = true
+        ) { page ->
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                contentPadding = PaddingValues(
+                    horizontal = 8.dp,
+                    vertical = 8.dp
+                )
+            ) {
+                items(state.appInfoList) { appInfo ->
+                    ItemAppInfoSmall(
+                        usedAppInfo = appInfo,
+                    ) { packageName ->
+                        navController.navigate(
+                            "${Screen.ScreenAppUsageDetail.route}/${packageName}/${state.targetDate.toMillis()}"
+                        )
                     }
                 }
             }

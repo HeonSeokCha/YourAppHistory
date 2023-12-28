@@ -101,7 +101,7 @@ fun ItemVerticalChart(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(300.dp)
+            .height(250.dp)
             .padding(
                 start = 8.dp,
                 end = 8.dp

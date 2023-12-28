@@ -20,15 +20,15 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     )
     abstract suspend fun deleteAppInfo(packageName: String)
 
-//    @Query(
-//        "SELECT * " +
-//          "FROM appInfo " +
-//         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
-//            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
-//           "AND appUsage.packageName = appInfo.packageName "
-//    )
-//    abstract suspend fun getDayUsedAppInfoList(
-//        beginTime: Long,
-//        endTime: Long
-//    ): Map<AppInfoEntity, List<AppUsageEntity>>
+    @Query(
+        "SELECT * " +
+          "FROM appInfo " +
+         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
+            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
+           "AND appUsage.packageName = appInfo.packageName "
+    )
+    abstract suspend fun getDayUsedAppInfoList(
+        beginTime: Long,
+        endTime: Long
+    ): Map<AppInfoEntity, List<AppUsageEntity>>
 }

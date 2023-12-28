@@ -3,7 +3,6 @@ package com.chs.yourapphistory.data.repository
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import androidx.paging.map
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
@@ -14,7 +13,6 @@ import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
-import com.chs.yourapphistory.data.paging.UsedAppListPagingSource
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -76,16 +74,17 @@ class AppRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getDayPagingUsedAppInfo(): Flow<PagingData<Pair<LocalDate, Map<AppInfo, List<AppUsageInfo>>>>> {
-        return Pager(
-            PagingConfig(pageSize = 5)
-        ) {
-            UsedAppListPagingSource(
-                applicationInfoSource = applicationInfoSource,
-                appInfoDao = appInfoDao,
-                appUsageDao = appUsageDao
-            )
-        }.flow
+    override suspend fun getDayUsedAppInfoList(date: LocalDate): List<Pair<AppInfo, List<AppUsageInfo>>> {
+        return appInfoDao.getDayUsedAppInfoList(
+            beginTime = date.atStartOfDayToMillis(),
+            endTime = date.atEndOfDayToMillis()
+        ).map {
+                it.key.toAppInfo(
+                    applicationInfoSource.getApplicationIcon(it.key.packageName)
+                ) to it.value.map {
+                    it.toAppUsageInfo()
+                }
+            }
     }
 
     override suspend fun getAppUsageInfoList(
