@@ -74,17 +74,19 @@ class AppRepositoryImpl @Inject constructor(
         )
     }
 
-    override suspend fun getDayUsedAppInfoList(date: LocalDate): List<Pair<AppInfo, List<AppUsageInfo>>> {
+    override fun getDayUsedAppInfoList(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
         return appInfoDao.getDayUsedAppInfoList(
             beginTime = date.atStartOfDayToMillis(),
             endTime = date.atEndOfDayToMillis()
         ).map {
+            it.map {
                 it.key.toAppInfo(
                     applicationInfoSource.getApplicationIcon(it.key.packageName)
                 ) to it.value.map {
                     it.toAppUsageInfo()
                 }
             }
+        }
     }
 
     override suspend fun getAppUsageInfoList(

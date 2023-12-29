@@ -13,7 +13,7 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    suspend fun getDayUsedAppInfoList(date: LocalDate): List<Pair<AppInfo, List<AppUsageInfo>>>
+    fun getDayUsedAppInfoList(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>>
 
     suspend fun getAppUsageInfoList(
         date: LocalDate,

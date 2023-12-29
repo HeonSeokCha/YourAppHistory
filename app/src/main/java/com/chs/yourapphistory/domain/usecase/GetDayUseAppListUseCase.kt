@@ -22,32 +22,39 @@ class GetDayUseAppListUseCase @Inject constructor(
     operator fun invoke(date: LocalDate): Flow<Resource<List<Pair<AppInfo, String>>>> {
         return flow {
             emit(Resource.Loading)
-            val a = withContext(Dispatchers.IO) {
-                repository.getDayUsedAppInfoList(date).map {
-                    it.first to (
-                            it.second.sumOf {
-                            if (date.dayOfMonth < it.endUseTime.dayOfMonth) {
-                                date.plusDays(1L)
-                                    .atStartOfDayToMillis() - it.beginUseTime.toMillis()
-                            }
+            repository.getDayUsedAppInfoList(date).collect {
+                if (it.isEmpty()) {
+                    emit(Resource.Loading)
+                } else {
+                    val a = withContext(Dispatchers.Default){
+                        it.map {
+                            it.first to (
+                                    it.second.sumOf {
+                                        if (date.dayOfMonth < it.endUseTime.dayOfMonth) {
+                                            date.plusDays(1L)
+                                                .atStartOfDayToMillis() - it.beginUseTime.toMillis()
+                                        }
 
-                            if (date.dayOfMonth > it.beginUseTime.dayOfMonth) {
-                                it.endUseTime.toMillis() - date.atStartOfDayToMillis()
-                            }
+                                        if (date.dayOfMonth > it.beginUseTime.dayOfMonth) {
+                                            it.endUseTime.toMillis() - date.atStartOfDayToMillis()
+                                        }
 
-                            (it.endUseTime.toMillis() - it.beginUseTime.toMillis())
+                                        (it.endUseTime.toMillis() - it.beginUseTime.toMillis())
+                                    }
+                                    )
                         }
+                    }
+                    emit(
+                        Resource.Success(
+                            a.sortedWith(compareByDescending { it.second }).map {
+                                it.first to it.second.convertToRealUsageTime()
+                            }
+                        )
                     )
                 }
             }
-
-            emit(
-                Resource.Success(
-                    a.sortedWith(compareByDescending { it.second }).map {
-                        it.first to it.second.convertToRealUsageTime()
-                    }
-                )
-            )
+        }.catch {
+            emit(Resource.Error(it.message.toString()))
         }
     }
 }

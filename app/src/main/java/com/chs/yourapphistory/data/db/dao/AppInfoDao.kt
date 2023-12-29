@@ -27,8 +27,8 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
             "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
            "AND appUsage.packageName = appInfo.packageName "
     )
-    abstract suspend fun getDayUsedAppInfoList(
+    abstract fun getDayUsedAppInfoList(
         beginTime: Long,
         endTime: Long
-    ): Map<AppInfoEntity, List<AppUsageEntity>>
+    ): Flow<Map<AppInfoEntity, List<AppUsageEntity>>>
 }
