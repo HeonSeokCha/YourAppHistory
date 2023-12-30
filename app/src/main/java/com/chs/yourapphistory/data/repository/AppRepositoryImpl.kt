@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -13,6 +14,7 @@ import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -74,19 +76,15 @@ class AppRepositoryImpl @Inject constructor(
         )
     }
 
-    override fun getDayUsedAppInfoList(date: LocalDate): Flow<List<Pair<AppInfo, List<AppUsageInfo>>>> {
-        return appInfoDao.getDayUsedAppInfoList(
-            beginTime = date.atStartOfDayToMillis(),
-            endTime = date.atEndOfDayToMillis()
-        ).map {
-            it.map {
-                it.key.toAppInfo(
-                    applicationInfoSource.getApplicationIcon(it.key.packageName)
-                ) to it.value.map {
-                    it.toAppUsageInfo()
-                }
-            }
-        }
+    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<AppUsageInfo>>>>>> {
+        return Pager(
+            PagingConfig(pageSize = 5)
+        ) {
+            GetDayPagingUsedList(
+                appInfoDao = appInfoDao,
+                applicationInfoSource = applicationInfoSource,
+            )
+        }.flow
     }
 
     override suspend fun getAppUsageInfoList(
@@ -94,8 +92,7 @@ class AppRepositoryImpl @Inject constructor(
         packageName: String
     ): List<AppUsageInfo> {
         return appUsageDao.getUsageInfoList(
-            beginTime = date.atStartOfDayToMillis(),
-            endTime = date.atEndOfDayToMillis(),
+            beginTime = date.toMillis(),
             packageName = packageName
         ).map { it.toAppUsageInfo() }
     }

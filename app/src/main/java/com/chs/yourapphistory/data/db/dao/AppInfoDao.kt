@@ -21,14 +21,16 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     abstract suspend fun deleteAppInfo(packageName: String)
 
     @Query(
-        "SELECT * " +
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as targetDate, * " +
           "FROM appInfo " +
-         "INNER JOIN appUsage ON (appUsage.beginUseTime BETWEEN :beginTime AND :endTime " +
-            "OR appUsage.endUseTime BETWEEN :beginTime AND :endTime)" +
+         "INNER JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN " +
+        "date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
+        "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN " +
+        "date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
            "AND appUsage.packageName = appInfo.packageName "
     )
-    abstract fun getDayUsedAppInfoList(
-        beginTime: Long,
-        endTime: Long
-    ): Flow<Map<AppInfoEntity, List<AppUsageEntity>>>
+    abstract suspend fun getDayUsedAppInfoList(
+        beginDate: Long,
+        endDate: Long
+    ): Map<@MapColumn("targetDate") String, Map<AppInfoEntity, List<AppUsageEntity>>>
 }

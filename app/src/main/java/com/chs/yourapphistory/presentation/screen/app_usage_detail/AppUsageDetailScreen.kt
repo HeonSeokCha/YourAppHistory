@@ -88,7 +88,7 @@ fun AppUsageDetailScreen(
                     text = if (state.targetDate == LocalDate.now()) {
                         "오늘"
                     } else {
-                        state.targetDate.toString()
+                        state.targetDate.format(Constants.DATE_FORMAT)
                     },
                     textAlign = TextAlign.Center
                 )

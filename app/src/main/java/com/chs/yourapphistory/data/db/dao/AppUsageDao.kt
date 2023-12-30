@@ -22,26 +22,22 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getLastEndUseTime(): Long
 
     @Query(
-        "SELECT * " +
+        "SELECT date(:targetDate / 1000, 'unixepoch', 'localtime'), * " +
           "FROM appUsage " +
-         "WHERE beginUseTime BETWEEN :beginTime AND :endTime " +
-            "OR endUseTime BETWEEN :beginTime AND :endTime"
+         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
+                "= date(:targetDate / 1000, 'unixepoch', 'localtime') "
     )
-    abstract suspend fun getPagingDayUsageInfo(
-        beginTime: Long,
-        endTime: Long
-    ):List<AppUsageEntity>
+    abstract suspend fun getPagingDayUsageInfo(targetDate: Long):List<AppUsageEntity>
 
     @Query(
         "SELECT * " +
           "FROM appUsage " +
-         "WHERE (beginUseTime BETWEEN :beginTime AND :endTime " +
-            "OR endUseTime BETWEEN :beginTime AND :endTime) " +
+         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
+                "= date(:beginTime / 1000, 'unixepoch', 'localtime') " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getUsageInfoList(
         beginTime: Long,
-        endTime: Long,
         packageName: String
     ): List<AppUsageEntity>
 }
