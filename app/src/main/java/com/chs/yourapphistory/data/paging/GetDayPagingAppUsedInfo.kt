@@ -3,20 +3,16 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.atEndOfDayToMillis
-import com.chs.yourapphistory.common.atStartOfDayToMillis
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
-import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.LocalDate
 
-class GetDayPagingUsedList(
+class GetDayPagingAppUsedInfo(
     private val appInfoDao: AppInfoDao,
     private val applicationInfoSource: ApplicationInfoSource,
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>() {
@@ -41,11 +37,11 @@ class GetDayPagingUsedList(
                     it.toAppUsageInfo()
                 }
             }
-        }.sortedByDescending { it.first }
+        }
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (pageDate == LocalDate.now()) null else pageDate.minusDays(1),
+            prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.FIRST_COLLECT_DAY),
             nextKey = pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
         )
     }

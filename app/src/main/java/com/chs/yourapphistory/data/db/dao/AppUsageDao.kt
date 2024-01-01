@@ -22,22 +22,16 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun getLastEndUseTime(): Long
 
     @Query(
-        "SELECT date(:targetDate / 1000, 'unixepoch', 'localtime'), * " +
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as targetDate, * " +
           "FROM appUsage " +
-         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
-                "= date(:targetDate / 1000, 'unixepoch', 'localtime') "
-    )
-    abstract suspend fun getPagingDayUsageInfo(targetDate: Long):List<AppUsageEntity>
-
-    @Query(
-        "SELECT * " +
-          "FROM appUsage " +
-         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
-                "= date(:beginTime / 1000, 'unixepoch', 'localtime') " +
-           "AND packageName = :packageName"
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
+           "AND packageName = :packageName " +
+         "ORDER BY targetDate DESC"
     )
     abstract suspend fun getUsageInfoList(
-        beginTime: Long,
+        beginDate: Long,
+        endDate: Long,
         packageName: String
-    ): List<AppUsageEntity>
+    ): Map<@MapColumn("targetDate") String, List<AppUsageEntity>>
 }

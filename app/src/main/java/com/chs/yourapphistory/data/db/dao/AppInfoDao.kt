@@ -23,11 +23,10 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as targetDate, * " +
           "FROM appInfo " +
-         "INNER JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN " +
-        "date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
-        "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN " +
-        "date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
-           "AND appUsage.packageName = appInfo.packageName "
+         "INNER JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
+           "AND appUsage.packageName = appInfo.packageName " +
+         "ORDER BY targetDate DESC"
     )
     abstract suspend fun getDayUsedAppInfoList(
         beginDate: Long,

@@ -7,6 +7,4 @@ import java.time.LocalDate
 
 data class UsedAppListState(
     val appInfoList: Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, String>>>>>? = null,
-    val isLoading: Boolean = false,
-    val errorMessage: String? = null
 )

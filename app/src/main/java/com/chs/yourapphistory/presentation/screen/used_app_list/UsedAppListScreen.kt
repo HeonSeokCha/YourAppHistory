@@ -64,42 +64,31 @@ fun UsedAppListScreenScreen(
             userScrollEnabled = true
         ) { page ->
             if (pagingData != null) {
-                if (state.isLoading) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        verticalArrangement = Arrangement.Center,
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        CircularProgressIndicator()
-                    }
-                } else {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                    ) {
-                        item {
-                            Row {
-                                Text(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .align(Alignment.CenterVertically),
-                                    text = pagingData[page]?.first.toString(),
-                                    textAlign = TextAlign.Center
-                                )
-                            }
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                ) {
+                    item {
+                        Row {
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .align(Alignment.CenterVertically),
+                                text = pagingData[page]?.first.toString(),
+                                textAlign = TextAlign.Center
+                            )
                         }
+                    }
 
-                        items(count = pagingData[page]?.second?.size ?: 0) { idx ->
-                            val appInfo = pagingData[page]?.second?.get(idx)
-                            if (appInfo != null) {
-                                ItemAppInfoSmall(
-                                    usedAppInfo = appInfo,
-                                ) { packageName ->
-                                    navController.navigate(
-                                        "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"
-                                    )
-                                }
+                    items(count = pagingData[page]?.second?.size ?: 0) { idx ->
+                        val appInfo = pagingData[page]?.second?.get(idx)
+                        if (appInfo != null) {
+                            ItemAppInfoSmall(
+                                usedAppInfo = appInfo,
+                            ) { packageName ->
+                                navController.navigate(
+                                    "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"
+                                )
                             }
                         }
                     }

@@ -29,8 +29,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.calculateTimeZoneUsage
 import com.chs.yourapphistory.common.convertToRealUsageTime
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.screen.common.ItemVerticalChart
 import java.time.LocalDate
 
@@ -43,100 +46,93 @@ fun AppUsageDetailScreen(
 ) {
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val pagingData = state.dayUsageList?.collectAsLazyPagingItems()
     var selectHourUsageTime by remember { mutableStateOf("") }
 
-    val pagerState = if (state.localDateList.isEmpty()) {
-        rememberPagerState(
-            pageCount = {
-                state.localDateList.size
-            }, initialPage = 0
-        )
-    } else {
-        rememberPagerState(
-            pageCount = {
-                state.localDateList.size
-            }, initialPage = state.localDateList.indexOf(date)
-        )
+    val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: 0 })
+
+    LaunchedEffect(context, viewModel) {
+        viewModel.getDayAppUsageList(packageName, date)
     }
 
-    LaunchedEffect(state.targetDate) {
-        viewModel.getDayAppUsageList(
-            packageName = packageName,
-            state.targetDate
-        )
-        selectHourUsageTime = ""
-    }
-
-    if (state.localDateList.isNotEmpty()) {
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect {
-                viewModel.changeDate(it)
-            }
-        }
-    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (state.localDateList.isNotEmpty()) {
-            Row {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    text = if (state.targetDate == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        state.targetDate.format(Constants.DATE_FORMAT)
-                    },
-                    textAlign = TextAlign.Center
-                )
-            }
-        }
-
         HorizontalPager(
             state = pagerState,
             reverseLayout = true,
             userScrollEnabled = true
         ) { page ->
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-            ) {
-                if (state.dayUsageList.isNotEmpty()) {
+            if (pagingData != null) {
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                ) {
                     item {
-                        Text(
-                            text = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-
-                        Spacer(modifier = Modifier.height(32.dp))
+                        Row {
+                            val date: LocalDate = pagingData[page]?.first!!
+                            Text(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .align(Alignment.CenterVertically),
+                                text = if (date == LocalDate.now()) {
+                                    "오늘"
+                                } else {
+                                    date.format(Constants.DATE_FORMAT)
+                                },
+                                textAlign = TextAlign.Center
+                            )
+                        }
                     }
 
                     item {
-                        ItemVerticalChart(state.dayUsageList) {
-                            if (it != null) {
-                                selectHourUsageTime =
-                                    "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
+                        val dayUsageList = pagingData[page]?.second
+                        if (dayUsageList != null) {
+                            Text(
+                                text = dayUsageList.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) }.convertToRealUsageTime(),
+                                fontSize = 22.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+
+                            Spacer(modifier = Modifier.height(32.dp))
+                        }
+                    }
+
+                    item {
+                        val data = pagingData[page]
+                        if (data != null) {
+                            val date = data.first
+                            val dayUsageList = data.second
+                            ItemVerticalChart(
+                                calculateTimeZoneUsage(
+                                    date = date,
+                                    list = dayUsageList
+                                )
+                            ) {
+                                if (it != null) {
+                                    selectHourUsageTime =
+                                        "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
+                                }
                             }
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            if (selectHourUsageTime.isNotEmpty()) {
+                                Text(text = selectHourUsageTime)
+                            }
+
+
+                            Spacer(modifier = Modifier.height(32.dp))
+
+                            Text(
+                                text = "총 실행 횟수 ${dayUsageList.size}회",
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp
+                            )
                         }
 
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        if (selectHourUsageTime.isNotEmpty()) {
-                            Text(text = selectHourUsageTime)
-                        }
-
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        Text(
-                            text = "총 실행 횟수 ${state.dayLaunchCount}회",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
                     }
                 }
             }
