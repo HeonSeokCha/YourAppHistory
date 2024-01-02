@@ -18,7 +18,9 @@ import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import com.chs.yourapphistory.domain.usecase.GetAppUsageTimeZoneInfoUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -81,7 +83,7 @@ class AppRepositoryImpl @Inject constructor(
                 appInfoDao = appInfoDao,
                 applicationInfoSource = applicationInfoSource,
             )
-        }.flow
+        }.flow.flowOn(Dispatchers.IO)
     }
 
     override fun getAppUsageInfoList(
@@ -96,7 +98,7 @@ class AppRepositoryImpl @Inject constructor(
                 targetDate = date,
                 packageName = packageName
             )
-        }.flow
+        }.flow.flowOn(Dispatchers.IO)
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {

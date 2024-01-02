@@ -3,6 +3,7 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.toAppUsageInfo
@@ -22,13 +23,12 @@ class GetDayPagingAppUsageInfo(
     }
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<AppUsageInfo>>> {
-        val pageDate: LocalDate = params.key ?: LocalDate.now()
-
-        val a = if (targetDate == pageDate) pageDate else targetDate
+        val pageDate: LocalDate = params.key ?: targetDate
+        val endDate = appUsageDao.getOldestCollectTime().toLocalDate()
 
         val data = appUsageDao.getUsageInfoList(
-            beginDate = a.minusDays(Constants.FIRST_COLLECT_DAY).toMillis(),
-            endDate = a.toMillis(),
+            beginDate = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).toMillis(),
+            endDate = pageDate.toMillis(),
             packageName = packageName
         ).map {
             LocalDate.parse(it.key, Constants.SQL_DATE_TIME_FORMAT) to it.value.map {
@@ -36,10 +36,11 @@ class GetDayPagingAppUsageInfo(
             }
         }
 
+
         return LoadResult.Page(
             data = data,
             prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.FIRST_COLLECT_DAY),
-            nextKey = pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
+            nextKey = if (pageDate <= endDate) null else pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
         )
     }
 }

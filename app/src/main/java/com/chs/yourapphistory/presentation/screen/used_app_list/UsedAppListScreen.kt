@@ -35,6 +35,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
+import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -58,29 +59,32 @@ fun UsedAppListScreenScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        HorizontalPager(
-            state = pagerState,
-            reverseLayout = true,
-            userScrollEnabled = true
-        ) { page ->
-            if (pagingData != null) {
+        if (pagingData != null && pagingData.itemCount != 0) {
+            Row {
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterVertically),
+                    text = pagingData[pagerState.currentPage]?.first.toString(),
+                    textAlign = TextAlign.Center
+                )
+            }
+            HorizontalPager(
+                state = pagerState,
+                reverseLayout = true,
+                userScrollEnabled = true,
+                key = { pagingData[it]!!.first }
+            ) { page ->
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    item {
-                        Row {
-                            Text(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .align(Alignment.CenterVertically),
-                                text = pagingData[page]?.first.toString(),
-                                textAlign = TextAlign.Center
-                            )
+                    items(
+                        count = pagingData[page]?.second?.size ?: 0,
+                        key = {
+                            pagingData[page]?.second?.get(it)?.first?.packageName.toString()
                         }
-                    }
-
-                    items(count = pagingData[page]?.second?.size ?: 0) { idx ->
+                    ) { idx ->
                         val appInfo = pagingData[page]?.second?.get(idx)
                         if (appInfo != null) {
                             ItemAppInfoSmall(
@@ -94,6 +98,8 @@ fun UsedAppListScreenScreen(
                     }
                 }
             }
+        } else {
+            CircleLoadingIndicator()
         }
     }
 }
