@@ -9,6 +9,7 @@ import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
@@ -42,6 +43,6 @@ class GetDayUseAppListUseCase @Inject constructor(
                 }
                 it.first to a
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 }

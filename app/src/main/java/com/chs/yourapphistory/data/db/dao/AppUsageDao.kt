@@ -21,6 +21,9 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     )
     abstract suspend fun getLastEndUseTime(): Long
 
+    @Query("DELETE FROM appUsage WHERE packageName = :packageName")
+    abstract suspend fun deleteUsageInfo(packageName: String)
+
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as targetDate, * " +
           "FROM appUsage " +

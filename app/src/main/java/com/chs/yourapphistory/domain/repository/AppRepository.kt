@@ -20,6 +20,4 @@ interface AppRepository {
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<AppUsageInfo>>>>
 
-    suspend fun getOldestAppUsageCollectDay(): LocalDate
-
 }

@@ -4,6 +4,16 @@ import android.app.AppOpsManager
 import android.content.Context
 import android.os.Process
 import androidx.activity.ComponentActivity
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.Instant
 import java.time.LocalDate
@@ -11,16 +21,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.time.Duration.Companion.hours
-
-fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
-    return if (targetDate == LocalDate.now()) {
-        listOf(targetDate)
-    } else {
-        targetDate.datesUntil(LocalDate.now().plusDays(1L))
-            .toList()
-            .reversed()
-    }
-}
 
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT

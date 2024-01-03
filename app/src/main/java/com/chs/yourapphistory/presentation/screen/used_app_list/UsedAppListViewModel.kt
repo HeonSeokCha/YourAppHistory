@@ -3,10 +3,7 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.chs.yourapphistory.common.Resource
-import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
-import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -18,13 +15,11 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class UsedAppListViewModel @Inject constructor(
     private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
-    private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
 ) : ViewModel() {
@@ -34,6 +29,7 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            insertInfo()
             _state.update {
                 it.copy(
                     appInfoList = getDayUseAppListUseCase().cachedIn(viewModelScope)

@@ -62,6 +62,7 @@ class AppRepositoryImpl @Inject constructor(
             packageName
         }.forEach {
             appInfoDao.deleteAppInfo(it.packageName)
+            appUsageDao.deleteUsageInfo(it.packageName)
         }
     }
 
@@ -77,13 +78,13 @@ class AppRepositoryImpl @Inject constructor(
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<AppUsageInfo>>>>>> {
         return Pager(
-            PagingConfig(pageSize = 5)
+            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
             GetDayPagingAppUsedInfo(
                 appInfoDao = appInfoDao,
                 applicationInfoSource = applicationInfoSource,
             )
-        }.flow.flowOn(Dispatchers.IO)
+        }.flow
     }
 
     override fun getAppUsageInfoList(
@@ -91,22 +92,13 @@ class AppRepositoryImpl @Inject constructor(
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<AppUsageInfo>>>> {
         return Pager(
-            PagingConfig(pageSize = 5)
+            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
             GetDayPagingAppUsageInfo(
                 appUsageDao = appUsageDao,
                 targetDate = date,
                 packageName = packageName
             )
-        }.flow.flowOn(Dispatchers.IO)
-    }
-
-    override suspend fun getOldestAppUsageCollectDay(): LocalDate {
-        val oldestCollectTime: Long = appUsageDao.getOldestCollectTime()
-        return if (oldestCollectTime.isZero()) {
-            LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY)
-        } else {
-            oldestCollectTime.toLocalDate()
-        }
+        }.flow
     }
 }

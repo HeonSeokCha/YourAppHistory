@@ -36,9 +36,18 @@ class GetDayPagingAppUsageInfo(
             }
         }
 
+        val dateList = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).datesUntil(
+            pageDate.plusDays(1L)
+        ).map { date ->
+            if (data.any { it.first == date }) {
+                date to data.find { it.first == date }!!.second
+            } else {
+                date to emptyList()
+            }
+        }.toList().reversed()
 
         return LoadResult.Page(
-            data = data,
+            data = dateList,
             prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.FIRST_COLLECT_DAY),
             nextKey = if (pageDate <= endDate) null else pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
         )
