@@ -4,23 +4,20 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.atEndOfDayToMillis
+import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
-import com.chs.yourapphistory.data.paging.GetDayPagingAppUsageInfo
 import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
-import com.chs.yourapphistory.domain.usecase.GetAppUsageTimeZoneInfoUseCase
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flowOn
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -87,18 +84,24 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override fun getAppUsageInfoList(
+    override suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<AppUsageInfo>>>> {
-        return Pager(
-            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
-        ) {
-            GetDayPagingAppUsageInfo(
-                appUsageDao = appUsageDao,
-                targetDate = date,
-                packageName = packageName
-            )
-        }.flow
+    ): List<AppUsageInfo> {
+        return appUsageDao.getUsageInfoList(
+            beginDate = date.atStartOfDayToMillis(),
+            endDate = date.atEndOfDayToMillis(),
+            packageName = packageName
+        ).map {
+            it.toAppUsageInfo()
+        }
+    }
+
+    override suspend fun getOldestAppUsageCollectDay(): LocalDate {
+        return appUsageDao.getOldestCollectTime().toLocalDate()
+    }
+
+    override fun getPackageLabel(packageName: String): String {
+        return applicationInfoSource.getApplicationLabel(packageName)
     }
 }

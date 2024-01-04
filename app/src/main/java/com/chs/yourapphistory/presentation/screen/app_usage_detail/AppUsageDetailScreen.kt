@@ -40,99 +40,98 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppUsageDetailScreen(
-    packageName: String,
-    date: LocalDate,
-    viewModel: AppUsageDetailViewModel = hiltViewModel()
-) {
+fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    val pagingData = state.dayUsageList?.collectAsLazyPagingItems()
     var selectHourUsageTime by remember { mutableStateOf("") }
 
-    val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: 0 })
-
-    LaunchedEffect(context, viewModel) {
-        viewModel.getDayAppUsageList(packageName, date)
+    val pagerState = if (state.datesList.isNotEmpty()) {
+        rememberPagerState(
+            pageCount = {
+                state.datesList.size
+            }, initialPage = state.datesList.indexOf(state.targetDate)
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
     }
 
+    LaunchedEffect(state.targetDate) {
+        viewModel.getDayAppUsageList(state.targetDate)
+    }
+
+
+    if (state.datesList.isNotEmpty()) {
+        LaunchedEffect(pagerState) {
+            snapshotFlow { pagerState.currentPage }.collect { idx ->
+                viewModel.changeDate(state.datesList[idx])
+            }
+        }
+    }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (pagingData != null && pagingData.itemCount != 0) {
-            Row {
-                val date: LocalDate = pagingData[pagerState.currentPage]?.first!!
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    text = if (date == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        date.format(Constants.DATE_FORMAT)
-                    },
-                    textAlign = TextAlign.Center
-                )
-            }
+        if (!state.targetPackageLabel.isNullOrEmpty()) {
+            Text(
+                text = state.targetPackageLabel!!
+            )
+        }
 
-            HorizontalPager(
-                state = pagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-                key = {
-                    pagingData[it]!!.first
-                }
-            ) { page ->
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                ) {
-                    val data = pagingData[page]
-                    if (data != null) {
-                        val date = data.first
-                        val dayUsageList = data.second
-                        Text(
-                            text = dayUsageList.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) }
-                                .convertToRealUsageTime(),
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+        Row {
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                text = if (state.targetDate == LocalDate.now()) {
+                    "오늘"
+                } else {
+                    state.targetDate.format(Constants.DATE_FORMAT)
+                },
+                textAlign = TextAlign.Center
+            )
+        }
 
-                        Spacer(modifier = Modifier.height(32.dp))
+        HorizontalPager(
+            state = pagerState,
+            reverseLayout = true,
+            userScrollEnabled = true,
+        ) { page ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+            ) {
+                if (state.dayUsageList.isNotEmpty()) {
+                    Text(
+                        text = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold
+                    )
 
-                        ItemVerticalChart(
-                            calculateTimeZoneUsage(
-                                date = date,
-                                list = dayUsageList
-                            )
-                        ) {
-                            if (it != null) {
-                                selectHourUsageTime =
-                                    "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
-                            }
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    ItemVerticalChart(state.dayUsageList) {
+                        if (it != null) {
+                            selectHourUsageTime =
+                                "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
                         }
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        if (selectHourUsageTime.isNotEmpty()) {
-                            Text(text = selectHourUsageTime)
-                        }
-
-
-                        Spacer(modifier = Modifier.height(32.dp))
-
-                        Text(
-                            text = "총 실행 횟수 ${dayUsageList.size}회",
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp
-                        )
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (selectHourUsageTime.isNotEmpty()) {
+                        Text(text = selectHourUsageTime)
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(
+                        text = "총 실행 횟수 ${state.launchCount}회",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
                 }
             }
-        } else {
-            CircleLoadingIndicator()
         }
     }
 }

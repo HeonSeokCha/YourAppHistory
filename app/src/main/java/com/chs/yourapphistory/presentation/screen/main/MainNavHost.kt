@@ -48,10 +48,7 @@ fun MainNavHost(
                 },
             )
         ) {
-            AppUsageDetailScreen(
-                packageName = it.arguments?.getString("packageName")!!,
-                date = it.arguments?.getLong("targetDate")?.toLocalDate() ?: LocalDate.now()
-            )
+            AppUsageDetailScreen()
         }
     }
 }

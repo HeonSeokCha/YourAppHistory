@@ -25,16 +25,15 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun deleteUsageInfo(packageName: String)
 
     @Query(
-        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as targetDate, * " +
+        "SELECT * " +
           "FROM appUsage " +
          "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
-           "AND packageName = :packageName " +
-         "ORDER BY targetDate DESC"
+           "AND packageName = :packageName "
     )
     abstract suspend fun getUsageInfoList(
         beginDate: Long,
         endDate: Long,
         packageName: String
-    ): Map<@MapColumn("targetDate") String, List<AppUsageEntity>>
+    ): List<AppUsageEntity>
 }

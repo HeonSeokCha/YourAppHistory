@@ -15,9 +15,12 @@ interface AppRepository {
 
     fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<AppUsageInfo>>>>>>
 
-    fun getAppUsageInfoList(
+    suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<AppUsageInfo>>>>
+    ): List<AppUsageInfo>
 
+    suspend fun getOldestAppUsageCollectDay(): LocalDate
+
+    fun getPackageLabel(packageName: String): String
 }

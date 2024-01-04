@@ -22,6 +22,16 @@ import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.time.Duration.Companion.hours
 
+fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
+    return if (targetDate == LocalDate.now()) {
+        listOf(targetDate)
+    } else {
+        targetDate.datesUntil(LocalDate.now().plusDays(1L))
+            .toList()
+            .reversed()
+    }
+}
+
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT
     return localTime.plusHours(this.toLong())
