@@ -1,8 +1,5 @@
 package com.chs.yourapphistory.presentation.screen.common
 
-import android.util.Log
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
@@ -14,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,26 +22,34 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.TextLayoutResult
+import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
+import com.chs.yourapphistory.common.convertToRealUsageMinutes
+import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun ItemVerticalChart(
     hourUsageList: List<Pair<Int, Long>>,
-    selectHour: (Pair<Int, Long>?) -> Unit
+    clickText: DrawScope.(
+        TextMeasurer,
+        BarArea,
+    ) -> Unit
 ) {
     val density = LocalDensity.current
     val textSize = with(density) { 10.sp.toPx() }
@@ -75,27 +79,17 @@ fun ItemVerticalChart(
         fontSize = 10.sp,
         color = Color.Black
     )
-    val style = TextStyle(
-        fontSize = 12.sp,
-        color = Color.Black
-    )
+
 
     LaunchedEffect(barAreas) {
         selectedBar = null
-        selectHour(null)
     }
 
     LaunchedEffect(selectedPos) {
-        val findBar = barAreas.find { selectedPos in it.xStart .. it.xEnd }
+        val findBar = barAreas.find { selectedPos in it.xStart..it.xEnd }
         selectedBar = if (findBar?.value.isZero()) {
             null
         } else findBar
-    }
-
-    LaunchedEffect(selectedBar) {
-        if (selectedBar != null) {
-            selectHour(selectedBar!!.idx to selectedBar!!.value)
-        }
     }
 
     Row(
@@ -107,61 +101,18 @@ fun ItemVerticalChart(
                 end = 8.dp
             )
     ) {
-
         val scope = rememberCoroutineScope()
-        val animatable = remember { Animatable(1f) }
-        val tempAnimatable = remember { Animatable(0f) }
-
         Canvas(
             modifier = Modifier
                 .fillMaxSize()
                 .tapOrPress(
                     onStart = { position ->
-//                        scope.launch {
-//                            selectedBar?.let { selected ->
-//                                if (position in selected.xStart..selected.xEnd) {
-//                                    // click in selected area - do nothing
-//                                } else {
-//                                    tempPosition = position
-//                                    scope.launch {
-//                                        tempAnimatable.snapTo(0f)
-//                                        tempAnimatable.animateTo(1f, animationSpec = tween(300))
-//                                    }
-//                                }
-//
-//                            }
-//                        }
                     },
                     onCancel = { position ->
-//                        tempPosition = -Int.MAX_VALUE.toFloat()
-//                        scope.launch {
-//                            tempAnimatable.animateTo(0f)
-//                        }
                     },
                     onCompleted = {
-//                        val currentSelected = selectedBar
                         scope.launch {
                             selectedPos = it
-//                            animatable.snapTo(tempAnimatable.value)
-//                            async {
-//                                animatable.animateTo(
-//                                    1f,
-//                                    animationSpec = tween(
-//                                        300
-//                                            .times(1f - tempAnimatable.value)
-//                                            .roundToInt()
-//                                    )
-//                                )
-//                            }
-//
-//                            async {
-//                                tempAnimatable.snapTo(0f)
-//                                currentSelected?.let {
-//                                    tempPosition = currentSelected.xStart.plus(1f)
-//                                    tempAnimatable.snapTo(1f)
-//                                    tempAnimatable.animateTo(0f, tween(300))
-//                                }
-//                            }
                         }
                     }
 
@@ -201,7 +152,7 @@ fun ItemVerticalChart(
                             (info.idx + 1).convert24HourString(true)
                         } else {
                             info.idx.convert24HourString(true)
-                       },
+                        },
                         topLeft = Offset(
                             x = textRectPadding,
                             y = chartAreaBottom
@@ -212,9 +163,8 @@ fun ItemVerticalChart(
             }
 
             if (selectedBar != null) {
-                val barHeight = (size.height - selectedBar!!.value.times(scale).toFloat() - smallPadding - labelSectionHeight)
-                val textResult = textMeasurer.measure(selectedBar!!.idx.convertBetweenHourString())
-                val textRectPadding = selectedBar!!.xStart - (textResult.size.width.div(24) * selectedBar!!.idx)
+                val barHeight = (size.height - selectedBar!!.value.times(scale)
+                    .toFloat() - smallPadding - labelSectionHeight)
 
                 drawLine(
                     color = Color.Black,
@@ -223,30 +173,110 @@ fun ItemVerticalChart(
                     strokeWidth = 4f
                 )
 
-                drawRoundRect(
-                    color = Color.LightGray,
-                    topLeft = Offset(
-                        textRectPadding - 0f,
-                        0f
-                    ),
-                    size = Size(
-                        textResult.size.width.toFloat(),
-                        textResult.size.height.toFloat()
-                    ),
-                    cornerRadius = CornerRadius(50f)
+                clickText(
+                    textMeasurer,
+                    selectedBar!!,
                 )
 
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = selectedBar!!.idx.convertBetweenHourString(),
-                    style = style,
-                    topLeft = Offset(
-                        textRectPadding + 20f,
-                        3f
-                    )
-                )
             }
         }
+    }
+}
+
+@Composable
+fun UsageTimeZoneChart(
+    list: List<Pair<Int, Long>>
+) {
+    ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
+        val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
+        val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectTimZoneValue)
+        val selectValue = selectedBar.value.convertToRealUsageMinutes()
+        val selectValueMeasuer: TextLayoutResult = textMeasurer.measure(
+            selectValue,
+            TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            ),
+        )
+        val totalWidth: Float = (selectTimeMeasurer.size.width + selectValueMeasuer.size.width).toFloat()
+
+        val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
+
+        drawRoundRect(
+            color = Color.LightGray,
+            topLeft = Offset(
+                textRectPadding,
+                0f
+            ),
+            size = Size(
+                totalWidth + 12.dp.toPx(),
+                selectValueMeasuer.size.height.toFloat() + 21f
+            ),
+            cornerRadius = CornerRadius(50f)
+        )
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = selectTimZoneValue,
+            style = TextStyle(
+                fontSize = 12.sp,
+                color = Color.Black
+            ),
+            topLeft = Offset(
+                textRectPadding + 20f,
+                12f
+            )
+        )
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = selectValue,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            ),
+            topLeft = Offset(
+                textRectPadding + 20f + selectTimeMeasurer.size.width.toFloat(),
+                6f
+            )
+        )
+    }
+}
+
+@Composable
+fun UsageLaunchCountChart(
+    list: List<Pair<Int, Long>>
+) {
+    ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
+        val textResult = textMeasurer.measure(selectedBar.idx.convertBetweenHourString())
+        val textRectPadding = selectedBar.xStart - (textResult.size.width.div(24) * selectedBar.idx)
+        drawRoundRect(
+            color = Color.LightGray,
+            topLeft = Offset(
+                textRectPadding - 0f,
+                0f
+            ),
+            size = Size(
+                textResult.size.width.toFloat(),
+                textResult.size.height.toFloat()
+            ),
+            cornerRadius = CornerRadius(50f)
+        )
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = selectedBar.idx.convertBetweenHourString(),
+            style = TextStyle(
+                fontSize = 12.sp,
+                color = Color.Black
+            ),
+            topLeft = Offset(
+                textRectPadding + 20f,
+                3f
+            )
+        )
     }
 }
 

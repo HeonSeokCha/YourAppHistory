@@ -106,6 +106,10 @@ fun Long?.isZero(): Boolean {
     return this == null || this == 0L
 }
 
+fun Long.convertToRealUsageMinutes(): String {
+    return "${(this / 1000) / 60 % 60}분"
+}
+
 fun Long.convertToRealUsageTime(): String {
     val hour: Long = (this / 1000) / 60 / 60 % 24
     val minutes: Long = (this / 1000) / 60 % 60

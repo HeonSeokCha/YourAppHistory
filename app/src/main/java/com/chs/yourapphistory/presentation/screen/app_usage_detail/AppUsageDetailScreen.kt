@@ -36,6 +36,7 @@ import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.ItemVerticalChart
+import com.chs.yourapphistory.presentation.screen.common.UsageTimeZoneChart
 import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -74,7 +75,9 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
     ) {
         if (!state.targetPackageLabel.isNullOrEmpty()) {
             Text(
-                text = state.targetPackageLabel!!
+                text = state.targetPackageLabel!!,
+                fontSize = 22.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
@@ -110,18 +113,7 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    ItemVerticalChart(state.dayUsageList) {
-                        if (it != null) {
-                            selectHourUsageTime =
-                                "${it.first}:00 ~ ${it.first + 1}:00  ->  ${it.second.convertToRealUsageTime()}"
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    if (selectHourUsageTime.isNotEmpty()) {
-                        Text(text = selectHourUsageTime)
-                    }
+                    UsageTimeZoneChart(state.dayUsageList)
 
                     Spacer(modifier = Modifier.height(32.dp))
 
