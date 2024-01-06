@@ -7,5 +7,5 @@ data class AppUsageDetailState(
     val targetDate: LocalDate = LocalDate.now(),
     val targetPackageLabel: String? = null,
     val dayUsageList: List<Pair<Int, Long>> = emptyList(),
-    val launchCount: Int = 0
+    val launchCount: List<Pair<Int, Long>> = emptyList()
 )

@@ -50,6 +50,23 @@ fun Int.convertBetweenHourString(): String {
             (this + 1).convert24HourString(false)
 }
 
+fun calculateTimezoneLaunchCount(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
+    val usageMap = object : HashMap<Int, Long>() {
+        init {
+            for (i in 0..23) {
+                put(i, 0L)
+            }
+        }
+    }
+
+    list.forEach { appUsageInfo ->
+        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { _, value ->
+            value + 1
+        }
+    }
+    return usageMap.toList()
+}
+
 fun calculateTimeZoneUsage(
     date: LocalDate,
     list: List<AppUsageInfo>

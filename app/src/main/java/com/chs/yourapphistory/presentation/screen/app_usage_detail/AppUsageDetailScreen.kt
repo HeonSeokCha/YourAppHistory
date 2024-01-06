@@ -29,13 +29,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.calculateTimeZoneUsage
 import com.chs.yourapphistory.common.convertToRealUsageTime
-import com.chs.yourapphistory.common.toMillis
-import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
-import com.chs.yourapphistory.presentation.screen.common.ItemVerticalChart
+import com.chs.yourapphistory.presentation.screen.common.UsageLaunchCountChart
 import com.chs.yourapphistory.presentation.screen.common.UsageTimeZoneChart
 import java.time.LocalDate
 
@@ -44,7 +40,6 @@ import java.time.LocalDate
 fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
     val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
-    var selectHourUsageTime by remember { mutableStateOf("") }
 
     val pagerState = if (state.datesList.isNotEmpty()) {
         rememberPagerState(
@@ -118,10 +113,12 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
-                        text = "총 실행 횟수 ${state.launchCount}회",
+                        text = "총 실행 횟수 ${state.launchCount.sumOf { it.second } }회",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
+                    
+                    UsageLaunchCountChart(state.launchCount )
                 }
             }
         }

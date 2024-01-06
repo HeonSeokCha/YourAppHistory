@@ -191,7 +191,7 @@ fun UsageTimeZoneChart(
         val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
         val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectTimZoneValue)
         val selectValue = selectedBar.value.convertToRealUsageMinutes()
-        val selectValueMeasuer: TextLayoutResult = textMeasurer.measure(
+        val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
             selectValue,
             TextStyle(
                 fontSize = 14.sp,
@@ -199,7 +199,7 @@ fun UsageTimeZoneChart(
                 color = Color.Black
             ),
         )
-        val totalWidth: Float = (selectTimeMeasurer.size.width + selectValueMeasuer.size.width).toFloat()
+        val totalWidth: Float = (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
 
         val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
 
@@ -211,7 +211,7 @@ fun UsageTimeZoneChart(
             ),
             size = Size(
                 totalWidth + 12.dp.toPx(),
-                selectValueMeasuer.size.height.toFloat() + 21f
+                selectValueMeasurer.size.height.toFloat() + 21f
             ),
             cornerRadius = CornerRadius(50f)
         )
@@ -250,31 +250,58 @@ fun UsageLaunchCountChart(
     list: List<Pair<Int, Long>>
 ) {
     ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
-        val textResult = textMeasurer.measure(selectedBar.idx.convertBetweenHourString())
-        val textRectPadding = selectedBar.xStart - (textResult.size.width.div(24) * selectedBar.idx)
+        val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
+        val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectTimZoneValue)
+        val selectValue = "${selectedBar.value}회"
+        val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
+            selectValue,
+            TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            ),
+        )
+        val totalWidth: Float = (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
+
+        val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
+
         drawRoundRect(
             color = Color.LightGray,
             topLeft = Offset(
-                textRectPadding - 0f,
+                textRectPadding,
                 0f
             ),
             size = Size(
-                textResult.size.width.toFloat(),
-                textResult.size.height.toFloat()
+                totalWidth + 12.dp.toPx(),
+                selectValueMeasurer.size.height.toFloat() + 21f
             ),
             cornerRadius = CornerRadius(50f)
         )
 
         drawText(
             textMeasurer = textMeasurer,
-            text = selectedBar.idx.convertBetweenHourString(),
+            text = selectTimZoneValue,
             style = TextStyle(
                 fontSize = 12.sp,
                 color = Color.Black
             ),
             topLeft = Offset(
                 textRectPadding + 20f,
-                3f
+                12f
+            )
+        )
+
+        drawText(
+            textMeasurer = textMeasurer,
+            text = selectValue,
+            style = TextStyle(
+                fontSize = 14.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black
+            ),
+            topLeft = Offset(
+                textRectPadding + 20f + selectTimeMeasurer.size.width.toFloat(),
+                6f
             )
         )
     }
