@@ -15,6 +15,8 @@ import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -61,11 +63,13 @@ class ApplicationInfoSource @Inject constructor(
         }.toString()
     }
 
-    fun getApplicationIcon(packageName: String): Bitmap? {
-        return try {
-            context.packageManager.getApplicationIcon(packageName).toBitmap()
-        } catch (e: PackageManager.NameNotFoundException) {
-            null
+    suspend fun getApplicationIcon(packageName: String): Bitmap? {
+        return withContext(Dispatchers.IO) {
+           try {
+                context.packageManager.getApplicationIcon(packageName).toBitmap()
+            } catch (e: PackageManager.NameNotFoundException) {
+                null
+            }
         }
     }
 

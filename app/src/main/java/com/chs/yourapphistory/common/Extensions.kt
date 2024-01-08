@@ -15,6 +15,8 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.LifecycleOwner
 import com.chs.yourapphistory.domain.model.AppUsageInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -67,7 +69,7 @@ fun calculateTimezoneLaunchCount(list: List<AppUsageInfo>): List<Pair<Int, Long>
     return usageMap.toList()
 }
 
-fun calculateTimeZoneUsage(
+suspend fun calculateTimeZoneUsage(
     date: LocalDate,
     list: List<AppUsageInfo>
 ): List<Pair<Int, Long>> {
@@ -79,40 +81,42 @@ fun calculateTimeZoneUsage(
         }
     }
 
-    list.forEach { appUsageInfo ->
-        if (date.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
+    withContext(Dispatchers.Default) {
+        list.forEach { appUsageInfo ->
+            if (date.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
+                usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
+                    val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
+                    value + (nextDayStartMilli - appUsageInfo.beginUseTime.toMillis())
+                }
+                return@forEach
+            }
+
+            if (date.dayOfMonth > appUsageInfo.beginUseTime.dayOfMonth) {
+                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
+                    val dayStartMilli = date.atStartOfDayToMillis()
+                    value + (appUsageInfo.endUseTime.toMillis() - dayStartMilli)
+                }
+                return@forEach
+            }
+
             usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-                val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
-                value + (nextDayStartMilli - appUsageInfo.beginUseTime.toMillis())
-            }
-            return@forEach
-        }
-
-        if (date.dayOfMonth > appUsageInfo.beginUseTime.dayOfMonth) {
-            usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
-                val dayStartMilli = date.atStartOfDayToMillis()
-                value + (appUsageInfo.endUseTime.toMillis() - dayStartMilli)
-            }
-            return@forEach
-        }
-
-        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-            if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                for (i in appUsageInfo.beginUseTime.hour + 1..appUsageInfo.endUseTime.hour) {
-                    val targetHour = date.atStartOfDay().plusHours(i.toLong())
-                    usageMap.computeIfPresent(i) { key1, value1 ->
-                        if (i == appUsageInfo.endUseTime.hour) {
-                            value1 + (appUsageInfo.endUseTime.toMillis() - targetHour.toMillis())
-                        } else {
-                            1.hours.inWholeMilliseconds
+                if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
+                    for (i in appUsageInfo.beginUseTime.hour + 1..appUsageInfo.endUseTime.hour) {
+                        val targetHour = date.atStartOfDay().plusHours(i.toLong())
+                        usageMap.computeIfPresent(i) { key1, value1 ->
+                            if (i == appUsageInfo.endUseTime.hour) {
+                                value1 + (appUsageInfo.endUseTime.toMillis() - targetHour.toMillis())
+                            } else {
+                                1.hours.inWholeMilliseconds
+                            }
                         }
                     }
+                    val nextHour =
+                        date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
+                    value + (nextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
+                } else {
+                    value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
                 }
-                val nextHour =
-                    date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
-                value + (nextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
-            } else {
-                value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
             }
         }
     }

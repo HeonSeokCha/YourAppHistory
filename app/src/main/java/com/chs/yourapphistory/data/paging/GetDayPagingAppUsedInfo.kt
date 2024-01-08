@@ -42,7 +42,7 @@ class GetDayPagingAppUsedInfo(
         return LoadResult.Page(
             data = data,
             prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.FIRST_COLLECT_DAY),
-            nextKey = pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
         )
     }
 }
