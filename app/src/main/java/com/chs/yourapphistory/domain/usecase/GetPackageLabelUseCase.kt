@@ -6,7 +6,7 @@ import javax.inject.Inject
 class GetPackageLabelUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    operator fun invoke(packageName: String): String {
+    suspend operator fun invoke(packageName: String): String {
         return repository.getPackageLabel(packageName)
     }
 }

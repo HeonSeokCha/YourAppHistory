@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
+import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -12,12 +13,19 @@ import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -41,10 +49,13 @@ class AppRepositoryImpl @Inject constructor(
         val localList: List<AppInfoEntity> = appInfoDao.getAllPackage()
         val currentLauncherList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
-        appInfoDao.insert(
+        appInfoDao.upsert(
             *currentLauncherList
                 .filterNot { launcherPackageName ->
-                    localList.any { it.packageName == launcherPackageName }
+                    localList.any {
+                        it.packageName == launcherPackageName
+                                && it.label == getPackageLabel(launcherPackageName)
+                    }
                 }.map { packageName ->
                     AppInfoEntity(
                         packageName = packageName,
@@ -53,13 +64,25 @@ class AppRepositoryImpl @Inject constructor(
                 }.toTypedArray()
         )
 
-        localList.filterNot { packageInfo ->
+        val removePackageList = localList.filterNot { packageInfo ->
             currentLauncherList.any { it == packageInfo.packageName }
         }.map { packageName ->
             packageName
-        }.forEach {
-            appInfoDao.deleteAppInfo(it.packageName)
-            appUsageDao.deleteUsageInfo(it.packageName)
+        }
+
+        withContext(Dispatchers.IO) {
+            val (appInfo, appUsage) = async { appInfoDao.delete(*removePackageList.toTypedArray()) } to
+                    async {
+                        appUsageDao.delete(
+                            *removePackageList.map {
+                                AppUsageEntity(
+                                    packageName = it.packageName,
+                                    beginUseTime = 0L
+                                )
+                            }.toTypedArray()
+                        )
+                    }
+            awaitAll(appInfo, appUsage)
         }
     }
 
@@ -68,12 +91,15 @@ class AppRepositoryImpl @Inject constructor(
             getLastUsageEventTime()
         )
 
-        appUsageDao.insert(
-            *applicationInfoSource.getAppUsageInfoList(rawEvents).toTypedArray()
+        val a = applicationInfoSource.getAppUsageInfoList(rawEvents)
+        Log.e("LIST", a.toString())
+        appUsageDao.upsert(
+            *a.toTypedArray()
         )
+
     }
 
-    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<AppUsageInfo>>>>>> {
+    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>> {
         return Pager(
             PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
@@ -101,7 +127,7 @@ class AppRepositoryImpl @Inject constructor(
         return appUsageDao.getOldestCollectTime().toLocalDate()
     }
 
-    override fun getPackageLabel(packageName: String): String {
+    override suspend fun getPackageLabel(packageName: String): String {
         return applicationInfoSource.getApplicationLabel(packageName)
     }
 }

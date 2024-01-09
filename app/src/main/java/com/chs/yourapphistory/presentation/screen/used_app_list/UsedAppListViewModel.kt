@@ -30,6 +30,7 @@ class UsedAppListViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             insertInfo()
+
             _state.update {
                 it.copy(
                     appInfoList = getDayUseAppListUseCase().cachedIn(viewModelScope)
@@ -38,11 +39,12 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
-    suspend fun insertInfo() {
+    private suspend fun insertInfo() {
         withContext(Dispatchers.IO) {
-            val (appInfo, appUsage) =
-                async { insertInstallAppInfoUseCase() } to async { insertAppUsageInfoUseCase() }
-            awaitAll(appInfo, appUsage)
+            awaitAll(
+                async { insertInstallAppInfoUseCase() },
+                async { insertAppUsageInfoUseCase() }
+            )
         }
     }
 }

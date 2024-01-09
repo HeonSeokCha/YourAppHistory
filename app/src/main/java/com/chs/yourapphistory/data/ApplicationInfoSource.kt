@@ -45,22 +45,24 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    fun getApplicationLabel(packageName: String): String {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            context.packageManager.getApplicationLabel(
-                context.packageManager.getApplicationInfo(
-                    packageName,
-                    PackageManager.ApplicationInfoFlags.of(0)
+    suspend fun getApplicationLabel(packageName: String): String {
+        return withContext(Dispatchers.Default) {
+           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getApplicationLabel(
+                    context.packageManager.getApplicationInfo(
+                        packageName,
+                        PackageManager.ApplicationInfoFlags.of(0)
+                    )
                 )
-            )
-        } else {
-            context.packageManager.getApplicationLabel(
-                context.packageManager.getApplicationInfo(
-                    packageName,
-                    0
+            } else {
+                context.packageManager.getApplicationLabel(
+                    context.packageManager.getApplicationInfo(
+                        packageName,
+                        0
+                    )
                 )
-            )
-        }.toString()
+            }.toString()
+        }
     }
 
     suspend fun getApplicationIcon(packageName: String): Bitmap? {
@@ -196,6 +198,8 @@ class ApplicationInfoSource @Inject constructor(
 //                }
             }
         }
+        Log.e("INCOMPLETE", inCompletedUsageList.map { it.key }.toString())
+        Log.e("COMPLETE", completedUsageList.map {it.packageName}.toString())
         return completedUsageList
     }
 }

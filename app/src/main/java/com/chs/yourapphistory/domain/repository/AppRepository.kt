@@ -22,5 +22,5 @@ interface AppRepository {
 
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 
-    fun getPackageLabel(packageName: String): String
+    suspend fun getPackageLabel(packageName: String): String
 }
