@@ -78,7 +78,7 @@ class ApplicationInfoSource @Inject constructor(
     fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-                queryEvents(beginTime, System.currentTimeMillis())
+                queryEvents(beginTime - 86400000, System.currentTimeMillis())
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
@@ -92,6 +92,7 @@ class ApplicationInfoSource @Inject constructor(
             val time: Long = currentEvent.timeStamp
             val eventType: Int = currentEvent.eventType
 
+            Log.e("RAW", "${packageName} : ${time.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${eventType}")
             if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
                 || eventType == UsageEvents.Event.ACTIVITY_PAUSED
                 || eventType == UsageEvents.Event.ACTIVITY_STOPPED
@@ -99,6 +100,7 @@ class ApplicationInfoSource @Inject constructor(
                 || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
 //                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
 //                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
+                || eventType == 12
             ) {
                 resultArr.add(
                     AppUsageEventRawInfo(
@@ -111,9 +113,9 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-        resultArr.map {
-            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
-        }
+//        resultArr.map {
+//            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
+//        }
         return resultArr
     }
 
