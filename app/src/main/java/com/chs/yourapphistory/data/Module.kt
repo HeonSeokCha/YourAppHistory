@@ -2,7 +2,9 @@ package com.chs.yourapphistory.data
 
 import android.content.Context
 import com.chs.yourapphistory.data.db.YourAppHistoryDatabase
+import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
+import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import dagger.Module
 import dagger.Provides
@@ -37,5 +39,18 @@ object Module {
     @Provides
     fun provideAppInfoDao(db: YourAppHistoryDatabase): AppInfoDao {
         return db.appInfoDao
+    }
+
+    @Singleton
+    @Provides
+    fun provideAppForegroundUsageDao(db: YourAppHistoryDatabase): AppForegroundUsageDao {
+        return db.appForegroundUsageDao
+    }
+
+
+    @Singleton
+    @Provides
+    fun provideAppNotifyInfoDao(db: YourAppHistoryDatabase): AppNotifyInfoDao {
+        return db.appNotifyInfoDao
     }
 }

@@ -10,7 +10,9 @@ import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
+import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
+import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
@@ -32,7 +34,9 @@ import javax.inject.Inject
 class AppRepositoryImpl @Inject constructor(
     private val applicationInfoSource: ApplicationInfoSource,
     private val appUsageDao: AppUsageDao,
-    private val appInfoDao: AppInfoDao
+    private val appInfoDao: AppInfoDao,
+    private val appForegroundUsageDao: AppForegroundUsageDao,
+    private val appNotifyInfoDao: AppNotifyInfoDao
 ) : AppRepository {
 
     private suspend fun getLastUsageEventTime(): Long {
@@ -87,16 +91,40 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertAppUsageInfo() {
+        val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
         val rawEvents = applicationInfoSource.getUsageEvent(
             getLastUsageEventTime()
         )
 
-        val a = applicationInfoSource.getAppUsageInfoList(rawEvents)
-        Log.e("LIST", a.toString())
-        appUsageDao.upsert(
-            *a.toTypedArray()
-        )
+        CoroutineScope(Dispatchers.IO).launch {
+            val appUsageInsert = async {
+                appUsageDao.upsert(
+                    *applicationInfoSource.getAppUsageInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = rawEvents
+                    ).toTypedArray()
+                )
+            }
 
+            val appForegroundUsageInsert = async {
+                appForegroundUsageDao.upsert(
+                    *applicationInfoSource.getAppForeGroundUsageInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = rawEvents
+                    ).toTypedArray()
+                )
+            }
+
+            val appNotifyInfoUpsert = async {
+                appNotifyInfoDao.upsert(
+                    *applicationInfoSource.getAppNotifyInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = rawEvents
+                    ).toTypedArray()
+                )
+            }
+            awaitAll(appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
+        }
     }
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>> {

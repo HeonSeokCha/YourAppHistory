@@ -13,6 +13,8 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDateTime
+import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
+import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
@@ -92,14 +94,13 @@ class ApplicationInfoSource @Inject constructor(
             val time: Long = currentEvent.timeStamp
             val eventType: Int = currentEvent.eventType
 
-            Log.e("RAW", "${packageName} : ${time.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${eventType}")
             if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
                 || eventType == UsageEvents.Event.ACTIVITY_PAUSED
                 || eventType == UsageEvents.Event.ACTIVITY_STOPPED
                 || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
                 || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
-//                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
-//                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
+                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
                 || eventType == 12
             ) {
                 resultArr.add(
@@ -119,8 +120,53 @@ class ApplicationInfoSource @Inject constructor(
         return resultArr
     }
 
-    fun getAppUsageInfoList(usageEventList: List<AppUsageEventRawInfo>): List<AppUsageEntity> {
-        val installPackageNames: List<String> = getInstalledLauncherPackageNameList()
+    fun getAppForeGroundUsageInfoList(
+        installPackageNames: List<String>,
+        usageEventList: List<AppUsageEventRawInfo>
+    ): List<AppForegroundUsageEntity> {
+        val inCompletedUsageList: HashMap<String, AppForegroundUsageEntity> = hashMapOf()
+        val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
+       usageEventList.filter {
+           (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+                   || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
+               && installPackageNames.any { packageName -> packageName == it.packageName}
+       }.forEach {
+           if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
+               if (!inCompletedUsageList.containsKey(it.packageName))
+                inCompletedUsageList[it.packageName] = AppForegroundUsageEntity(
+                    packageName = it.packageName,
+                    beginUseTime = it.eventTime
+                )
+           } else {
+               if (inCompletedUsageList.containsKey(it.packageName)) {
+                   completedUsageList.add(inCompletedUsageList[it.packageName]!!.copy(
+                       endUseTime = it.eventTime
+                   ))
+               }
+           }
+       }
+        return completedUsageList
+    }
+
+    fun getAppNotifyInfoList(
+        installPackageNames: List<String>,
+        usageEventList: List<AppUsageEventRawInfo>
+    ): List<AppNotifyInfoEntity> {
+        return usageEventList.filter {
+            it.eventType == 12
+                    && installPackageNames.any { packageName -> packageName == it.packageName }
+        }.map {
+            AppNotifyInfoEntity(
+                packageName = it.packageName,
+                notifyTime = it.eventTime
+            )
+        }
+    }
+
+    fun getAppUsageInfoList(
+        installPackageNames: List<String>,
+        usageEventList: List<AppUsageEventRawInfo>
+    ): List<AppUsageEntity> {
         var prevPackageName: String? = null
         var prevActivityClassName: String? = null
         val inCompletedUsageList: HashMap<String, AppUsageEntity> = hashMapOf()
@@ -200,8 +246,6 @@ class ApplicationInfoSource @Inject constructor(
 //                }
             }
         }
-        Log.e("INCOMPLETE", inCompletedUsageList.map { it.key }.toString())
-        Log.e("COMPLETE", completedUsageList.map {it.packageName}.toString())
         return completedUsageList
     }
 }
