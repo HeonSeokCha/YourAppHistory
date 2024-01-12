@@ -3,11 +3,10 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetAppLaunchCountUseCase
-import com.chs.yourapphistory.domain.usecase.GetAppUsageTimeZoneInfoUseCase
+import com.chs.yourapphistory.domain.usecase.GetAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import com.chs.yourapphistory.domain.usecase.GetPackageLabelUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -23,7 +22,7 @@ import javax.inject.Inject
 class AppUsageDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
-    private val getAppUsageTimeZoneInfoUseCase: GetAppUsageTimeZoneInfoUseCase,
+    private val getAppUsageInfoUseCase: GetAppUsageInfoUseCase,
     private val getAppLaunchCountUseCase: GetAppLaunchCountUseCase,
     private val getPackageLabelUseCase: GetPackageLabelUseCase
 ) : ViewModel() {
@@ -53,7 +52,7 @@ class AppUsageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    dayUsageList = getAppUsageTimeZoneInfoUseCase(
+                    dayUsageList = getAppUsageInfoUseCase(
                         date = date,
                         packageName = targetPackageName
                     ),

@@ -2,7 +2,9 @@ package com.chs.yourapphistory.domain.repository
 
 import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Resource
+import com.chs.yourapphistory.domain.model.AppForegroundUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.AppNotifyInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -19,6 +21,16 @@ interface AppRepository {
         date: LocalDate,
         packageName: String
     ): List<AppUsageInfo>
+
+    suspend fun getAppForegroundUsageInfoList(
+        date: LocalDate,
+        packageName: String
+    ): List<AppForegroundUsageInfo>
+
+    suspend fun getAppNotifyInfoList(
+        date: LocalDate,
+        packageName: String
+    ): List<AppNotifyInfo>
 
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 

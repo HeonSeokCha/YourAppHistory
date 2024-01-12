@@ -17,8 +17,12 @@ import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
+import com.chs.yourapphistory.data.toAppForegroundUsageInfo
+import com.chs.yourapphistory.data.toAppNotifyInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
+import com.chs.yourapphistory.domain.model.AppForegroundUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.AppNotifyInfo
 import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.CoroutineScope
@@ -142,12 +146,37 @@ class AppRepositoryImpl @Inject constructor(
         date: LocalDate,
         packageName: String
     ): List<AppUsageInfo> {
-        return appUsageDao.getUsageInfoList(
+        return appUsageDao.getDayUsageInfoList(
             beginDate = date.atStartOfDayToMillis(),
             endDate = date.atEndOfDayToMillis(),
             packageName = packageName
         ).map {
             it.toAppUsageInfo()
+        }
+    }
+
+    override suspend fun getAppForegroundUsageInfoList(
+        date: LocalDate,
+        packageName: String
+    ): List<AppForegroundUsageInfo> {
+        return appForegroundUsageDao.getDayForegroundUsageInfo(
+            beginDate = date.atStartOfDayToMillis(),
+            endDate = date.atEndOfDayToMillis(),
+            packageName = packageName
+        ).map {
+            it.toAppForegroundUsageInfo()
+        }
+    }
+
+    override suspend fun getAppNotifyInfoList(
+        date: LocalDate,
+        packageName: String
+    ): List<AppNotifyInfo> {
+        return appNotifyInfoDao.getDayNotifyCount(
+            packageName = packageName,
+            targetDate = date.toMillis()
+        ).map {
+            it.toAppNotifyInfo()
         }
     }
 

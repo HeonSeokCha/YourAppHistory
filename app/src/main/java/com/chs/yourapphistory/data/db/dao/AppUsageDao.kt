@@ -31,7 +31,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
            "AND packageName = :packageName "
     )
-    abstract suspend fun getUsageInfoList(
+    abstract suspend fun getDayUsageInfoList(
         beginDate: Long,
         endDate: Long,
         packageName: String

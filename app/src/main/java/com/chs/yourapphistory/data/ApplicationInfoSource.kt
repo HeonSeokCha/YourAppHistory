@@ -80,7 +80,7 @@ class ApplicationInfoSource @Inject constructor(
     fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-                queryEvents(beginTime - 86400000, System.currentTimeMillis())
+                queryEvents(beginTime, System.currentTimeMillis())
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
