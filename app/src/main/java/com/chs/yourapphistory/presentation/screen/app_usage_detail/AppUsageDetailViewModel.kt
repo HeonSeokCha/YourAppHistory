@@ -3,9 +3,12 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.common.toLocalDate
+import com.chs.yourapphistory.domain.usecase.GetAppForegroundUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.GetAppLaunchCountUseCase
+import com.chs.yourapphistory.domain.usecase.GetAppNotifyCountUseCase
 import com.chs.yourapphistory.domain.usecase.GetAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.GetLastCollectDayUseCase
 import com.chs.yourapphistory.domain.usecase.GetPackageLabelUseCase
@@ -24,15 +27,17 @@ class AppUsageDetailViewModel @Inject constructor(
     private val getLastCollectDayUseCase: GetLastCollectDayUseCase,
     private val getAppUsageInfoUseCase: GetAppUsageInfoUseCase,
     private val getAppLaunchCountUseCase: GetAppLaunchCountUseCase,
-    private val getPackageLabelUseCase: GetPackageLabelUseCase
+    private val getPackageLabelUseCase: GetPackageLabelUseCase,
+    private val getAppNotifyCountUseCase: GetAppNotifyCountUseCase,
+    private val getAppForegroundUsageInfoUseCase: GetAppForegroundUsageInfoUseCase
 ) : ViewModel() {
 
     private val _state: MutableStateFlow<AppUsageDetailState> =
         MutableStateFlow(AppUsageDetailState())
     val state: StateFlow<AppUsageDetailState> = _state.asStateFlow()
 
-    private val targetPackageName: String = savedStateHandle["packageName"] ?: ""
-    private val targetDate: LocalDate = (savedStateHandle["targetDate"] ?: 0L).toLocalDate()
+    private val targetPackageName: String = savedStateHandle[Constants.KEY_TARGET_PACKAGE_NAME] ?: ""
+    private val targetDate: LocalDate = (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
 
     init {
         viewModelScope.launch {
