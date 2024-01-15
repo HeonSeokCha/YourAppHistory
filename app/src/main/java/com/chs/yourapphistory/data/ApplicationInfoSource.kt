@@ -142,6 +142,8 @@ class ApplicationInfoSource @Inject constructor(
                    completedUsageList.add(inCompletedUsageList[it.packageName]!!.copy(
                        endUseTime = it.eventTime
                    ))
+
+                   inCompletedUsageList.remove(it.packageName)
                }
            }
        }

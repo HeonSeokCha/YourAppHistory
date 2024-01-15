@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
-import com.chs.yourapphistory.domain.usecase.GetAppNotifyCountUseCase
 import java.time.LocalDate
 
 data class AppUsageDetailState(
@@ -10,5 +9,5 @@ data class AppUsageDetailState(
     val dayUsageList: List<Pair<Int, Long>> = emptyList(),
     val launchCount: List<Pair<Int, Long>> = emptyList(),
     val notifyCount: List<Pair< Int, Long>> = emptyList(),
-    val foregroundUSageList: List<Pair<Int, Long>> = emptyList()
+    val foregroundUsageList: List<Pair<Int, Long>> = emptyList()
 )

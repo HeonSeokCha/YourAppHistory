@@ -9,8 +9,8 @@ import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
+import com.chs.yourapphistory.domain.model.AppBaseUsageInfo.AppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.AppUsageInfo
 import java.time.LocalDate
 
 class GetDayPagingAppUsedInfo(

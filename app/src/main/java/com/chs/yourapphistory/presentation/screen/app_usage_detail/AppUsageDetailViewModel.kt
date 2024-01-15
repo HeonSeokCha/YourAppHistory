@@ -64,6 +64,14 @@ class AppUsageDetailViewModel @Inject constructor(
                     launchCount = getAppLaunchCountUseCase(
                         date = date,
                         packageName = targetPackageName
+                    ),
+                    foregroundUsageList = getAppForegroundUsageInfoUseCase(
+                        date = date,
+                        packageName = targetPackageName
+                    ),
+                    notifyCount = getAppNotifyCountUseCase(
+                        date = date,
+                        packageName = targetPackageName
                     )
                 )
             }

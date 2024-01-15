@@ -37,7 +37,7 @@ fun MainNavHost(
         }
 
         composable(
-            route = "${Screen.ScreenAppUsageDetail.route}/{${Constants.KEY_TARGET_PACKAGE_NAME}/{${Constants.KEY_TARGET_DATE}}",
+            route = "${Screen.ScreenAppUsageDetail.route}/{key_target_package_name}/{key_target_date}",
             arguments = listOf(
                 navArgument(Constants.KEY_TARGET_PACKAGE_NAME) {
                     nullable = false

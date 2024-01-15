@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -98,6 +100,7 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
             ) {
                 if (state.dayUsageList.isNotEmpty()) {
                     Text(
@@ -113,12 +116,36 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
-                        text = "총 실행 횟수 ${state.launchCount.sumOf { it.second } }회",
+                        text = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
                     )
-                    
-                    UsageLaunchCountChart(state.launchCount )
+
+                    UsageLaunchCountChart(state.launchCount)
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(
+                        text = "포그라운드 실행 시간 " +
+                                state.foregroundUsageList.sumOf { it.second }
+                                    .convertToRealUsageTime(),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+
+                    UsageTimeZoneChart(state.foregroundUsageList)
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(
+                        text = "총 알림 횟수 ${state.notifyCount.sumOf { it.second }}회",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+
+                    UsageLaunchCountChart(state.notifyCount)
+
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }

@@ -3,18 +3,9 @@ package com.chs.yourapphistory.common
 import android.app.AppOpsManager
 import android.content.Context
 import android.os.Process
+import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.LifecycleOwner
-import com.chs.yourapphistory.domain.model.AppUsageInfo
+import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -52,26 +43,9 @@ fun Int.convertBetweenHourString(): String {
             (this + 1).convert24HourString(false)
 }
 
-fun calculateTimezoneLaunchCount(list: List<AppUsageInfo>): List<Pair<Int, Long>> {
-    val usageMap = object : HashMap<Int, Long>() {
-        init {
-            for (i in 0..23) {
-                put(i, 0L)
-            }
-        }
-    }
-
-    list.forEach { appUsageInfo ->
-        usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { _, value ->
-            value + 1
-        }
-    }
-    return usageMap.toList()
-}
-
 suspend fun calculateTimeZoneUsage(
     date: LocalDate,
-    list: List<AppUsageInfo>
+    list: List<AppBaseUsageInfo>
 ): List<Pair<Int, Long>> {
     val usageMap = object : HashMap<Int, Long>() {
         init {
@@ -80,6 +54,7 @@ suspend fun calculateTimeZoneUsage(
             }
         }
     }
+    Log.e("TEST", list.toString())
 
     withContext(Dispatchers.Default) {
         list.forEach { appUsageInfo ->

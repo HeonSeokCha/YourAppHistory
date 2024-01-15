@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.data.repository
 
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -20,10 +19,9 @@ import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
 import com.chs.yourapphistory.data.toAppForegroundUsageInfo
 import com.chs.yourapphistory.data.toAppNotifyInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
-import com.chs.yourapphistory.domain.model.AppForegroundUsageInfo
+import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppNotifyInfo
-import com.chs.yourapphistory.domain.model.AppUsageInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -131,7 +129,7 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>> {
+    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppBaseUsageInfo.AppUsageInfo>>>>>> {
         return Pager(
             PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
@@ -145,7 +143,7 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getAppUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): List<AppUsageInfo> {
+    ): List<AppBaseUsageInfo.AppUsageInfo> {
         return appUsageDao.getDayUsageInfoList(
             beginDate = date.atStartOfDayToMillis(),
             endDate = date.atEndOfDayToMillis(),
@@ -158,7 +156,7 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getAppForegroundUsageInfoList(
         date: LocalDate,
         packageName: String
-    ): List<AppForegroundUsageInfo> {
+    ): List<AppBaseUsageInfo.AppForegroundUsageInfo> {
         return appForegroundUsageDao.getDayForegroundUsageInfo(
             beginDate = date.atStartOfDayToMillis(),
             endDate = date.atEndOfDayToMillis(),

@@ -184,9 +184,8 @@ fun ItemVerticalChart(
 }
 
 @Composable
-fun UsageTimeZoneChart(
-    list: List<Pair<Int, Long>>
-) {
+fun UsageTimeZoneChart(list: List<Pair<Int, Long>>) {
+
     ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
         val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
         val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectTimZoneValue)
