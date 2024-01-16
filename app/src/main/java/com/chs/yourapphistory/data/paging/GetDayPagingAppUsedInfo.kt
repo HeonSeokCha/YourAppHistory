@@ -26,18 +26,36 @@ class GetDayPagingAppUsedInfo(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
+        val installPackageList: List<String> =
+            applicationInfoSource.getInstalledLauncherPackageNameList()
 
         val data = appInfoDao.getDayUsedAppInfoList(
             beginDate = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).toMillis(),
             endDate = pageDate.toMillis()
         ).map {
-            LocalDate.parse(it.key, Constants.SQL_DATE_TIME_FORMAT) to it.value.map {
+            val date = LocalDate.parse(it.key, Constants.SQL_DATE_TIME_FORMAT)
+
+            val list = it.value.map {
                 it.key.toAppInfo(
                     applicationInfoSource.getApplicationIcon(it.key.packageName)
                 ) to it.value.map {
                     it.toAppUsageInfo()
                 }
-            }
+            }.toMutableList()
+
+            list.addAll(
+                installPackageList.filterNot { packageName ->
+                    list.any { it.first.packageName == packageName }
+                }.map {
+                    AppInfo(
+                        packageName = it,
+                        label = applicationInfoSource.getApplicationLabel(it),
+                        icon = applicationInfoSource.getApplicationIcon(it)
+                    ) to emptyList<AppUsageInfo>()
+                }.sortedBy { it.first.packageName }
+            )
+
+            date to list
         }
 
         return LoadResult.Page(

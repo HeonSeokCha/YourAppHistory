@@ -156,7 +156,7 @@ class ApplicationInfoSource @Inject constructor(
     ): List<AppNotifyInfoEntity> {
         return usageEventList.filter {
             it.eventType == 12
-                    && installPackageNames.any { packageName -> packageName == it.packageName }
+                && installPackageNames.any { packageName -> packageName == it.packageName }
         }.map {
             AppNotifyInfoEntity(
                 packageName = it.packageName,
