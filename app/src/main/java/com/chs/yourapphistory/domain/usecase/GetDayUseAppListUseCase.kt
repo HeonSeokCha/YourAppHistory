@@ -37,7 +37,7 @@ class GetDayUseAppListUseCase @Inject constructor(
                             (it.endUseTime.toMillis() - it.beginUseTime.toMillis())
                         }
                         it.first to totalTime
-                    }.sortedByDescending { it.second }.map {
+                    }.map {
                         it.first to it.second.convertToRealUsageTime()
                     }
                 }

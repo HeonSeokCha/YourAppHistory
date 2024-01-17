@@ -10,7 +10,6 @@ import android.os.Build
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
@@ -22,7 +21,6 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
-@Singleton
 class ApplicationInfoSource @Inject constructor(
     private val context: Context
 ) {
@@ -114,9 +112,9 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-//        resultArr.map {
-//            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
-//        }
+        resultArr.map {
+            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
+        }
         return resultArr
     }
 

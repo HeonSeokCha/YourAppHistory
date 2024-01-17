@@ -131,7 +131,9 @@ class AppRepositoryImpl @Inject constructor(
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppBaseUsageInfo.AppUsageInfo>>>>>> {
         return Pager(
-            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
+            PagingConfig(
+                pageSize = 1,
+            )
         ) {
             GetDayPagingAppUsedInfo(
                 appInfoDao = appInfoDao,

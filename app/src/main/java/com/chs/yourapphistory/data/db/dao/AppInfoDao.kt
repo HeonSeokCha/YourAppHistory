@@ -31,5 +31,5 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     abstract suspend fun getDayUsedAppInfoList(
         beginDate: Long,
         endDate: Long
-    ): Map<@MapColumn("targetDate") String, Map<AppInfoEntity, List<AppUsageEntity>>>
+    ): Map<@MapColumn("targetDate") String, Map<@MapColumn("packageName") String, List<AppUsageEntity>>>
 }

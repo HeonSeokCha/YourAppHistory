@@ -12,6 +12,9 @@ import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo.AppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import java.time.LocalDate
+import java.time.LocalDateTime
+import kotlin.system.measureTimeMillis
+import kotlin.time.measureTime
 
 class GetDayPagingAppUsedInfo(
     private val appInfoDao: AppInfoDao,
@@ -29,34 +32,39 @@ class GetDayPagingAppUsedInfo(
         val installPackageList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
 
+//        Log.e("MEASURE1", LocalDateTime.now().toString())
         val data = appInfoDao.getDayUsedAppInfoList(
             beginDate = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).toMillis(),
             endDate = pageDate.toMillis()
         ).map {
             val date = LocalDate.parse(it.key, Constants.SQL_DATE_TIME_FORMAT)
 
-            val list = it.value.map {
-                it.key.toAppInfo(
-                    applicationInfoSource.getApplicationIcon(it.key.packageName)
-                ) to it.value.map {
-                    it.toAppUsageInfo()
-                }
-            }.toMutableList()
-
-            list.addAll(
-                installPackageList.filterNot { packageName ->
-                    list.any { it.first.packageName == packageName }
-                }.map {
+            val list = installPackageList.map { packageName ->
+                if (it.value.containsKey(packageName)) {
                     AppInfo(
-                        packageName = it,
-                        label = applicationInfoSource.getApplicationLabel(it),
-                        icon = applicationInfoSource.getApplicationIcon(it)
-                    ) to emptyList<AppUsageInfo>()
-                }.sortedBy { it.first.packageName }
+                        packageName = packageName,
+                        label = applicationInfoSource.getApplicationLabel(packageName),
+                        icon = applicationInfoSource.getApplicationIcon(packageName)
+                    ) to it.value[packageName]!!.map {
+                        it.toAppUsageInfo()
+                    }
+                } else {
+                    AppInfo(
+                        packageName = packageName,
+                        label = applicationInfoSource.getApplicationLabel(packageName),
+                        icon = applicationInfoSource.getApplicationIcon(packageName)
+                    ) to emptyList()
+                }
+            }.sortedWith(
+                compareBy(
+                    { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
+                    { it.first.label }
+                )
             )
 
             date to list
         }
+//        Log.e("MEASURE2", LocalDateTime.now().toString())
 
         return LoadResult.Page(
             data = data,
