@@ -6,6 +6,13 @@ import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 
 @Dao
 abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
+
+    @Query(
+        "SELECT IFNULL(MAX(notifyTime), 0) " +
+          "FROM appNotifyInfo"
+    )
+    abstract suspend fun getLastEventTime(): Long
+
     @Query(
         "SELECT * " +
           "FROM appNotifyInfo " +

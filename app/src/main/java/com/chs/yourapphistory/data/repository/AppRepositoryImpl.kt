@@ -13,8 +13,10 @@ import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
+import com.chs.yourapphistory.data.db.dao.BaseDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
 import com.chs.yourapphistory.data.toAppForegroundUsageInfo
 import com.chs.yourapphistory.data.toAppNotifyInfo
@@ -41,12 +43,16 @@ class AppRepositoryImpl @Inject constructor(
     private val appNotifyInfoDao: AppNotifyInfoDao
 ) : AppRepository {
 
-    private suspend fun getLastUsageEventTime(): Long {
-        return appUsageDao.getLastEndUseTime().run {
-            if (this == 0L) {
-                LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
-            } else {
-                this
+    private suspend fun getLastEventTime(usageEventType: UsageEventType): Long {
+        return when (usageEventType) {
+            is UsageEventType.AppUsageEvent -> {
+                appUsageDao.getLastEventTime()
+            }
+            is UsageEventType.AppForegroundUsageEvent -> {
+               appForegroundUsageDao.getLastEventTime()
+            }
+            is UsageEventType.AppNotifyEvent -> {
+                appNotifyInfoDao.getLastEventTime()
             }
         }
     }
@@ -94,34 +100,44 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-        val rawEvents = applicationInfoSource.getUsageEvent(
-            getLastUsageEventTime()
-        )
+
 
         CoroutineScope(Dispatchers.IO).launch {
             val appUsageInsert = async {
+                val type: UsageEventType = UsageEventType.AppUsageEvent
                 appUsageDao.upsert(
                     *applicationInfoSource.getAppUsageInfoList(
                         installPackageNames = installPackageNames,
-                        usageEventList = rawEvents
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
                     ).toTypedArray()
                 )
             }
 
             val appForegroundUsageInsert = async {
+                val type: UsageEventType = UsageEventType.AppForegroundUsageEvent
                 appForegroundUsageDao.upsert(
                     *applicationInfoSource.getAppForeGroundUsageInfoList(
                         installPackageNames = installPackageNames,
-                        usageEventList = rawEvents
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
                     ).toTypedArray()
                 )
             }
 
             val appNotifyInfoUpsert = async {
+                val type: UsageEventType = UsageEventType.AppNotifyEvent
                 appNotifyInfoDao.upsert(
                     *applicationInfoSource.getAppNotifyInfoList(
                         installPackageNames = installPackageNames,
-                        usageEventList = rawEvents
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
                     ).toTypedArray()
                 )
             }
@@ -131,9 +147,7 @@ class AppRepositoryImpl @Inject constructor(
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppBaseUsageInfo.AppUsageInfo>>>>>> {
         return Pager(
-            PagingConfig(
-                pageSize = 1,
-            )
+            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
             GetDayPagingAppUsedInfo(
                 appInfoDao = appInfoDao,
@@ -147,8 +161,7 @@ class AppRepositoryImpl @Inject constructor(
         packageName: String
     ): List<AppBaseUsageInfo.AppUsageInfo> {
         return appUsageDao.getDayUsageInfoList(
-            beginDate = date.atStartOfDayToMillis(),
-            endDate = date.atEndOfDayToMillis(),
+            targetDate = date.toMillis(),
             packageName = packageName
         ).map {
             it.toAppUsageInfo()
@@ -160,8 +173,7 @@ class AppRepositoryImpl @Inject constructor(
         packageName: String
     ): List<AppBaseUsageInfo.AppForegroundUsageInfo> {
         return appForegroundUsageDao.getDayForegroundUsageInfo(
-            beginDate = date.atStartOfDayToMillis(),
-            endDate = date.atEndOfDayToMillis(),
+            targetDate = date.toMillis(),
             packageName = packageName
         ).map {
             it.toAppForegroundUsageInfo()

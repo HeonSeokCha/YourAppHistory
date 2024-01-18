@@ -6,16 +6,22 @@ import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 
 @Dao
 abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
+
+    @Query(
+        "SELECT IFNULL(MAX(endUseTime), 0) " +
+          "FROM appForegroundUsage "
+    )
+    abstract suspend fun getLastEventTime(): Long
+
     @Query(
         "SELECT * " +
-         "FROM appForegroundUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
+          "FROM appForegroundUsage " +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:targetDate / 1000, 'unixepoch', 'localtime') AND date(:targetDate / 1000, 'unixepoch', 'localtime')" +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:targetDate / 1000, 'unixepoch', 'localtime') AND date(:targetDate / 1000, 'unixepoch', 'localtime'))" +
            "AND packageName = :packageName "
     )
     abstract suspend fun getDayForegroundUsageInfo(
-        beginDate: Long,
-        endDate: Long,
+        targetDate: Long,
         packageName: String
     ): List<AppForegroundUsageEntity>
 }

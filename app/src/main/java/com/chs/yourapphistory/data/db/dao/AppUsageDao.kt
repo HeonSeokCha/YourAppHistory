@@ -17,9 +17,9 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
 
     @Query(
         "SELECT IFNULL(MAX(endUseTime), 0)" +
-          "FROM appUsage "
+                "FROM appUsage "
     )
-    abstract suspend fun getLastEndUseTime(): Long
+    abstract suspend fun getLastEventTime(): Long
 
     @Query("DELETE FROM appUsage WHERE packageName = :packageName")
     abstract suspend fun deleteUsageInfo(packageName: String)
@@ -27,13 +27,12 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT * " +
           "FROM appUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime'))" +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:targetDate / 1000, 'unixepoch', 'localtime') AND date(:targetDate / 1000, 'unixepoch', 'localtime')" +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:targetDate / 1000, 'unixepoch', 'localtime') AND date(:targetDate / 1000, 'unixepoch', 'localtime'))" +
            "AND packageName = :packageName "
     )
     abstract suspend fun getDayUsageInfoList(
-        beginDate: Long,
-        endDate: Long,
+        targetDate: Long,
         packageName: String
     ): List<AppUsageEntity>
 }

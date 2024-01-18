@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.common
 
+import android.app.usage.UsageEvents
 import java.time.format.DateTimeFormatter
 
 object Constants {
@@ -14,4 +15,16 @@ object Constants {
     const val KEY_TARGET_DATE: String = "key_target_date"
     const val KEY_TARGET_PACKAGE_NAME: String = "key_target_package_name"
 
+    val APP_USAGE_EVENT_FILTER = listOf(
+        UsageEvents.Event.ACTIVITY_RESUMED,
+        UsageEvents.Event.ACTIVITY_PAUSED,
+        UsageEvents.Event.ACTIVITY_STOPPED,
+        UsageEvents.Event.SCREEN_NON_INTERACTIVE,
+        UsageEvents.Event.SCREEN_INTERACTIVE
+    )
+
+    val APP_FOREGROUND_USAGE_EVENT_FILTER = listOf(
+        UsageEvents.Event.FOREGROUND_SERVICE_START,
+        UsageEvents.Event.FOREGROUND_SERVICE_STOP
+    )
 }

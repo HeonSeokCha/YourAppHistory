@@ -16,6 +16,7 @@ import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
+import com.chs.yourapphistory.data.model.UsageEventType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -75,13 +76,27 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
+    fun getUsageEvent(
+        usageType: UsageEventType,
+        beginTime: Long
+    ): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
+        val usageFilterList = when (usageType) {
+            is UsageEventType.AppUsageEvent -> {
+                Constants.APP_USAGE_EVENT_FILTER
+            }
+            is UsageEventType.AppNotifyEvent -> {
+                listOf(12)
+            }
+            is UsageEventType.AppForegroundUsageEvent -> {
+                Constants.APP_FOREGROUND_USAGE_EVENT_FILTER
+            }
+        }
 
         while (usageEvents.hasNextEvent()) {
             val currentEvent = UsageEvents.Event().apply {
@@ -92,15 +107,7 @@ class ApplicationInfoSource @Inject constructor(
             val time: Long = currentEvent.timeStamp
             val eventType: Int = currentEvent.eventType
 
-            if (eventType == UsageEvents.Event.ACTIVITY_RESUMED
-                || eventType == UsageEvents.Event.ACTIVITY_PAUSED
-                || eventType == UsageEvents.Event.ACTIVITY_STOPPED
-                || eventType == UsageEvents.Event.SCREEN_NON_INTERACTIVE
-                || eventType == UsageEvents.Event.SCREEN_INTERACTIVE
-                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
-                || eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
-                || eventType == 12
-            ) {
+            if (usageFilterList.any { it == eventType }) {
                 resultArr.add(
                     AppUsageEventRawInfo(
                         packageName = packageName,
