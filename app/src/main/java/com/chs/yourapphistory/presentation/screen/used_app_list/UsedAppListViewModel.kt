@@ -3,6 +3,7 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
@@ -29,7 +30,9 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            chsLog("START_INSERT")
             insertInfo()
+            chsLog("END_INSERT")
 
             _state.update {
                 it.copy(

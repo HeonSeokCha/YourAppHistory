@@ -3,6 +3,7 @@ package com.chs.yourapphistory.domain.usecase
 import androidx.paging.PagingData
 import androidx.paging.map
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.system.measureTimeMillis
 
 class GetDayUseAppListUseCase @Inject constructor(
     private val repository: AppRepository

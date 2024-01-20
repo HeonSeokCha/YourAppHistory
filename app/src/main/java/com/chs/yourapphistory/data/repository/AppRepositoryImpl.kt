@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
@@ -52,12 +53,18 @@ class AppRepositoryImpl @Inject constructor(
             is UsageEventType.AppUsageEvent -> {
                 appUsageDao.getLastEventTime()
             }
+
             is UsageEventType.AppForegroundUsageEvent -> {
-               appForegroundUsageDao.getLastEventTime()
+                appForegroundUsageDao.getLastEventTime()
             }
+
             is UsageEventType.AppNotifyEvent -> {
                 appNotifyInfoDao.getLastEventTime()
             }
+        }.run {
+            if (this == 0L) {
+                LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
+            } else this
         }
     }
 
@@ -76,6 +83,7 @@ class AppRepositoryImpl @Inject constructor(
                     AppInfoEntity(
                         packageName = packageName,
                         label = applicationInfoSource.getApplicationLabel(packageName),
+                        icon = applicationInfoSource.getApplicationIcon(packageName)
                     )
                 }.toTypedArray()
         )
@@ -104,54 +112,44 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-
         withContext(Dispatchers.IO) {
             val appUsageInsert = async(Dispatchers.IO) {
                 val type: UsageEventType = UsageEventType.AppUsageEvent
-                val a = measureTimeMillis {
-                    appUsageDao.upsert(
-                        *applicationInfoSource.getAppUsageInfoList(
-                            installPackageNames = installPackageNames,
-                            usageEventList = applicationInfoSource.getUsageEvent(
-                                usageType = type,
-                                beginTime = getLastEventTime(type)
-                            )
-                        ).toTypedArray()
-                    )
-                }
-                Log.e("CHS_TIME", a.toString())
+                appUsageDao.upsert(
+                    *applicationInfoSource.getAppUsageInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
+                    ).toTypedArray()
+                )
             }
 
             val appForegroundUsageInsert = async(Dispatchers.IO) {
                 val type: UsageEventType = UsageEventType.AppForegroundUsageEvent
-                val a = measureTimeMillis {
-                    appForegroundUsageDao.upsert(
-                        *applicationInfoSource.getAppForeGroundUsageInfoList(
-                            installPackageNames = installPackageNames,
-                            usageEventList = applicationInfoSource.getUsageEvent(
-                                usageType = type,
-                                beginTime = getLastEventTime(type)
-                            )
-                        ).toTypedArray()
-                    )
-                }
-                Log.e("CHS_TIME", a.toString())
+                appForegroundUsageDao.upsert(
+                    *applicationInfoSource.getAppForeGroundUsageInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
+                    ).toTypedArray()
+                )
             }
 
             val appNotifyInfoUpsert = async(Dispatchers.IO) {
-                val a = measureTimeMillis {
-                    val type: UsageEventType = UsageEventType.AppNotifyEvent
-                    appNotifyInfoDao.upsert(
-                        *applicationInfoSource.getAppNotifyInfoList(
-                            installPackageNames = installPackageNames,
-                            usageEventList = applicationInfoSource.getUsageEvent(
-                                usageType = type,
-                                beginTime = getLastEventTime(type)
-                            )
-                        ).toTypedArray()
-                    )
-                }
-                Log.e("CHS_TIME", a.toString())
+                val type: UsageEventType = UsageEventType.AppNotifyEvent
+                appNotifyInfoDao.upsert(
+                    *applicationInfoSource.getAppNotifyInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = applicationInfoSource.getUsageEvent(
+                            usageType = type,
+                            beginTime = getLastEventTime(type)
+                        )
+                    ).toTypedArray()
+                )
             }
             awaitAll(appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
         }
@@ -161,10 +159,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
-            GetDayPagingAppUsedInfo(
-                appInfoDao = appInfoDao,
-                applicationInfoSource = applicationInfoSource,
-            )
+            GetDayPagingAppUsedInfo(appInfoDao = appInfoDao)
         }.flow
     }
 

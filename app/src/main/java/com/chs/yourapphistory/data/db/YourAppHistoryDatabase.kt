@@ -22,8 +22,9 @@ import com.chs.yourapphistory.data.db.entity.AppUsageEntity
         AppNotifyInfoEntity::class
     ],
     version = 1,
-    exportSchema = false
+    exportSchema = false,
 )
+@TypeConverters(RoomConverter::class)
 abstract class YourAppHistoryDatabase : RoomDatabase() {
     abstract val appUsageDao: AppUsageDao
     abstract val appInfoDao: AppInfoDao

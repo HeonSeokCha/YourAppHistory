@@ -181,3 +181,7 @@ fun getUsagePermission(context: Context): Boolean {
         false
     }
 }
+
+fun chsLog(value: String) {
+    Log.e("CHS_LOG", value)
+}

@@ -64,9 +64,9 @@ fun UsedAppListScreenScreen(
                 ) {
                     items(
                         count = pagingData[page]?.second?.size ?: 0,
-                        key = {
-                            pagingData[page]?.second?.get(it)?.first?.packageName.toString()
-                        }
+//                        key = {
+//                            pagingData[page]?.second?.get(it)?.first?.packageName.toString()
+//                        }
                     ) { idx ->
                         val appInfo = pagingData[page]?.second?.get(idx)
                         if (appInfo != null) {

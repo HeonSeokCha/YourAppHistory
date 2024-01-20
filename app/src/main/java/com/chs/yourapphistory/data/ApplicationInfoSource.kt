@@ -119,9 +119,9 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-        resultArr.map {
-            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
-        }
+//        resultArr.map {
+//            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
+//        }
         return resultArr
     }
 

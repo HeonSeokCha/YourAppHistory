@@ -10,11 +10,11 @@ import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppNotifyInfo
 
-fun AppInfoEntity.toAppInfo(icon: Bitmap?): AppInfo {
+fun AppInfoEntity.toAppInfo(): AppInfo {
     return AppInfo(
         packageName = this.packageName,
         label = this.label,
-        icon = icon
+        icon = this.icon
     )
 }
 
