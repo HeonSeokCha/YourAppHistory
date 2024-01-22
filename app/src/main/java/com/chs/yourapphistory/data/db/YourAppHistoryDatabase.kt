@@ -24,7 +24,6 @@ import com.chs.yourapphistory.data.db.entity.AppUsageEntity
     version = 1,
     exportSchema = false,
 )
-@TypeConverters(RoomConverter::class)
 abstract class YourAppHistoryDatabase : RoomDatabase() {
     abstract val appUsageDao: AppUsageDao
     abstract val appInfoDao: AppInfoDao

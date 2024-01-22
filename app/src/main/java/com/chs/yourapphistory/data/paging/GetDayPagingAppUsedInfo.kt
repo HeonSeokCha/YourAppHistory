@@ -5,17 +5,22 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toMillis
+import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
+import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo.AppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class GetDayPagingAppUsedInfo(
     private val appInfoDao: AppInfoDao,
+    private val applicationInfoSource: ApplicationInfoSource
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -36,9 +41,13 @@ class GetDayPagingAppUsedInfo(
 
             val list = installPackageList.map { installAppInfo ->
                 if (it.value.containsKey(installAppInfo)) {
-                    installAppInfo.toAppInfo() to it.value[installAppInfo]!!.map { it.toAppUsageInfo() }
+                    installAppInfo.toAppInfo(
+                        applicationInfoSource.getApplicationIcon(installAppInfo.packageName)
+                    ) to it.value[installAppInfo]!!.map { it.toAppUsageInfo() }
                 } else {
-                    installAppInfo.toAppInfo() to emptyList()
+                    installAppInfo.toAppInfo(
+                        applicationInfoSource.getApplicationIcon(installAppInfo.packageName)
+                    ) to emptyList()
                 }
             }.sortedWith(
                 compareBy(
@@ -51,8 +60,8 @@ class GetDayPagingAppUsedInfo(
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.FIRST_COLLECT_DAY),
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.FIRST_COLLECT_DAY + 1)
+            prevKey = null,
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(7)
         )
     }
 }

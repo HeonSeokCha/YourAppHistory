@@ -16,9 +16,8 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query(
         "SELECT * " +
           "FROM appForegroundUsage " +
-         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName "
     )
     abstract suspend fun getDayForegroundUsageInfo(

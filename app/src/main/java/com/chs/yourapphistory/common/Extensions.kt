@@ -54,7 +54,7 @@ suspend fun calculateTimeZoneUsage(
             }
         }
     }
-    Log.e("TEST", list.toString())
+    chsLog(list.toString())
 
     withContext(Dispatchers.Default) {
         list.forEach { appUsageInfo ->

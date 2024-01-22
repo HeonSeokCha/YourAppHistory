@@ -83,7 +83,6 @@ class AppRepositoryImpl @Inject constructor(
                     AppInfoEntity(
                         packageName = packageName,
                         label = applicationInfoSource.getApplicationLabel(packageName),
-                        icon = applicationInfoSource.getApplicationIcon(packageName)
                     )
                 }.toTypedArray()
         )
@@ -159,7 +158,10 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
         ) {
-            GetDayPagingAppUsedInfo(appInfoDao = appInfoDao)
+            GetDayPagingAppUsedInfo(
+                appInfoDao = appInfoDao,
+                applicationInfoSource = applicationInfoSource
+            )
         }.flow
     }
 
@@ -167,12 +169,13 @@ class AppRepositoryImpl @Inject constructor(
         date: LocalDate,
         packageName: String
     ): List<AppBaseUsageInfo.AppUsageInfo> {
-        return appUsageDao.getDayUsageInfoList(
+        val a = appUsageDao.getDayUsageInfoList(
             targetDate = date.toMillis(),
             packageName = packageName
         ).map {
             it.toAppUsageInfo()
         }
+        return a
     }
 
     override suspend fun getAppForegroundUsageInfoList(
