@@ -1,6 +1,7 @@
-package com.chs.yourapphistory.data
+package com.chs.yourapphistory.di
 
 import android.content.Context
+import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.YourAppHistoryDatabase
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao

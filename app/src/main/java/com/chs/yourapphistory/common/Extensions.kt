@@ -54,7 +54,6 @@ suspend fun calculateTimeZoneUsage(
             }
         }
     }
-    chsLog(list.toString())
 
     withContext(Dispatchers.Default) {
         list.forEach { appUsageInfo ->
@@ -78,7 +77,7 @@ suspend fun calculateTimeZoneUsage(
                 if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
                     for (i in appUsageInfo.beginUseTime.hour + 1..appUsageInfo.endUseTime.hour) {
                         val targetHour = date.atStartOfDay().plusHours(i.toLong())
-                        usageMap.computeIfPresent(i) { key1, value1 ->
+                        usageMap.computeIfPresent(i) { _, value1 ->
                             if (i == appUsageInfo.endUseTime.hour) {
                                 value1 + (appUsageInfo.endUseTime.toMillis() - targetHour.toMillis())
                             } else {

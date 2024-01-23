@@ -1,14 +1,13 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
-import android.content.Context
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -17,14 +16,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableLongStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -40,7 +34,6 @@ import java.time.LocalDate
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
-    val context: Context = LocalContext.current
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val pagerState = if (state.datesList.isNotEmpty()) {
@@ -72,13 +65,19 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
     ) {
         if (!state.targetPackageLabel.isNullOrEmpty()) {
             Text(
+                modifier = Modifier
+                    .padding(start = 8.dp),
                 text = state.targetPackageLabel!!,
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold
             )
         }
 
-        Row {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
             Text(
                 modifier = Modifier
                     .weight(1f)
@@ -104,6 +103,8 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
             ) {
                 if (state.dayUsageList.isNotEmpty()) {
                     Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
                         text = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
                         fontSize = 22.sp,
                         fontWeight = FontWeight.Bold
@@ -116,6 +117,8 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
                         text = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp
@@ -126,6 +129,8 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
                         text = "포그라운드 실행 시간 " +
                                 state.foregroundUsageList.sumOf { it.second }
                                     .convertToRealUsageTime(),
@@ -138,6 +143,8 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
                     Text(
+                        modifier = Modifier
+                            .padding(start = 8.dp),
                         text = "총 알림 횟수 ${state.notifyCount.sumOf { it.second }}회",
                         fontWeight = FontWeight.Bold,
                         fontSize = 16.sp

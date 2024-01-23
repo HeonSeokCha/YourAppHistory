@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.data
+package com.chs.yourapphistory.di
 
 import com.chs.yourapphistory.data.repository.AppRepositoryImpl
 import com.chs.yourapphistory.domain.repository.AppRepository

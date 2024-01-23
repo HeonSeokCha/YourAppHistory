@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -31,32 +32,25 @@ class GetDayPagingAppUsedInfo(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
-        val installPackageList: List<AppInfoEntity> = appInfoDao.getAllPackage()
 
-        val data = appInfoDao.getDayUsedAppInfoList(
-            beginDate = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).toMillis(),
-            endDate = pageDate.toMillis()
-        ).map {
-            val date = LocalDate.parse(it.key, Constants.SQL_DATE_TIME_FORMAT)
+        val data = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).datesUntil(pageDate.plusDays(1L))
+            .toList()
+            .reversed()
+            .map { date ->
+                val a = appInfoDao.getDayUsedAppInfoList(date.toMillis())
 
-            val list = installPackageList.map { installAppInfo ->
-                if (it.value.containsKey(installAppInfo)) {
-                    installAppInfo.toAppInfo(
-                        applicationInfoSource.getApplicationIcon(installAppInfo.packageName)
-                    ) to it.value[installAppInfo]!!.map { it.toAppUsageInfo() }
-                } else {
-                    installAppInfo.toAppInfo(
-                        applicationInfoSource.getApplicationIcon(installAppInfo.packageName)
-                    ) to emptyList()
-                }
-            }.sortedWith(
-                compareBy(
-                    { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
-                    { it.first.label }
+                val list = a.map {
+                    it.key.toAppInfo(applicationInfoSource.getApplicationIcon(it.key.packageName)) to it.value.map {
+                        it.toAppUsageInfo()
+                    }
+                }.sortedWith(
+                    compareBy(
+                        { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
+                        { it.first.label }
+                    )
                 )
-            )
-            date to list
-        }
+                date to list
+            }
 
         return LoadResult.Page(
             data = data,
