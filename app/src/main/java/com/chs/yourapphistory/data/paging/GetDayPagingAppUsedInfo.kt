@@ -33,13 +33,11 @@ class GetDayPagingAppUsedInfo(
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
 
-        val data = pageDate.minusDays(Constants.FIRST_COLLECT_DAY).datesUntil(pageDate.plusDays(1L))
+        val data = pageDate.minusDays(Constants.PAGING_DAY).datesUntil(pageDate.plusDays(1L))
             .toList()
             .reversed()
             .map { date ->
-                val a = appInfoDao.getDayUsedAppInfoList(date.toMillis())
-
-                val list = a.map {
+                val list = appInfoDao.getDayUsedAppInfoList(date.toMillis()).map {
                     it.key.toAppInfo(applicationInfoSource.getApplicationIcon(it.key.packageName)) to it.value.map {
                         it.toAppUsageInfo()
                     }
@@ -55,7 +53,7 @@ class GetDayPagingAppUsedInfo(
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(7)
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
 }

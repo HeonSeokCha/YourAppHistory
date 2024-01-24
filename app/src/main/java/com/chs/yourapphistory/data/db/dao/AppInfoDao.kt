@@ -23,12 +23,11 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     @Query(
         "SELECT * " +
           "FROM appInfo " +
-          "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND appUsage.packageName = appInfo.packageName " +
-         "WHERE appInfo.packageName = appUsage.packageName"
+         "LEFT JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
+           "AND appInfo.packageName = appUsage.packageName "
     )
     abstract suspend fun getDayUsedAppInfoList(
         targetDate: Long
-    ): Map<AppInfoEntity, List<AppUsageEntity> >
+    ): Map<AppInfoEntity, List<AppUsageEntity>>
 }
