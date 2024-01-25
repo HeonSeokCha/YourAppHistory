@@ -13,7 +13,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         "SELECT IFNULL(MIN(beginUseTime), 0) " +
           "FROM appUsage"
     )
-    abstract suspend fun getOldestCollectTime(): Long
+    abstract suspend fun getFirstCollectTime(): Long
 
     @Query(
         "SELECT IFNULL(MAX(endUseTime), 0)" +

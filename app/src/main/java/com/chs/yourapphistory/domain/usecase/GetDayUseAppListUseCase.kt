@@ -23,7 +23,7 @@ class GetDayUseAppListUseCase @Inject constructor(
     operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, String>>>>> {
         return repository.getDayUsedAppInfoList().map {
             it.map {
-                val a = withContext(Dispatchers.Default) {
+                it.first to withContext(Dispatchers.Default) {
                     val date = it.first
                     it.second.map {
                         val totalTime = it.second.sumOf {
@@ -43,7 +43,6 @@ class GetDayUseAppListUseCase @Inject constructor(
                         it.first to it.second.convertToRealUsageTime()
                     }
                 }
-                it.first to a
             }
         }.flowOn(Dispatchers.IO)
     }

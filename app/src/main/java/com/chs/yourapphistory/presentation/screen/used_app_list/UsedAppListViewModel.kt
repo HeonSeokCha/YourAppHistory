@@ -30,9 +30,7 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            chsLog("START_INSERT")
             insertInfo()
-            chsLog("END_INSERT")
 
             _state.update {
                 it.copy(

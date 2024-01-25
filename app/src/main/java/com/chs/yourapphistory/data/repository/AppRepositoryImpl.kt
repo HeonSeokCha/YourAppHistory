@@ -151,10 +151,11 @@ class AppRepositoryImpl @Inject constructor(
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<AppBaseUsageInfo.AppUsageInfo>>>>>> {
         return Pager(
-            PagingConfig(pageSize = Constants.FIRST_COLLECT_DAY.toInt())
+            PagingConfig(pageSize = 2)
         ) {
             GetDayPagingAppUsedInfo(
                 appInfoDao = appInfoDao,
+                appUsageDao = appUsageDao,
                 applicationInfoSource = applicationInfoSource
             )
         }.flow
@@ -197,7 +198,7 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getOldestAppUsageCollectDay(): LocalDate {
-        return appUsageDao.getOldestCollectTime().toLocalDate()
+        return appUsageDao.getFirstCollectTime().toLocalDate()
     }
 
     override suspend fun getPackageLabel(packageName: String): String {
