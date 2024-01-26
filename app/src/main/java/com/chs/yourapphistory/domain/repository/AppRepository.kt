@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.domain.repository
 
+import android.graphics.Bitmap
 import androidx.paging.PagingData
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -33,4 +34,6 @@ interface AppRepository {
     suspend fun getOldestAppUsageCollectDay(): LocalDate
 
     suspend fun getPackageLabel(packageName: String): String
+
+    suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 }

@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
@@ -22,7 +23,8 @@ import javax.inject.Inject
 class UsedAppListViewModel @Inject constructor(
     private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
-    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase
+    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
+    private val getAppIconMapUseCase: GetAppIconMapUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(UsedAppListState())
@@ -34,7 +36,8 @@ class UsedAppListViewModel @Inject constructor(
 
             _state.update {
                 it.copy(
-                    appInfoList = getDayUseAppListUseCase().cachedIn(viewModelScope)
+                    appInfoList = getDayUseAppListUseCase().cachedIn(viewModelScope),
+                    appIconList = getAppIconMapUseCase()
                 )
             }
         }

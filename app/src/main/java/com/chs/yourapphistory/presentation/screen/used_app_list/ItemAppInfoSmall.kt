@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import android.graphics.Bitmap
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -32,6 +33,7 @@ import com.chs.yourapphistory.domain.model.AppInfo
 @Composable
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, String>,
+    icon: Bitmap?,
     clickAble: (String) -> Unit
 ) {
     val appInfo = usedAppInfo.first
@@ -56,12 +58,12 @@ fun ItemAppInfoSmall(
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (appInfo.icon != null) {
+                if (icon != null) {
                     Image(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape),
-                        bitmap = appInfo.icon.asImageBitmap(),
+                        bitmap = icon.asImageBitmap(),
                         contentDescription = null
                     )
                 } else {

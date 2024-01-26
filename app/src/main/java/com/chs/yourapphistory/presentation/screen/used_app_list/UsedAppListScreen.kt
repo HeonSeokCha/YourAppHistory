@@ -76,6 +76,7 @@ fun UsedAppListScreenScreen(
                         if (appInfo != null) {
                             ItemAppInfoSmall(
                                 usedAppInfo = appInfo,
+                                icon = state.appIconList[appInfo.first.packageName]
                             ) { packageName ->
                                 navController.navigate(
                                     "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"

@@ -66,14 +66,16 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    suspend fun getApplicationIcon(packageName: String): Bitmap? {
+    suspend fun getApplicationIconMap(installPackageNames: List<String>): HashMap<String, Bitmap?> {
         return withContext(Dispatchers.IO) {
-           try {
-                context.packageManager.getApplicationIcon(packageName).toBitmap(
-                    width = 144, height = 144
-                )
-            } catch (e: PackageManager.NameNotFoundException) {
-                null
+            installPackageNames.associateWithTo(HashMap()) {
+                try {
+                    context.packageManager.getApplicationIcon(it).toBitmap(
+                        width = 144, height = 144
+                    )
+                } catch (e: PackageManager.NameNotFoundException) {
+                    null
+                }
             }
         }
     }

@@ -3,8 +3,6 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
@@ -31,12 +29,16 @@ class GetDayPagingAppUsedInfo(
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
         val limitDate = appUsageDao.getFirstCollectTime().toLocalDate()
-        val data = pageDate.minusDays(Constants.PAGING_DAY).datesUntil(pageDate.plusDays(1L))
+        val minDate = if (pageDate.minusDays(Constants.PAGING_DAY) < limitDate) {
+            limitDate
+        } else pageDate.minusDays(Constants.PAGING_DAY)
+
+        val data = minDate.datesUntil(pageDate.plusDays(1L))
             .toList()
             .reversed()
             .map { date ->
                 date to appInfoDao.getDayUsedAppInfoList(date.toMillis()).map {
-                    it.key.toAppInfo(applicationInfoSource.getApplicationIcon(it.key.packageName)) to it.value.map {
+                    it.key.toAppInfo() to it.value.map {
                         it.toAppUsageInfo()
                     }
                 }.sortedWith(
@@ -47,11 +49,10 @@ class GetDayPagingAppUsedInfo(
                 )
             }
 
-        chsLog("${pageDate.toString()} ~  ${limitDate.toString()} : ${data.size}")
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (pageDate <= limitDate) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (minDate == limitDate) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
 }

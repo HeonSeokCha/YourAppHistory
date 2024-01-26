@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -203,5 +204,11 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun getPackageLabel(packageName: String): String {
         return applicationInfoSource.getApplicationLabel(packageName)
+    }
+
+    override suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
+        return applicationInfoSource.getApplicationIconMap(
+            applicationInfoSource.getInstalledLauncherPackageNameList()
+        )
     }
 }
