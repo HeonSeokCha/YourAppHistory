@@ -4,7 +4,7 @@ import java.time.LocalDate
 
 data class AppUsageDetailState(
     val datesList: List<LocalDate> = emptyList(),
-    val targetDate: LocalDate = LocalDate.now(),
+    val targetDate: LocalDate? = null,
     val targetPackageLabel: String? = null,
     val dayUsageList: List<Pair<Int, Long>> = emptyList(),
     val launchCount: List<Pair<Int, Long>> = emptyList(),

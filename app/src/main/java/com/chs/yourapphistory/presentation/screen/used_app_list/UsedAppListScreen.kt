@@ -62,24 +62,25 @@ fun UsedAppListScreenScreen(
                 userScrollEnabled = true,
                 key = { pagingData[it]!!.first }
             ) { page ->
+                val packageList = pagingData[page]!!.second
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally,
                 ) {
-                    items(
-                        count = pagingData[page]?.second?.size ?: 0,
-                        key = {
-                            pagingData[page]?.second?.get(it)?.first?.packageName.toString()
-                        }
-                    ) { idx ->
-                        val appInfo = pagingData[page]?.second?.get(idx)
-                        if (appInfo != null) {
+                    if (packageList.isNotEmpty()) {
+                        items(
+                            count = packageList.size,
+                            key = {
+                                packageList[it].first.packageName
+                            }
+                        ) { idx ->
+                            val appInfo = packageList[idx]
                             ItemAppInfoSmall(
                                 usedAppInfo = appInfo,
                                 icon = state.appIconList[appInfo.first.packageName]
                             ) { packageName ->
                                 navController.navigate(
-                                    "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]?.first?.toMillis()}"
+                                    "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]!!.first.toMillis()}"
                                 )
                             }
                         }

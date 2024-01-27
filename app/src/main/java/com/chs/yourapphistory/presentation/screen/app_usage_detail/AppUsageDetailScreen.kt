@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.UsageLaunchCountChart
 import com.chs.yourapphistory.presentation.screen.common.UsageTimeZoneChart
@@ -47,7 +48,9 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
     }
 
     LaunchedEffect(state.targetDate) {
-        viewModel.getDayAppUsageList(state.targetDate)
+        if (state.targetDate != null) {
+            viewModel.getDayAppUsageList(state.targetDate!!)
+        }
     }
 
 
@@ -73,23 +76,27 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
             )
         }
 
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp)
-        ) {
-            Text(
+
+        if (state.targetDate != null) {
+            Row(
                 modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically),
-                text = if (state.targetDate == LocalDate.now()) {
-                    "오늘"
-                } else {
-                    state.targetDate.format(Constants.DATE_FORMAT)
-                },
-                textAlign = TextAlign.Center
-            )
+                    .fillMaxWidth()
+                    .padding(vertical = 16.dp)
+            ) {
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterVertically),
+                    text = if (state.targetDate == LocalDate.now()) {
+                        "오늘"
+                    } else {
+                        state.targetDate!!.format(Constants.DATE_FORMAT)
+                    },
+                    textAlign = TextAlign.Center
+                )
+            }
         }
+
 
         HorizontalPager(
             state = pagerState,

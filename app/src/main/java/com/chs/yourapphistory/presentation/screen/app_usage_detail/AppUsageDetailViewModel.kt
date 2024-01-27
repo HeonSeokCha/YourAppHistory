@@ -4,6 +4,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.getUntilDateList
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetAppForegroundUsageInfoUseCase
@@ -40,6 +41,7 @@ class AppUsageDetailViewModel @Inject constructor(
     private val targetDate: LocalDate = (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
 
     init {
+        chsLog("INIT")
         viewModelScope.launch {
             _state.update {
                 it.copy(
