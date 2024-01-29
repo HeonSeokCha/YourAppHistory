@@ -1,6 +1,9 @@
 package com.chs.yourapphistory.presentation.screen.main
 
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -17,9 +20,12 @@ import java.time.LocalDate
 @Composable
 fun MainNavHost(
     navController: NavHostController,
-    isGrantPermission: Boolean
+    paddingValues: PaddingValues,
+    isGrantPermission: Boolean,
+    selectPackage: (String?) -> Unit
 ) {
     NavHost(
+        modifier = Modifier.padding(paddingValues),
         navController = navController,
         startDestination = if (isGrantPermission) {
             Screen.ScreenUsedAppList.route
@@ -49,7 +55,9 @@ fun MainNavHost(
                 },
             )
         ) {
-            AppUsageDetailScreen()
+            AppUsageDetailScreen {
+                selectPackage(it)
+            }
         }
     }
 }

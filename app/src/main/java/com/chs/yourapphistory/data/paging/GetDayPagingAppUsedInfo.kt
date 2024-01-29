@@ -12,12 +12,13 @@ import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo.AppUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class GetDayPagingAppUsedInfo(
     private val appInfoDao: AppInfoDao,
     private val appUsageDao: AppUsageDao,
-    private val applicationInfoSource: ApplicationInfoSource
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -33,21 +34,23 @@ class GetDayPagingAppUsedInfo(
             limitDate
         } else pageDate.minusDays(Constants.PAGING_DAY)
 
-        val data = minDate.datesUntil(pageDate.plusDays(1L))
-            .toList()
-            .reversed()
-            .map { date ->
-                date to appInfoDao.getDayUsedAppInfoList(date.toMillis()).map {
-                    it.key.toAppInfo() to it.value.map {
-                        it.toAppUsageInfo()
-                    }
-                }.sortedWith(
-                    compareBy(
-                        { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
-                        { it.first.label }
+        val data = withContext(Dispatchers.IO) {
+            minDate.datesUntil(pageDate.plusDays(1L))
+                .toList()
+                .reversed()
+                .map { date ->
+                    date to appInfoDao.getDayUsedAppInfoList(date.toMillis()).map {
+                        it.key.toAppInfo() to it.value.map {
+                            it.toAppUsageInfo()
+                        }
+                    }.sortedWith(
+                        compareBy(
+                            { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
+                            { it.first.label }
+                        )
                     )
-                )
-            }
+                }
+        }
 
         return LoadResult.Page(
             data = data,

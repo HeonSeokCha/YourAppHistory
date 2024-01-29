@@ -14,6 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
@@ -34,7 +35,10 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
+fun AppUsageDetailScreen(
+    viewModel: AppUsageDetailViewModel = hiltViewModel(),
+    currentPackageLabel: (String?) -> Unit
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     val pagerState = if (state.datesList.isNotEmpty()) {
@@ -53,6 +57,11 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
         }
     }
 
+    LaunchedEffect(state.targetPackageLabel) {
+        if (state.targetPackageLabel != null) {
+            currentPackageLabel(state.targetPackageLabel!!)
+        }
+    }
 
     if (state.datesList.isNotEmpty()) {
         LaunchedEffect(pagerState) {
@@ -66,15 +75,6 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (!state.targetPackageLabel.isNullOrEmpty()) {
-            Text(
-                modifier = Modifier
-                    .padding(start = 8.dp),
-                text = state.targetPackageLabel!!,
-                fontSize = 22.sp,
-                fontWeight = FontWeight.Bold
-            )
-        }
 
 
         if (state.targetDate != null) {
@@ -92,7 +92,8 @@ fun AppUsageDetailScreen(viewModel: AppUsageDetailViewModel = hiltViewModel()) {
                     } else {
                         state.targetDate!!.format(Constants.DATE_FORMAT)
                     },
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
                 )
             }
         }

@@ -109,13 +109,14 @@ class ApplicationInfoSource @Inject constructor(
 
             val packageName: String = currentEvent.packageName
             val time: Long = currentEvent.timeStamp
+            val className: String? = currentEvent.className
             val eventType: Int = currentEvent.eventType
 
             if (usageFilterList.any { it == eventType }) {
                 resultArr.add(
                     AppUsageEventRawInfo(
                         packageName = packageName,
-                        className = currentEvent.className,
+                        className = className,
                         eventType = eventType,
                         eventTime = time
                     )
@@ -138,7 +139,7 @@ class ApplicationInfoSource @Inject constructor(
        usageEventList.filter {
            (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
                    || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
-               && installPackageNames.any { packageName -> packageName == it.packageName}
+               && installPackageNames.any { packageName -> packageName == it.packageName }
        }.forEach {
            if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
                if (!inCompletedUsageList.containsKey(it.packageName))

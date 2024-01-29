@@ -5,6 +5,8 @@ import android.content.Context
 import android.os.Process
 import android.util.Log
 import androidx.activity.ComponentActivity
+import androidx.lifecycle.Lifecycle
+import androidx.navigation.NavHostController
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -183,4 +185,8 @@ fun getUsagePermission(context: Context): Boolean {
 
 fun chsLog(value: String) {
     Log.e("CHS_LOG", value)
+}
+
+fun NavHostController.canGoBack(): Boolean {
+    return this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED
 }
