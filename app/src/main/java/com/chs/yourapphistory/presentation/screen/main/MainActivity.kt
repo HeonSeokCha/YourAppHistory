@@ -17,11 +17,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.chs.yourapphistory.R
-import com.chs.yourapphistory.common.canGoBack
 import com.chs.yourapphistory.common.getUsagePermission
 import dagger.hilt.android.AndroidEntryPoint
 

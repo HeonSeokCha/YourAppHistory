@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,29 +15,29 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
-import com.chs.yourapphistory.presentation.screen.common.UsageLaunchCountChart
-import com.chs.yourapphistory.presentation.screen.common.UsageTimeZoneChart
+import com.chs.yourapphistory.presentation.screen.common.UsageChart
 import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppUsageDetailScreen(
     viewModel: AppUsageDetailViewModel = hiltViewModel(),
+    navController: NavHostController,
     currentPackageLabel: (String?) -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
@@ -71,11 +72,15 @@ fun AppUsageDetailScreen(
         }
     }
 
+    BackHandler {
+        currentPackageLabel(null)
+        navController.navigateUp()
+    }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
 
         if (state.targetDate != null) {
             Row(
@@ -110,55 +115,37 @@ fun AppUsageDetailScreen(
                     .verticalScroll(rememberScrollState())
             ) {
                 if (state.dayUsageList.isNotEmpty()) {
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        text = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold
+                    UsageChart(
+                        title = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
+                        list = state.dayUsageList,
+                        convertText = { it.convertToRealUsageMinutes() }
                     )
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    UsageTimeZoneChart(state.dayUsageList)
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        text = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                    UsageChart(
+                        title = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
+                        list = state.launchCount,
+                        convertText = { "${it}회" }
                     )
 
-                    UsageLaunchCountChart(state.launchCount)
-
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        text = "포그라운드 실행 시간 " +
+                    UsageChart(
+                        title = "포그라운드 실행 시간 " +
                                 state.foregroundUsageList.sumOf { it.second }
                                     .convertToRealUsageTime(),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                        list = state.foregroundUsageList,
+                        convertText = { it.convertToRealUsageMinutes() }
                     )
-
-                    UsageTimeZoneChart(state.foregroundUsageList)
 
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(
-                        modifier = Modifier
-                            .padding(start = 8.dp),
-                        text = "총 알림 횟수 ${state.notifyCount.sumOf { it.second }}회",
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 16.sp
+                    UsageChart(
+                        title = "총 알림 횟수 ${state.launchCount.sumOf { it.second }}회",
+                        list = state.launchCount,
+                        convertText = { "${it}회" }
                     )
-
-                    UsageLaunchCountChart(state.notifyCount)
 
                     Spacer(modifier = Modifier.height(32.dp))
                 }

@@ -55,7 +55,7 @@ fun MainNavHost(
                 },
             )
         ) {
-            AppUsageDetailScreen {
+            AppUsageDetailScreen(navController = navController) {
                 selectPackage(it)
             }
         }
