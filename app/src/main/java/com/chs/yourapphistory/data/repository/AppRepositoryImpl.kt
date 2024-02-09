@@ -92,14 +92,7 @@ class AppRepositoryImpl @Inject constructor(
         withContext(Dispatchers.IO) {
             val (appInfo, appUsage) = async { appInfoDao.delete(*removePackageList.toTypedArray()) } to
                     async {
-                        appUsageDao.delete(
-                            *removePackageList.map {
-                                AppUsageEntity(
-                                    packageName = it.packageName,
-                                    beginUseTime = 0L
-                                )
-                            }.toTypedArray()
-                        )
+                        appUsageDao.deleteUsageInfo(removePackageList.map { it.packageName })
                     }
             awaitAll(appInfo, appUsage)
         }

@@ -124,14 +124,6 @@ fun AppUsageDetailScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     UsageChart(
-                        title = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
-                        list = state.launchCount,
-                        convertText = { "${it}회" }
-                    )
-
-                    Spacer(modifier = Modifier.height(32.dp))
-
-                    UsageChart(
                         title = "포그라운드 실행 시간 " +
                                 state.foregroundUsageList.sumOf { it.second }
                                     .convertToRealUsageTime(),
@@ -142,7 +134,15 @@ fun AppUsageDetailScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     UsageChart(
-                        title = "총 알림 횟수 ${state.launchCount.sumOf { it.second }}회",
+                        title = "알림 ${state.launchCount.sumOf { it.second }}개",
+                        list = state.launchCount,
+                        convertText = { "${it}개" }
+                    )
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    UsageChart(
+                        title = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
                         list = state.launchCount,
                         convertText = { "${it}회" }
                     )

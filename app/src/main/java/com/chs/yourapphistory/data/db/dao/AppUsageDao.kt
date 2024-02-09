@@ -21,8 +21,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     )
     abstract suspend fun getLastEventTime(): Long
 
-    @Query("DELETE FROM appUsage WHERE packageName = :packageName")
-    abstract suspend fun deleteUsageInfo(packageName: String)
+    @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
+    abstract suspend fun deleteUsageInfo(packageNames: List<String>)
 
     @Query(
         "SELECT * " +

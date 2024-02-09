@@ -26,7 +26,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.PointerIcon.Companion.Text
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -39,10 +38,9 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
-import com.chs.yourapphistory.common.convertToRealUsageMinutes
-import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -101,8 +99,8 @@ fun ItemVerticalChart(
             .fillMaxWidth()
             .height(250.dp)
             .padding(
-                start = 8.dp,
-                end = 8.dp
+                start = 4.dp,
+                end = 4.dp
             )
     ) {
         val scope = rememberCoroutineScope()

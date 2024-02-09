@@ -104,7 +104,7 @@ fun Long?.isZero(): Boolean {
 }
 
 fun Long.convertToRealUsageMinutes(): String {
-    return "${(this / 1000) / 60 % 60}분"
+    return "${(this / 1000) / 60}분"
 }
 
 fun Long.convertToRealUsageTime(): String {
@@ -185,8 +185,4 @@ fun getUsagePermission(context: Context): Boolean {
 
 fun chsLog(value: String) {
     Log.e("CHS_LOG", value)
-}
-
-fun NavHostController.canGoBack(): Boolean {
-    return this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED
 }
