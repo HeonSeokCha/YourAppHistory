@@ -35,6 +35,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
@@ -59,21 +60,8 @@ fun ItemVerticalChart(
     val labelSectionHeight = smallPadding.times(2) + textSize
     val barWidth = with(density) { 6.dp.toPx() }
     val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 16).div(24).dp.toPx()
+        (LocalConfiguration.current.screenWidthDp - 8).div(24).dp.toPx()
     }
-
-    val horizontalPadding = (distance - barWidth)
-    val barAreas = hourUsageList.mapIndexed { idx, pair ->
-        BarArea(
-            idx = idx,
-            value = pair.second,
-            xStart = horizontalPadding + distance.times(idx) - distance.div(2),
-            xEnd = horizontalPadding + distance.times(idx) + distance.div(2)
-        )
-    }
-
-    var selectedBar: BarArea? by remember { mutableStateOf(null) }
-    var selectedPos by remember { mutableFloatStateOf(0f) }
 
     val textMeasurer = rememberTextMeasurer()
 
@@ -81,6 +69,27 @@ fun ItemVerticalChart(
         fontSize = 10.sp,
         color = Color.Black
     )
+
+    val basePadding = textMeasurer
+        .measure(
+            text = 0.convert24HourString(true),
+            style = style1
+        ).size
+        .width
+        .div(2)
+        .toFloat()
+
+    val barAreas = hourUsageList.mapIndexed { idx, pair ->
+        BarArea(
+            idx = idx,
+            value = pair.second,
+            xStart = basePadding + distance.times(idx) - barWidth,
+            xEnd = basePadding + distance.times(idx) + barWidth
+        )
+    }
+
+    var selectedBar: BarArea? by remember { mutableStateOf(null) }
+    var selectedPos by remember { mutableFloatStateOf(0f) }
 
 
     LaunchedEffect(barAreas) {
@@ -94,93 +103,96 @@ fun ItemVerticalChart(
         } else findBar
     }
 
-    Row(
+    val scope = rememberCoroutineScope()
+
+    Canvas(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxSize()
             .height(250.dp)
-            .padding(
-                start = 4.dp,
-                end = 4.dp
+            .padding(horizontal = 4.dp)
+            .tapOrPress(
+                onStart = { position ->
+                },
+                onCancel = { position ->
+                },
+                onCompleted = {
+                    scope.launch {
+                        selectedPos = it
+                    }
+                }
+
             )
     ) {
-        val scope = rememberCoroutineScope()
-        Canvas(
-            modifier = Modifier
-                .fillMaxSize()
-                .tapOrPress(
-                    onStart = { position ->
-                    },
-                    onCancel = { position ->
-                    },
-                    onCompleted = {
-                        scope.launch {
-                            selectedPos = it
-                        }
+
+        repeat(3) {
+            drawLine(
+                color = Color.Gray,
+                start = Offset(basePadding.div(2), ((100.dp.toPx() * (it) + 10))),
+                end = Offset(size.width - basePadding.div(2), ((100.dp.toPx() * (it) + 10)))
+            )
+        }
+        val scale = calculateScale(
+            (size.height - smallPadding).roundToInt(),
+            hourUsageList.map { it.second }
+        )
+        val chartAreaBottom = size.height - labelSectionHeight
+
+        barAreas.forEachIndexed { idx, info ->
+            val barHeight = info.value.times(scale).toFloat()
+            drawRoundRect(
+                color = Color.LightGray,
+                topLeft = Offset(
+                    x = basePadding + distance.times(idx) - barWidth,
+                    y = size.height - barHeight - smallPadding - labelSectionHeight
+                ),
+                size = Size(barWidth, barHeight),
+                cornerRadius = CornerRadius(4.dp.toPx())
+            )
+
+            if (info.idx % 6 == 0 || info.idx == 23) {
+                val time = if (info.idx == 23) 24 else info.idx
+                val textResult = textMeasurer.measure(
+                    text = time.convert24HourString(true),
+                    style = style1
+                )
+                val textRectPadding = when (time) {
+                    0 -> 0f
+                    24 -> {
+                        size.width - textResult.size.width
                     }
 
-                )
-        ) {
-            repeat(3) {
-                drawLine(
-                    color = Color.Gray,
-                    start = Offset(0f, ((100.dp.toPx() * (it) + 10))),
-                    end = Offset(size.width, ((100.dp.toPx() * (it) + 10)))
-                )
-            }
-            val scale = calculateScale(
-                (size.height - smallPadding).roundToInt(),
-                hourUsageList.map { it.second }
-            )
-            val chartAreaBottom = size.height - labelSectionHeight
-
-            barAreas.forEachIndexed { idx, info ->
-                val barHeight = info.value.times(scale).toFloat()
-                drawRoundRect(
-                    color = Color.LightGray,
-                    topLeft = Offset(
-                        x = horizontalPadding + distance.times(idx) - barWidth.div(2),
-                        y = size.height - barHeight - smallPadding - labelSectionHeight
-                    ),
-                    size = Size(barWidth, barHeight),
-                    cornerRadius = CornerRadius(4.dp.toPx())
-                )
-
-                if (info.idx % 6 == 0 || info.idx == 23) {
-                    val textResult = textMeasurer.measure(info.idx.convert24HourString(true))
-                    val textRectPadding = info.xStart - (textResult.size.width.div(32) * info.idx)
-                    drawText(
-                        textMeasurer = textMeasurer,
-                        text = if (info.idx == 23) {
-                            (info.idx + 1).convert24HourString(true)
-                        } else {
-                            info.idx.convert24HourString(true)
-                        },
-                        topLeft = Offset(
-                            x = textRectPadding,
-                            y = chartAreaBottom
-                        ),
-                        style = style1
-                    )
+                    else -> {
+                        size.width.div(4).times(time / 6) - textResult.size.width.div(2)
+                    }
                 }
-            }
 
-            if (selectedBar != null) {
-                val barHeight = (size.height - selectedBar!!.value.times(scale)
-                    .toFloat() - smallPadding - labelSectionHeight)
-
-                drawLine(
-                    color = Color.Black,
-                    start = Offset(selectedBar!!.xStart + distance.div(2), 50f),
-                    end = Offset(selectedBar!!.xStart + distance.div(2), barHeight),
-                    strokeWidth = 4f
+                drawText(
+                    textMeasurer = textMeasurer,
+                    text = time.convert24HourString(true),
+                    topLeft = Offset(
+                        x = textRectPadding,
+                        y = chartAreaBottom
+                    ),
+                    style = style1
                 )
-
-                clickText(
-                    textMeasurer,
-                    selectedBar!!,
-                )
-
             }
+        }
+
+        if (selectedBar != null) {
+            val barHeight = (size.height - selectedBar!!.value.times(scale)
+                .toFloat() - smallPadding - labelSectionHeight)
+
+            drawLine(
+                color = Color.Black,
+                start = Offset(selectedBar!!.xStart + barWidth.div(2), 50f),
+                end = Offset(selectedBar!!.xStart + barWidth.div(2), barHeight),
+                strokeWidth = 4f
+            )
+
+            clickText(
+                textMeasurer,
+                selectedBar!!,
+            )
         }
     }
 }
@@ -210,7 +222,13 @@ fun UsageChart(
 
         ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
             val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
-            val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectTimZoneValue)
+            val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
+                selectTimZoneValue,
+                TextStyle(
+                    fontSize = 12.sp,
+                    color = Color.Black
+                ),
+            )
             val selectValue = convertText(selectedBar.value)
             val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
                 selectValue,
@@ -220,7 +238,8 @@ fun UsageChart(
                     color = Color.Black
                 ),
             )
-            val totalWidth: Float = (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
+            val totalWidth: Float =
+                (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
 
             val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
 

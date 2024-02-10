@@ -42,7 +42,7 @@ fun Int.convert24HourString(isShowAMPM: Boolean): String {
 fun Int.convertBetweenHourString(): String {
     return this.convert24HourString(true) +
             " ~ " +
-            (this + 1).convert24HourString(false)
+            (this + 1).convert24HourString(false) + " "
 }
 
 suspend fun calculateTimeZoneUsage(

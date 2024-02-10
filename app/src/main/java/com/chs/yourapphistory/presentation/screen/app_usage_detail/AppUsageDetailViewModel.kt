@@ -41,7 +41,6 @@ class AppUsageDetailViewModel @Inject constructor(
     private val targetDate: LocalDate = (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
 
     init {
-        chsLog("INIT")
         viewModelScope.launch {
             _state.update {
                 it.copy(
