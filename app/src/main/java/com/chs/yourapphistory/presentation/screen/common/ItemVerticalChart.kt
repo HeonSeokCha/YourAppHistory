@@ -39,7 +39,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
 import com.chs.yourapphistory.common.isZero
@@ -60,7 +59,7 @@ fun ItemVerticalChart(
     val labelSectionHeight = smallPadding.times(2) + textSize
     val barWidth = with(density) { 6.dp.toPx() }
     val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 8).div(24).dp.toPx()
+        (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
     }
 
     val textMeasurer = rememberTextMeasurer()
@@ -83,8 +82,8 @@ fun ItemVerticalChart(
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = basePadding + distance.times(idx) - barWidth,
-            xEnd = basePadding + distance.times(idx) + barWidth
+            xStart = basePadding + smallPadding + (distance).times(idx) - barWidth,
+            xEnd = basePadding + smallPadding + distance.times(idx) + barWidth
         )
     }
 
@@ -142,7 +141,7 @@ fun ItemVerticalChart(
             drawRoundRect(
                 color = Color.LightGray,
                 topLeft = Offset(
-                    x = basePadding + distance.times(idx) - barWidth,
+                    x = basePadding + smallPadding + (distance).times(idx) - barWidth,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -151,16 +150,17 @@ fun ItemVerticalChart(
 
             if (info.idx % 6 == 0 || info.idx == 23) {
                 val time = if (info.idx == 23) 24 else info.idx
+
                 val textResult = textMeasurer.measure(
                     text = time.convert24HourString(true),
                     style = style1
                 )
+
                 val textRectPadding = when (time) {
                     0 -> 0f
                     24 -> {
                         size.width - textResult.size.width
                     }
-
                     else -> {
                         size.width.div(4).times(time / 6) - textResult.size.width.div(2)
                     }
@@ -229,6 +229,8 @@ fun UsageChart(
                     color = Color.Black
                 ),
             )
+
+
             val selectValue = convertText(selectedBar.value)
             val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
                 selectValue,
