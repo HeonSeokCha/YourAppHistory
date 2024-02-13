@@ -3,9 +3,8 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
-import com.chs.yourapphistory.domain.usecase.GetDayUseAppListUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayUsedAppListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,7 +20,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsedAppListViewModel @Inject constructor(
-    private val getDayUseAppListUseCase: GetDayUseAppListUseCase,
+    private val getDayUsedAppListUseCase: GetDayUsedAppListUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase
@@ -36,7 +35,7 @@ class UsedAppListViewModel @Inject constructor(
 
             _state.update {
                 it.copy(
-                    appInfoList = getDayUseAppListUseCase().cachedIn(viewModelScope),
+                    appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
                     appIconList = getAppIconMapUseCase()
                 )
             }

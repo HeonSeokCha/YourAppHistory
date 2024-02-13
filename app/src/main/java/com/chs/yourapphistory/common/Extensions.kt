@@ -153,6 +153,10 @@ fun Long.toLocalDate(): LocalDate {
     return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
 }
 
+fun Long.getDayOfMonth(): Int {
+    return this.toLocalDate().dayOfMonth
+}
+
 fun LocalDate.atStartOfDayToMillis(): Long {
     return this.atStartOfDay().toMillis()
 }

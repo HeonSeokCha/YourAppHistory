@@ -21,7 +21,7 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     abstract suspend fun deleteAppInfo(packageName: String)
 
     @Query(
-        "SELECT * " +
+        "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
@@ -29,5 +29,5 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     )
     abstract suspend fun getDayUsedAppInfoList(
         targetDate: Long
-    ): Map<AppInfoEntity, List<AppUsageEntity>>
+    ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 }

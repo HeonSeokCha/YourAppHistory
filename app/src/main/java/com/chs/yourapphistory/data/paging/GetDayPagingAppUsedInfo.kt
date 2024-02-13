@@ -19,15 +19,15 @@ import java.time.LocalDate
 class GetDayPagingAppUsedInfo(
     private val appInfoDao: AppInfoDao,
     private val appUsageDao: AppUsageDao,
-) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>>): LocalDate? {
+) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>() {
+    override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
             page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<AppUsageInfo>>>>> {
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
         val limitDate = appUsageDao.getFirstCollectTime().toLocalDate()
         val minDate = if (pageDate.minusDays(Constants.PAGING_DAY) < limitDate) {
@@ -40,12 +40,10 @@ class GetDayPagingAppUsedInfo(
                 .reversed()
                 .map { date ->
                     date to appInfoDao.getDayUsedAppInfoList(date.toMillis()).map {
-                        it.key.toAppInfo() to it.value.map {
-                            it.toAppUsageInfo()
-                        }
+                        it.key.toAppInfo() to it.value.map { it.key to it.value }
                     }.sortedWith(
                         compareBy(
-                            { -it.second.sumOf { (it.endUseTime.toMillis() - it.beginUseTime.toMillis()) } },
+                            { -it.second.sumOf { it.second - it.first } },
                             { it.first.label }
                         )
                     )

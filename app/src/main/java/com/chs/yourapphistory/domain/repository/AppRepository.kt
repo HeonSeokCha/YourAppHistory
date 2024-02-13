@@ -14,7 +14,7 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<AppBaseUsageInfo.AppUsageInfo>>>>>>
+    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<Pair<Long, Long>>>>>>>
 
     suspend fun getAppUsageInfoList(
         date: LocalDate,
