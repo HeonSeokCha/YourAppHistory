@@ -134,8 +134,8 @@ fun AppUsageDetailScreen(
                     Spacer(modifier = Modifier.height(32.dp))
 
                     UsageChart(
-                        title = "알림 ${state.launchCount.sumOf { it.second }}개",
-                        list = state.launchCount,
+                        title = "알림 ${state.notifyCount.sumOf { it.second }}개",
+                        list = state.notifyCount,
                         convertText = { "${it}개" }
                     )
 

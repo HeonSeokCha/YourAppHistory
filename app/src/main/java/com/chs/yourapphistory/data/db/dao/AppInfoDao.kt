@@ -27,7 +27,32 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND appInfo.packageName = appUsage.packageName "
     )
-    abstract suspend fun getDayUsedAppInfoList(
+    abstract suspend fun getDayUsedList(
         targetDate: Long
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+
+
+    @Query(
+        "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
+          "FROM appInfo " +
+          "LEFT JOIN appForegroundUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
+           "AND appInfo.packageName = appForegroundUsage.packageName "
+    )
+    abstract suspend fun getDayForegroundUsedList(
+        targetDate: Long
+    ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+
+
+    @Query(
+        "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as notifyCount " +
+          "FROM appInfo " +
+          "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND appInfo.packageName = appNotifyInfo.packageName " +
+         "GROUP BY appNotifyInfo.packageName "
+    )
+    abstract suspend fun getDayNotifyList(
+        targetDate: Long
+    ): Map<AppInfoEntity, @MapColumn("notifyCount") Int>
+
 }

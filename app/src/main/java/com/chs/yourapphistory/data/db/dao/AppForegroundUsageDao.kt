@@ -8,6 +8,12 @@ import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
 
     @Query(
+        "SELECT IFNULL(MIN(beginUseTime), 0) " +
+          "FROM appForegroundUsage"
+    )
+    abstract suspend fun getFirstCollectTime(): Long
+
+    @Query(
         "SELECT IFNULL(MAX(endUseTime), 0) " +
           "FROM appForegroundUsage "
     )

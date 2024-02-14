@@ -15,11 +15,11 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
 
-class GetDayUsedAppListUseCase @Inject constructor(
+class GetDayForegroundUsedAppListUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
     operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, String>>>>> {
-        return repository.getDayUsedAppInfoList().map { pagingData ->
+        return repository.getDayForegroundUsedAppList().map { pagingData ->
             pagingData.map {
                 it.first to withContext(Dispatchers.Default) {
                     val date = it.first

@@ -1,7 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -13,11 +12,11 @@ import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
-import com.chs.yourapphistory.data.db.dao.BaseDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
-import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.UsageEventType
-import com.chs.yourapphistory.data.paging.GetDayPagingAppUsedInfo
+import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
+import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
+import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
 import com.chs.yourapphistory.data.toAppForegroundUsageInfo
 import com.chs.yourapphistory.data.toAppNotifyInfo
 import com.chs.yourapphistory.data.toAppUsageInfo
@@ -25,16 +24,13 @@ import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppNotifyInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.system.measureTimeMillis
 
 class AppRepositoryImpl @Inject constructor(
     private val applicationInfoSource: ApplicationInfoSource,
@@ -147,9 +143,31 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingAppUsedInfo(
+            GetDayPagingUsedList(
                 appInfoDao = appInfoDao,
                 appUsageDao = appUsageDao,
+            )
+        }.flow
+    }
+
+    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>> {
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetDayPagingForegroundUsedList(
+                appInfoDao = appInfoDao,
+                appForegroundUsageDao = appForegroundUsageDao
+            )
+        }.flow
+    }
+
+    override fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetDayPagingNotifyList(
+                appInfoDao = appInfoDao,
+                appNotifyInfoDao = appNotifyInfoDao
             )
         }.flow
     }
