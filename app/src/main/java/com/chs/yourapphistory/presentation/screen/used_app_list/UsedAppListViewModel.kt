@@ -3,7 +3,10 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayForegroundUsedAppListUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayNotifyAppListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUsedAppListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
@@ -21,6 +24,8 @@ import javax.inject.Inject
 @HiltViewModel
 class UsedAppListViewModel @Inject constructor(
     private val getDayUsedAppListUseCase: GetDayUsedAppListUseCase,
+    private val getDayForegroundUsedAppListUseCase: GetDayForegroundUsedAppListUseCase,
+    private val getDayNotifyAppListUseCase: GetDayNotifyAppListUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase
@@ -37,6 +42,28 @@ class UsedAppListViewModel @Inject constructor(
                 it.copy(
                     appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
                     appIconList = getAppIconMapUseCase()
+                )
+            }
+        }
+    }
+
+    fun changeSortOption(option: UsageEventType) {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    appInfoList = when (option) {
+                        UsageEventType.AppUsageEvent -> {
+                            getDayUsedAppListUseCase()
+                        }
+
+                        UsageEventType.AppForegroundUsageEvent -> {
+                            getDayForegroundUsedAppListUseCase()
+                        }
+
+                        UsageEventType.AppNotifyEvent -> {
+                            getDayNotifyAppListUseCase()
+                        }
+                    }
                 )
             }
         }
