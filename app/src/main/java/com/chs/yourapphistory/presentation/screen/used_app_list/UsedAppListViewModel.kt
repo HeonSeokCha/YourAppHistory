@@ -51,6 +51,7 @@ class UsedAppListViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
+                    sortOption = option,
                     appInfoList = when (option) {
                         UsageEventType.AppUsageEvent -> {
                             getDayUsedAppListUseCase()
