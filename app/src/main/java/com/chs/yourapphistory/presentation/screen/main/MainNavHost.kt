@@ -27,7 +27,7 @@ fun MainNavHost(
     NavHost(
         modifier = Modifier.padding(paddingValues),
         navController = navController,
-        startDestination = if (isGrantPermission) {
+        startDestination = if (!isGrantPermission) {
             Screen.ScreenUsedAppList.route
         } else {
             Screen.ScreenWelcome.route

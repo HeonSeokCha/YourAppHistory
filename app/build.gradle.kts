@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.kotlin)
+    implementation(libs.lottie)
     ksp(libs.hilt.compiler)
     ksp(libs.androidX.room.compiler)
 }
