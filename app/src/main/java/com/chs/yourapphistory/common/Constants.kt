@@ -5,14 +5,14 @@ import com.chs.yourapphistory.data.model.UsageEventType
 import java.time.format.DateTimeFormatter
 
 object Constants {
-    const val FIRST_COLLECT_DAY: Long = 5L
+    const val FIRST_COLLECT_DAY: Long = 10L
     const val PAGING_DAY: Long = 3L
-    val SIMPLE_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
-    val SIMPLE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
     val SIMPLE_HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h")
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")
     val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
-    val SQL_DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
+//    val SIMPLE_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS")
+//    val SIMPLE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss")
+//    val SQL_DATE_TIME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
 
     const val KEY_TARGET_DATE: String = "key_target_date"
     const val KEY_TARGET_PACKAGE_NAME: String = "key_target_package_name"
@@ -30,7 +30,7 @@ object Constants {
         UsageEvents.Event.FOREGROUND_SERVICE_STOP
     )
 
-    val USAGE_EVENT_TYPE_LIST = listOf<UsageEventType>(
+    val USAGE_EVENT_TYPE_LIST = listOf(
         UsageEventType.AppUsageEvent,
         UsageEventType.AppForegroundUsageEvent,
         UsageEventType.AppNotifyEvent

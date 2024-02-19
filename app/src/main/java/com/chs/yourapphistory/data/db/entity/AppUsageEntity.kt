@@ -6,7 +6,12 @@ import androidx.room.Index
 @Entity(
     tableName = "appUsage",
     primaryKeys = ["packageName", "beginUseTime"],
-    indices = [Index(value = ["beginUseTime", "endUseTime"])]
+    indices = [
+        Index(
+            value = ["beginUseTime", "endUseTime"],
+            orders = [Index.Order.DESC, Index.Order.DESC]
+        )
+    ]
 )
 data class AppUsageEntity(
     val packageName: String,

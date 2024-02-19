@@ -14,13 +14,6 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
     abstract suspend fun getAllPackage(): List<AppInfoEntity>
 
     @Query(
-        "DELETE " +
-          "FROM appInfo " +
-         "WHERE packageName = :packageName"
-    )
-    abstract suspend fun deleteAppInfo(packageName: String)
-
-    @Query(
         "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
