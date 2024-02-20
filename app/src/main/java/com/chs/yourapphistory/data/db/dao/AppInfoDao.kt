@@ -4,6 +4,7 @@ import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import kotlinx.coroutines.flow.Flow
 
@@ -38,14 +39,13 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
 
     @Query(
-        "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as notifyCount " +
+        "SELECT * " +
           "FROM appInfo " +
           "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND appInfo.packageName = appNotifyInfo.packageName " +
-         "GROUP BY appNotifyInfo.packageName "
+           "AND appInfo.packageName = appNotifyInfo.packageName "
     )
     abstract suspend fun getDayNotifyList(
         targetDate: Long
-    ): Map<AppInfoEntity, @MapColumn("notifyCount") Int>
+    ): Map<AppInfoEntity, List<AppNotifyInfoEntity>>
 
 }

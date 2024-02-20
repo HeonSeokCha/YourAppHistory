@@ -37,7 +37,7 @@ class GetDayPagingNotifyList(
                 .reversed()
                 .map { date ->
                     date to appInfoDao.getDayNotifyList(date.toMillis()).map {
-                        it.key.toAppInfo() to it.value
+                        it.key.toAppInfo() to it.value.size
                     }.sortedWith(
                         compareBy(
                             { -it.second },
