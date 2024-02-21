@@ -10,10 +10,12 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -22,10 +24,13 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -39,6 +44,15 @@ fun UsedAppListScreenScreen(
     val pagerState = rememberPagerState(pageCount = {
         pagingData?.itemCount ?: 0
     })
+
+    LaunchedEffect(state.sortOption.name ) {
+        snapshotFlow { state.sortOption.name }
+            .distinctUntilChanged()
+            .collect {
+                chsLog(state.sortOption.toString())
+                pagerState.scrollToPage(0)
+            }
+    }
 
     Column(
         modifier = Modifier
@@ -62,7 +76,7 @@ fun UsedAppListScreenScreen(
                         .weight(1f)
                         .align(Alignment.CenterVertically)
                         .clickable {
-                           filterDialogShow = true
+                            filterDialogShow = true
                         },
                     text = state.sortOption.name,
                     textAlign = TextAlign.Center,

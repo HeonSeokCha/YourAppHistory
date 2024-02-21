@@ -5,13 +5,12 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableFloatStateOf
@@ -35,7 +34,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
-import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
@@ -61,6 +59,7 @@ fun ItemVerticalChart(
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
     }
+    val barColor = MaterialTheme.colorScheme.primary
 
     val textMeasurer = rememberTextMeasurer()
 
@@ -139,7 +138,7 @@ fun ItemVerticalChart(
         barAreas.forEachIndexed { idx, info ->
             val barHeight = info.value.times(scale).toFloat()
             drawRoundRect(
-                color = Color.LightGray,
+                color = barColor,
                 topLeft = Offset(
                     x = basePadding + smallPadding + (distance).times(idx) - barWidth,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
@@ -203,6 +202,7 @@ fun UsageChart(
     list: List<Pair<Int, Long>>,
     convertText: (Long) -> String
 ) {
+    val barColor = MaterialTheme.colorScheme.onTertiary
     Card(
         modifier = Modifier
             .padding(horizontal = 8.dp)
@@ -246,7 +246,7 @@ fun UsageChart(
             val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
 
             drawRoundRect(
-                color = Color.LightGray,
+                color = barColor,
                 topLeft = Offset(
                     textRectPadding,
                     0f
