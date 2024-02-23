@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
@@ -31,6 +32,7 @@ import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -41,17 +43,14 @@ fun UsedAppListScreenScreen(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
     var filterDialogShow by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(pageCount = {
-        pagingData?.itemCount ?: 0
-    })
+    val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: 0 })
 
-    LaunchedEffect(state.sortOption.name ) {
-        snapshotFlow { state.sortOption.name }
-            .distinctUntilChanged()
-            .collect {
-                chsLog(state.sortOption.toString())
-                pagerState.scrollToPage(0)
-            }
+    LaunchedEffect(state.sortOption?.name) {
+        chsLog(state.sortOption.toString())
+        if (state.appInfoList != null) {
+            pagerState.scrollToPage(0)
+        }
+        viewModel.getUsedAppList()
     }
 
     Column(
@@ -64,7 +63,12 @@ fun UsedAppListScreenScreen(
                     modifier = Modifier
                         .weight(1f)
                         .align(Alignment.CenterVertically),
-                    text = pagingData[pagerState.currentPage]?.first.toString(),
+                    text = pagingData[pagerState.currentPage]?.first.run {
+                        if (this == LocalDate.now()) {
+                            "오늘"
+                        } else this.toString()
+
+                    },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
@@ -78,7 +82,7 @@ fun UsedAppListScreenScreen(
                         .clickable {
                             filterDialogShow = true
                         },
-                    text = state.sortOption.name,
+                    text = state.sortOption?.name ?: "",
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )

@@ -40,33 +40,50 @@ class UsedAppListViewModel @Inject constructor(
 
             _state.update {
                 it.copy(
-                    appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
-                    appIconList = getAppIconMapUseCase()
+                    appIconList = getAppIconMapUseCase(),
+                    sortOption = UsageEventType.AppUsageEvent
                 )
             }
+
         }
     }
 
-    fun changeSortOption(option: UsageEventType) {
-        viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    sortOption = option,
-                    appInfoList = when (option) {
-                        UsageEventType.AppUsageEvent -> {
-                            getDayUsedAppListUseCase()
-                        }
-
-                        UsageEventType.AppForegroundUsageEvent -> {
-                            getDayForegroundUsedAppListUseCase()
-                        }
-
-                        UsageEventType.AppNotifyEvent -> {
-                            getDayNotifyAppListUseCase()
-                        }
-                    }
-                )
+    fun getUsedAppList() {
+        when (state.value.sortOption) {
+            UsageEventType.AppUsageEvent -> {
+                _state.update {
+                    it.copy(
+                        appInfoList = getDayUsedAppListUseCase()
+                    )
+                }
             }
+
+            UsageEventType.AppForegroundUsageEvent -> {
+                _state.update {
+                    it.copy(
+                        appInfoList =
+                        getDayForegroundUsedAppListUseCase()
+                    )
+                }
+            }
+
+            UsageEventType.AppNotifyEvent -> {
+                _state.update {
+                    it.copy(
+                        appInfoList =
+                        getDayNotifyAppListUseCase()
+                    )
+                }
+            }
+
+            else -> Unit
+        }
+    }
+
+
+    fun changeSortOption(option: UsageEventType) {
+        _state.update {
+            it.copy(sortOption = option)
         }
     }
 
