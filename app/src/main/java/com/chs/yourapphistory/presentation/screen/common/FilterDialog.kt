@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -24,13 +25,13 @@ fun FilterDialog(
     onClick: (UsageEventType) -> Unit,
     onDismiss: () -> Unit
 ) {
-    AlertDialog(
+    BasicAlertDialog(
+        onDismissRequest = onDismiss,
         modifier = Modifier
             .wrapContentSize()
             .padding(vertical = 16.dp)
             .background(color = Color.White)
-            .padding(16.dp),
-        onDismissRequest = onDismiss,
+            .padding(16.dp)
     ) {
         LazyColumn(
             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -40,7 +41,6 @@ fun FilterDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .clickable {
-                            onDismiss()
                             onClick(list[idx])
                         },
                     text = list[idx].name,

@@ -47,10 +47,17 @@ fun UsedAppListScreenScreen(
 
     LaunchedEffect(state.sortOption?.name) {
         chsLog(state.sortOption.toString())
-        if (state.appInfoList != null) {
-            pagerState.scrollToPage(0)
+        chsLog(filterDialogShow.toString())
+
+        if (state.appInfoList == null) {
+            viewModel.getUsedAppList()
+        } else {
+            if (filterDialogShow) {
+                pagerState.scrollToPage(0)
+                viewModel.getUsedAppList()
+                filterDialogShow = false
+            }
         }
-        viewModel.getUsedAppList()
     }
 
     Column(
