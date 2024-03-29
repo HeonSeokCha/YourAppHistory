@@ -12,5 +12,5 @@ data class UsedAppListState(
     val appInfoList: Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, String>>>>>? = null,
     val appIconList: HashMap<String, Bitmap?> = hashMapOf(),
     val sortList: List<UsageEventType> = Constants.USAGE_EVENT_TYPE_LIST,
-    val sortOption: UsageEventType? = null
+    val sortOption: UsageEventType = UsageEventType.AppUsageEvent
 )

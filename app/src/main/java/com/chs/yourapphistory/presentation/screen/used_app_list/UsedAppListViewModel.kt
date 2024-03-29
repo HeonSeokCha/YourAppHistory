@@ -36,24 +36,27 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            insertInfo()
+            withContext(Dispatchers.IO) {
+                insertInfo()
+            }
 
             _state.update {
                 it.copy(
-                    appIconList = getAppIconMapUseCase(),
-                    sortOption = UsageEventType.AppUsageEvent
+                    appInfoList = getDayUsedAppListUseCase(),
+                    appIconList = getAppIconMapUseCase()
                 )
             }
-
         }
     }
 
-    fun getUsedAppList() {
-        when (state.value.sortOption) {
+
+    fun changeSortOption(option: UsageEventType) {
+        when (option) {
             UsageEventType.AppUsageEvent -> {
                 _state.update {
                     it.copy(
-                        appInfoList = getDayUsedAppListUseCase()
+                        appInfoList = getDayUsedAppListUseCase(),
+                        sortOption = option
                     )
                 }
             }
@@ -61,8 +64,8 @@ class UsedAppListViewModel @Inject constructor(
             UsageEventType.AppForegroundUsageEvent -> {
                 _state.update {
                     it.copy(
-                        appInfoList =
-                        getDayForegroundUsedAppListUseCase()
+                        appInfoList = getDayForegroundUsedAppListUseCase(),
+                        sortOption = option
                     )
                 }
             }
@@ -70,20 +73,11 @@ class UsedAppListViewModel @Inject constructor(
             UsageEventType.AppNotifyEvent -> {
                 _state.update {
                     it.copy(
-                        appInfoList =
-                        getDayNotifyAppListUseCase()
+                        appInfoList = getDayNotifyAppListUseCase(),
+                        sortOption = option
                     )
                 }
             }
-
-            else -> Unit
-        }
-    }
-
-
-    fun changeSortOption(option: UsageEventType) {
-        _state.update {
-            it.copy(sortOption = option)
         }
     }
 

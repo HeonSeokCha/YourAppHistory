@@ -15,6 +15,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -32,6 +33,7 @@ import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -44,21 +46,7 @@ fun UsedAppListScreenScreen(
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
     var filterDialogShow by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: 0 })
-
-    LaunchedEffect(state.sortOption?.name) {
-        chsLog(state.sortOption.toString())
-        chsLog(filterDialogShow.toString())
-
-        if (state.appInfoList == null) {
-            viewModel.getUsedAppList()
-        } else {
-            if (filterDialogShow) {
-                pagerState.scrollToPage(0)
-                viewModel.getUsedAppList()
-                filterDialogShow = false
-            }
-        }
-    }
+    val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
@@ -74,7 +62,6 @@ fun UsedAppListScreenScreen(
                         if (this == LocalDate.now()) {
                             "오늘"
                         } else this.toString()
-
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
@@ -137,6 +124,9 @@ fun UsedAppListScreenScreen(
             onDismiss = {
                 filterDialogShow = false
             }, onClick = { selectSortType ->
+                coroutineScope.launch {
+                    pagerState.scrollToPage(0)
+                }
                 viewModel.changeSortOption(selectSortType)
             }
         )

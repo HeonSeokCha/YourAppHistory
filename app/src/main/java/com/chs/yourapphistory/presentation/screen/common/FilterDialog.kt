@@ -42,6 +42,7 @@ fun FilterDialog(
                         .fillMaxWidth()
                         .clickable {
                             onClick(list[idx])
+                            onDismiss()
                         },
                     text = list[idx].name,
                     fontSize = 16.sp
