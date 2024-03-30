@@ -3,6 +3,7 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -31,21 +32,21 @@ class GetDayPagingUsedList(
             limitDate
         } else pageDate.minusDays(Constants.PAGING_DAY)
 
-        val data = withContext(Dispatchers.IO) {
-            minDate.datesUntil(pageDate.plusDays(1L))
-                .toList()
-                .reversed()
-                .map { date ->
-                    date to appInfoDao.getDayUsedList(date.toMillis()).map {
-                        it.key.toAppInfo() to it.value.map { it.key to it.value }
-                    }.sortedWith(
-                        compareBy(
-                            { -it.second.sumOf { it.second - it.first } },
-                            { it.first.label }
-                        )
+        chsLog("load :$pageDate")
+
+        val data = minDate.datesUntil(pageDate.plusDays(1L))
+            .toList()
+            .reversed()
+            .map { date ->
+                date to appInfoDao.getDayUsedList(date.toMillis()).map {
+                    it.key.toAppInfo() to it.value.map { it.key to it.value }
+                }.sortedWith(
+                    compareBy(
+                        { -it.second.sumOf { it.second - it.first } },
+                        { it.first.label }
                     )
-                }
-        }
+                )
+            }
 
         return LoadResult.Page(
             data = data,

@@ -34,7 +34,7 @@ fun MainNavHost(
         }
     ) {
         composable(Screen.ScreenWelcome.route) {
-            WelcomeScreen(navController = navController)
+            WelcomeScreen(navController)
 
         }
 

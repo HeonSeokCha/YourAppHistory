@@ -76,7 +76,7 @@ fun UsedAppListScreenScreen(
                         .clickable {
                             filterDialogShow = true
                         },
-                    text = state.sortOption?.name ?: "",
+                    text = state.sortOption.name,
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
@@ -86,7 +86,7 @@ fun UsedAppListScreenScreen(
                 state = pagerState,
                 reverseLayout = true,
                 userScrollEnabled = true,
-                key = { pagingData[it]!!.first }
+                key = { pagingData.peek(it)!!.first }
             ) { page ->
                 val packageList = pagingData[page]!!.second
                 LazyColumn(
