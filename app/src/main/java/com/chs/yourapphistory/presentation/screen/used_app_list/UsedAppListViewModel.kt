@@ -42,7 +42,7 @@ class UsedAppListViewModel @Inject constructor(
 
             _state.update {
                 it.copy(
-                    appInfoList = getDayUsedAppListUseCase(),
+                    appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
                     appIconList = getAppIconMapUseCase()
                 )
             }

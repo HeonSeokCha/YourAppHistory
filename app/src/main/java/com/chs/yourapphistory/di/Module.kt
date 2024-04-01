@@ -30,26 +30,21 @@ object Module {
         return YourAppHistoryDatabase.getInstance(context)
     }
 
-    @Singleton
     @Provides
     fun provideAppUsageDao(db: YourAppHistoryDatabase): AppUsageDao {
         return db.appUsageDao
     }
 
-    @Singleton
     @Provides
     fun provideAppInfoDao(db: YourAppHistoryDatabase): AppInfoDao {
         return db.appInfoDao
     }
 
-    @Singleton
     @Provides
     fun provideAppForegroundUsageDao(db: YourAppHistoryDatabase): AppForegroundUsageDao {
         return db.appForegroundUsageDao
     }
 
-
-    @Singleton
     @Provides
     fun provideAppNotifyInfoDao(db: YourAppHistoryDatabase): AppNotifyInfoDao {
         return db.appNotifyInfoDao
