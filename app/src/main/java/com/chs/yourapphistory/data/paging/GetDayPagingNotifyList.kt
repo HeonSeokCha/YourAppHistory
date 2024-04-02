@@ -15,7 +15,6 @@ import java.time.LocalDate
 
 class GetDayPagingNotifyList(
     private val appInfoDao: AppInfoDao,
-    private val appNotifyInfoDao: AppNotifyInfoDao
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -26,32 +25,26 @@ class GetDayPagingNotifyList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
-        val limitDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
-        val minDate = if (pageDate.minusDays(Constants.PAGING_DAY) < limitDate) {
-            limitDate
-        } else pageDate.minusDays(Constants.PAGING_DAY)
 
-        val data = withContext(Dispatchers.IO) {
-            minDate.datesUntil(pageDate.plusDays(1L))
-                .toList()
-                .reversed()
-                .map { date ->
-                    date to appInfoDao.getDayNotifyList(date.toMillis()).map {
-                        it.key.toAppInfo() to it.value.size
-                    }.sortedWith(
-                        compareBy(
-                            { -it.second },
-                            { it.first.label }
-                        )
+        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
+            .datesUntil(pageDate.plusDays(1L))
+            .toList()
+            .reversed()
+            .map { date ->
+                date to appInfoDao.getDayNotifyList(date.toMillis()).map {
+                    it.key.toAppInfo() to it.value.size
+                }.sortedWith(
+                    compareBy(
+                        { -it.second },
+                        { it.first.label }
                     )
-                }
-        }
+                )
+            }
 
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (minDate == limitDate) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
-
 }

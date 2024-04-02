@@ -13,10 +13,10 @@ import com.chs.yourapphistory.domain.model.AppInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
+import kotlin.streams.toList
 
 class GetDayPagingUsedList(
     private val appInfoDao: AppInfoDao,
-    private val appUsageDao: AppUsageDao,
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -27,14 +27,11 @@ class GetDayPagingUsedList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
-        val limitDate = appUsageDao.getFirstCollectTime().toLocalDate()
-        val minDate = if (pageDate.minusDays(Constants.PAGING_DAY) < limitDate) {
-            limitDate
-        } else pageDate.minusDays(Constants.PAGING_DAY)
 
         chsLog("load :$pageDate")
 
-        val data = minDate.datesUntil(pageDate.plusDays(1L))
+        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
+            .datesUntil(pageDate.plusDays(1L))
             .toList()
             .reversed()
             .map { date ->
@@ -51,7 +48,7 @@ class GetDayPagingUsedList(
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (minDate == limitDate) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
 }

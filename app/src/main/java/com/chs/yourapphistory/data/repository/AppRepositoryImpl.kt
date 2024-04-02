@@ -65,6 +65,7 @@ class AppRepositoryImpl @Inject constructor(
         val localList: List<AppInfoEntity> = appInfoDao.getAllPackage()
         val currentLauncherList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
+
         appInfoDao.upsert(
             *currentLauncherList
                 .filterNot { launcherPackageName ->
@@ -84,15 +85,16 @@ class AppRepositoryImpl @Inject constructor(
             currentLauncherList.any { it == packageInfo.packageName }
         }
 
-        withContext(Dispatchers.IO) {
-            val (appInfo, appUsage) = async { appInfoDao.delete(*removePackageList.toTypedArray()) } to
-                    async { appUsageDao.deleteUsageInfo(removePackageList.map { it.packageName }) }
-            awaitAll(appInfo, appUsage)
-        }
+        if (removePackageList.isEmpty()) return
+
+        appInfoDao.delete(*removePackageList.toTypedArray())
+        appUsageDao.deleteUsageInfo(removePackageList.map { it.packageName })
+
     }
 
     override suspend fun insertAppUsageInfo() {
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
+
         withContext(Dispatchers.IO) {
             val appUsageInsert = async(Dispatchers.IO) {
                 val type: UsageEventType = UsageEventType.AppUsageEvent
@@ -138,15 +140,9 @@ class AppRepositoryImpl @Inject constructor(
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>> {
         return Pager(
-            PagingConfig(
-                pageSize = 1,
-                initialLoadSize = 3
-            )
+            PagingConfig(pageSize = 1, initialLoadSize = 1)
         ) {
-            GetDayPagingUsedList(
-                appInfoDao = appInfoDao,
-                appUsageDao = appUsageDao,
-            )
+            GetDayPagingUsedList(appInfoDao = appInfoDao)
         }.flow
     }
 
@@ -154,10 +150,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingForegroundUsedList(
-                appInfoDao = appInfoDao,
-                appForegroundUsageDao = appForegroundUsageDao
-            )
+            GetDayPagingForegroundUsedList(appInfoDao = appInfoDao)
         }.flow
     }
 
@@ -165,10 +158,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingNotifyList(
-                appInfoDao = appInfoDao,
-                appNotifyInfoDao = appNotifyInfoDao
-            )
+            GetDayPagingNotifyList(appInfoDao = appInfoDao)
         }.flow
     }
 

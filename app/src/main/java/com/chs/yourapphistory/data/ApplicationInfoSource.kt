@@ -39,7 +39,7 @@ class ApplicationInfoSource @Inject constructor(
         } else {
             context.packageManager.queryIntentActivities(
                 mainIntent,
-                PackageManager.GET_META_DATA
+                0
             )
         }.map {
             it.activityInfo.packageName
@@ -136,6 +136,7 @@ class ApplicationInfoSource @Inject constructor(
     ): List<AppForegroundUsageEntity> {
         val inCompletedUsageList: HashMap<String, AppForegroundUsageEntity> = hashMapOf()
         val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
+
        usageEventList.filter {
            (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
                    || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
