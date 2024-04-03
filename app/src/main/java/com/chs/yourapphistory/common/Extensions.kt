@@ -15,6 +15,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.hours
 
 fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
@@ -111,29 +112,24 @@ fun Long.convertToRealUsageTime(): String {
     val hour: Long = (this / 1000) / 60 / 60 % 24
     val minutes: Long = (this / 1000) / 60 % 60
     val second: Long = (this / 1000) % 60
-    val milliSec: Long = (this / 1000)
-    var result: String = ""
 
-    if (hour != 0L) {
-        result += "${hour}시간 "
-    }
+    return when {
+        hour != 0L -> {
+            String.format("%02d시간 %02d분", hour, minutes)
+        }
 
-    if (minutes != 0L) {
-        result += "${minutes}분 "
-    }
+        minutes != 0L -> {
+            String.format("%02d분 %02d초", minutes, second)
+        }
 
-    if (second != 0L) {
-        result += "${second}초"
-    } else {
-        if (hour == 0L && minutes == 0L) {
-            result = if (milliSec != 0L) {
-                "1초 미만"
+        else -> {
+            if (second == 0L) {
+                String.format("%01d초", second)
             } else {
-                "0초"
+                String.format("%02d초", second)
             }
         }
     }
-    return result
 }
 
 
