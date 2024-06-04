@@ -60,8 +60,8 @@ fun WelcomeScreen(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (getUsagePermission(context)) {
-            navController.navigate(Screen.ScreenUsedAppList.route) {
-                popUpTo(Screen.ScreenWelcome.route) {
+            navController.navigate(Screen.ScreenUsedAppList) {
+                popUpTo(Screen.ScreenWelcome) {
                     inclusive = true
                 }
             }

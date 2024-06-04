@@ -1,23 +1,19 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
@@ -25,18 +21,15 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
-import com.chs.yourapphistory.common.chsLog
+import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.presentation.Screen
-import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun UsedAppListScreenScreen(
     navController: NavHostController,
@@ -52,7 +45,7 @@ fun UsedAppListScreenScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (pagingData != null && pagingData.itemCount != 0) {
+        if (pagingData != null) {
             Row {
                 Text(
                     modifier = Modifier
@@ -86,7 +79,7 @@ fun UsedAppListScreenScreen(
                 state = pagerState,
                 reverseLayout = true,
                 userScrollEnabled = true,
-                key = { pagingData.peek(it)!!.first }
+                key = pagingData.itemKey { it.first }
             ) { page ->
                 val packageList = pagingData[page]!!.second
                 LazyColumn(
@@ -106,15 +99,40 @@ fun UsedAppListScreenScreen(
                                 icon = state.appIconList[appInfo.first.packageName]
                             ) { packageName ->
                                 navController.navigate(
-                                    "${Screen.ScreenAppUsageDetail.route}/${packageName}/${pagingData[page]!!.first.toMillis()}"
+                                    Screen.ScreenAppUsageDetail(
+                                        packageName = packageName,
+                                        targetDate = pagingData[page]!!.first.toMillis()
+                                    )
                                 )
                             }
                         }
                     }
                 }
             }
-        } else {
-            CircleLoadingIndicator()
+
+            when (pagingData.loadState.refresh) {
+                is LoadState.Loading -> {
+
+                }
+
+                is LoadState.Error -> {
+
+                }
+
+                else -> Unit
+            }
+
+            when (pagingData.loadState.append) {
+                is LoadState.Loading -> {
+
+                }
+
+                is LoadState.Error -> {
+
+                }
+
+                else -> Unit
+            }
         }
     }
 
@@ -132,4 +150,3 @@ fun UsedAppListScreenScreen(
         )
     }
 }
-

@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.toRoute
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.presentation.Screen
@@ -28,33 +29,21 @@ fun MainNavHost(
         modifier = Modifier.padding(paddingValues),
         navController = navController,
         startDestination = if (isGrantPermission) {
-            Screen.ScreenUsedAppList.route
+            Screen.ScreenUsedAppList
         } else {
-            Screen.ScreenWelcome.route
+            Screen.ScreenWelcome
         }
     ) {
-        composable(Screen.ScreenWelcome.route) {
+        composable<Screen.ScreenWelcome> {
             WelcomeScreen(navController)
-
         }
 
-        composable(Screen.ScreenUsedAppList.route) {
+        composable<Screen.ScreenUsedAppList> {
             UsedAppListScreenScreen(navController)
         }
 
-        composable(
-            route = "${Screen.ScreenAppUsageDetail.route}/{key_target_package_name}/{key_target_date}",
-            arguments = listOf(
-                navArgument(Constants.KEY_TARGET_PACKAGE_NAME) {
-                    nullable = false
-                    type = NavType.StringType
-                },
-                navArgument(Constants.KEY_TARGET_DATE) {
-                    nullable = false
-                    type = NavType.LongType
-                },
-            )
-        ) {
+        composable<Screen.ScreenAppUsageDetail> {
+            val arg = it.toRoute<Screen.ScreenAppUsageDetail>()
             AppUsageDetailScreen(navController = navController) {
                 selectPackage(it)
             }

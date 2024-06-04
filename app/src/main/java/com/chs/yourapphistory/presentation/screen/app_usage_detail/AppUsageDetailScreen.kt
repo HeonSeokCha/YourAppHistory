@@ -33,7 +33,6 @@ import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
 import java.time.LocalDate
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AppUsageDetailScreen(
     viewModel: AppUsageDetailViewModel = hiltViewModel(),
