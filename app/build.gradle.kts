@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -64,4 +65,5 @@ dependencies {
     implementation(libs.lottie)
     ksp(libs.hilt.compiler)
     ksp(libs.androidX.room.compiler)
+    implementation(libs.kotlin.serialization)
 }

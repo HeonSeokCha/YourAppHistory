@@ -1,5 +1,8 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -31,8 +34,8 @@ class UsedAppListViewModel @Inject constructor(
     private val getAppIconMapUseCase: GetAppIconMapUseCase
 ) : ViewModel() {
 
-    private val _state = MutableStateFlow(UsedAppListState())
-    val state = _state.asStateFlow()
+    var state by mutableStateOf(UsedAppListState())
+        private set
 
     init {
         viewModelScope.launch {
@@ -40,43 +43,35 @@ class UsedAppListViewModel @Inject constructor(
                 insertInfo()
             }
 
-            _state.update {
-                it.copy(
-                    appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
-                    appIconList = getAppIconMapUseCase()
-                )
-            }
+            state = state.copy(
+                appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
+                appIconList = getAppIconMapUseCase()
+            )
         }
     }
 
 
     fun changeSortOption(option: UsageEventType) {
-        when (option) {
+        state = when (option) {
             UsageEventType.AppUsageEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayUsedAppListUseCase(),
-                        sortOption = option
-                    )
-                }
+                state.copy(
+                    appInfoList = getDayUsedAppListUseCase(),
+                    sortOption = option
+                )
             }
 
             UsageEventType.AppForegroundUsageEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayForegroundUsedAppListUseCase(),
-                        sortOption = option
-                    )
-                }
+                state.copy(
+                    appInfoList = getDayForegroundUsedAppListUseCase(),
+                    sortOption = option
+                )
             }
 
             UsageEventType.AppNotifyEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayNotifyAppListUseCase(),
-                        sortOption = option
-                    )
-                }
+                state.copy(
+                    appInfoList = getDayNotifyAppListUseCase(),
+                    sortOption = option
+                )
             }
         }
     }

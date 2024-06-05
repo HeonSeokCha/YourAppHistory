@@ -3,7 +3,9 @@ package com.chs.yourapphistory.presentation.screen.main
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -14,7 +16,9 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreen
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreen
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListViewModel
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreen
 import java.time.LocalDate
 
@@ -35,17 +39,38 @@ fun MainNavHost(
         }
     ) {
         composable<Screen.ScreenWelcome> {
-            WelcomeScreen(navController)
+            WelcomeScreen {
+                navController.navigate(it) {
+                    popUpTo(Screen.ScreenWelcome) {
+                        inclusive = true
+                    }
+                }
+            }
         }
 
         composable<Screen.ScreenUsedAppList> {
-            UsedAppListScreenScreen(navController)
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry(Screen.ScreenUsedAppList)
+            }
+            val viewmodel: UsedAppListViewModel = hiltViewModel(parentEntry)
+            UsedAppListScreenScreen(
+                state = viewmodel.state,
+                onEvent = viewmodel::changeSortOption
+            ) {
+                selectPackage(it.packageName)
+               navController.navigate(it)
+            }
         }
 
         composable<Screen.ScreenAppUsageDetail> {
             val arg = it.toRoute<Screen.ScreenAppUsageDetail>()
-            AppUsageDetailScreen(navController = navController) {
-                selectPackage(it)
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry(arg)
+            }
+            val viewModel: AppUsageDetailViewModel = hiltViewModel(parentEntry)
+            AppUsageDetailScreen(state = viewModel.state) {
+                selectPackage(null)
+                navController.navigateUp()
             }
         }
     }

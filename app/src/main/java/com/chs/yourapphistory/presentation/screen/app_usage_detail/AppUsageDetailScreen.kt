@@ -35,11 +35,9 @@ import java.time.LocalDate
 
 @Composable
 fun AppUsageDetailScreen(
-    viewModel: AppUsageDetailViewModel = hiltViewModel(),
-    navController: NavHostController,
-    currentPackageLabel: (String?) -> Unit
+    state: AppUsageDetailState,
+    onNavigate: () -> Unit,
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
 
     val pagerState = if (state.datesList.isNotEmpty()) {
         rememberPagerState(
@@ -49,31 +47,6 @@ fun AppUsageDetailScreen(
         )
     } else {
         rememberPagerState(pageCount = { 0 })
-    }
-
-    LaunchedEffect(state.targetDate) {
-        if (state.targetDate != null) {
-            viewModel.getDayAppUsageList(state.targetDate!!)
-        }
-    }
-
-    LaunchedEffect(state.targetPackageLabel) {
-        if (state.targetPackageLabel != null) {
-            currentPackageLabel(state.targetPackageLabel!!)
-        }
-    }
-
-    if (state.datesList.isNotEmpty()) {
-        LaunchedEffect(pagerState) {
-            snapshotFlow { pagerState.currentPage }.collect { idx ->
-                viewModel.changeDate(state.datesList[idx])
-            }
-        }
-    }
-
-    BackHandler {
-        currentPackageLabel(null)
-        navController.navigateUp()
     }
 
     Column(

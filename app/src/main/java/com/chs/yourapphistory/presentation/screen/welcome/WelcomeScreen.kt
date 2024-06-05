@@ -45,10 +45,9 @@ import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
 import com.chs.yourapphistory.presentation.Screen
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun WelcomeScreen(
-    navController: NavHostController
+    onNavigate: (Screen) -> Unit
 ) {
     val context: Context = LocalContext.current
 
@@ -60,11 +59,7 @@ fun WelcomeScreen(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (getUsagePermission(context)) {
-            navController.navigate(Screen.ScreenUsedAppList) {
-                popUpTo(Screen.ScreenWelcome) {
-                    inclusive = true
-                }
-            }
+            onNavigate(Screen.ScreenUsedAppList)
         }
     }
 
@@ -139,8 +134,6 @@ fun ContentItem(@RawRes lottieRawId: Int) {
         iterations = 1
     )
 
-//    Text(text = "")
-
     LottieAnimation(
         composition = composition,
         progress = { progress },
@@ -155,6 +148,6 @@ fun ContentItem(@RawRes lottieRawId: Int) {
 @Preview(showBackground = true)
 fun FirstOnBoardingScreenPreview() {
     Column(modifier = Modifier.fillMaxSize()) {
-        WelcomeScreen(navController = rememberNavController())
+        WelcomeScreen { }
     }
 }

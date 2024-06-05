@@ -25,6 +25,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.toMillis
+import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import kotlinx.coroutines.launch
@@ -32,10 +33,10 @@ import java.time.LocalDate
 
 @Composable
 fun UsedAppListScreenScreen(
-    navController: NavHostController,
-    viewModel: UsedAppListViewModel = hiltViewModel()
+    state: UsedAppListState,
+    onEvent: (UsageEventType) -> Unit,
+    onNavigate: (Screen.ScreenAppUsageDetail) -> Unit
 ) {
-    val state by viewModel.state.collectAsStateWithLifecycle()
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
     var filterDialogShow by remember { mutableStateOf(false) }
     val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: 0 })
@@ -46,20 +47,24 @@ fun UsedAppListScreenScreen(
             .fillMaxSize()
     ) {
         if (pagingData != null) {
+
             Row {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    text = pagingData[pagerState.currentPage]?.first.run {
-                        if (this == LocalDate.now()) {
-                            "오늘"
-                        } else this.toString()
-                    },
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
+                if (pagingData.itemCount != 0) {
+                    Text(
+                        modifier = Modifier
+                            .weight(1f)
+                            .align(Alignment.CenterVertically),
+                        text = pagingData[pagerState.currentPage]?.first.run {
+                            if (this == LocalDate.now()) {
+                                "오늘"
+                            } else this.toString()
+                        },
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp
+                    )
+                }
             }
+
 
             Row {
                 Text(
@@ -98,7 +103,7 @@ fun UsedAppListScreenScreen(
                                 usedAppInfo = appInfo,
                                 icon = state.appIconList[appInfo.first.packageName]
                             ) { packageName ->
-                                navController.navigate(
+                                onNavigate(
                                     Screen.ScreenAppUsageDetail(
                                         packageName = packageName,
                                         targetDate = pagingData[page]!!.first.toMillis()
@@ -145,7 +150,7 @@ fun UsedAppListScreenScreen(
                 coroutineScope.launch {
                     pagerState.scrollToPage(0)
                 }
-                viewModel.changeSortOption(selectSortType)
+                onEvent(selectSortType)
             }
         )
     }

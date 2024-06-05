@@ -2,11 +2,9 @@ package com.chs.yourapphistory.common
 
 import android.app.AppOpsManager
 import android.content.Context
+import android.content.Context.APP_OPS_SERVICE
 import android.os.Process
 import android.util.Log
-import androidx.activity.ComponentActivity
-import androidx.lifecycle.Lifecycle
-import androidx.navigation.NavHostController
 import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -15,7 +13,6 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import java.time.format.DateTimeFormatter
 import kotlin.time.Duration.Companion.hours
 
 fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
@@ -115,11 +112,19 @@ fun Long.convertToRealUsageTime(): String {
 
     return when {
         hour != 0L -> {
-            String.format("%02d시간 %02d분", hour, minutes)
+            if (minutes != 0L) {
+                String.format("%02d시간 %02d분", hour, minutes)
+            } else {
+                String.format("%02d시간", hour, minutes)
+            }
         }
 
         minutes != 0L -> {
-            String.format("%02d분 %02d초", minutes, second)
+            if (second != 0L) {
+                String.format("%02d분 %02d초", minutes, second)
+            } else {
+                String.format("%02d분", minutes, second)
+            }
         }
 
         else -> {
@@ -169,7 +174,7 @@ fun calculateScale(viewHeightPx: Int, values: List<Long>): Double {
 
 fun getUsagePermission(context: Context): Boolean {
     val appOps: AppOpsManager =
-        context.getSystemService(ComponentActivity.APP_OPS_SERVICE) as AppOpsManager
+        context.getSystemService(APP_OPS_SERVICE) as AppOpsManager
     return try {
         val mode: Int =
             appOps.unsafeCheckOpNoThrow(

@@ -1,5 +1,8 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -33,57 +36,52 @@ class AppUsageDetailViewModel @Inject constructor(
     private val getAppForegroundUsageInfoUseCase: GetAppForegroundUsageInfoUseCase
 ) : ViewModel() {
 
-    private val _state: MutableStateFlow<AppUsageDetailState> =
-        MutableStateFlow(AppUsageDetailState())
-    val state: StateFlow<AppUsageDetailState> = _state.asStateFlow()
+    var state by mutableStateOf(AppUsageDetailState())
+        private set
 
-    private val targetPackageName: String = savedStateHandle[Constants.KEY_TARGET_PACKAGE_NAME] ?: ""
-    private val targetDate: LocalDate = (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
+    private val targetPackageName: String =
+        savedStateHandle[Constants.KEY_TARGET_PACKAGE_NAME] ?: ""
+    private val targetDate: LocalDate =
+        (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
 
     init {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    targetDate = targetDate,
-                    datesList = getUntilDateList(
-                        getLastCollectDayUseCase()
-                    ),
-                    targetPackageLabel = getPackageLabelUseCase(targetPackageName)
-                )
-            }
+            state = state.copy(
+                targetDate = targetDate,
+                datesList = getUntilDateList(
+                    getLastCollectDayUseCase()
+                ),
+                targetPackageLabel = getPackageLabelUseCase(targetPackageName)
+            )
         }
     }
 
     fun getDayAppUsageList(date: LocalDate) {
         viewModelScope.launch {
-            _state.update {
-                it.copy(
-                    dayUsageList = getAppUsageInfoUseCase(
-                        date = date,
-                        packageName = targetPackageName
-                    ),
-                    launchCount = getAppLaunchCountUseCase(
-                        date = date,
-                        packageName = targetPackageName
-                    ),
-                    foregroundUsageList = getAppForegroundUsageInfoUseCase(
-                        date = date,
-                        packageName = targetPackageName
-                    ),
-                    notifyCount = getAppNotifyCountUseCase(
-                        date = date,
-                        packageName = targetPackageName
-                    )
+            state = state.copy(
+                dayUsageList = getAppUsageInfoUseCase(
+                    date = date,
+                    packageName = targetPackageName
+                ),
+                launchCount = getAppLaunchCountUseCase(
+                    date = date,
+                    packageName = targetPackageName
+                ),
+                foregroundUsageList = getAppForegroundUsageInfoUseCase(
+                    date = date,
+                    packageName = targetPackageName
+                ),
+                notifyCount = getAppNotifyCountUseCase(
+                    date = date,
+                    packageName = targetPackageName
                 )
-            }
+            )
         }
     }
 
     fun changeDate(localDate: LocalDate) {
-        _state.update {
-            it.copy(
-                targetDate = localDate
-            )
-        }
+        state = state.copy(
+            targetDate = localDate
+        )
     }
 }
