@@ -28,8 +28,6 @@ class GetDayPagingUsedList(
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
 
-        chsLog("load :$pageDate")
-
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .datesUntil(pageDate.plusDays(1L))
             .toList()

@@ -105,7 +105,7 @@ fun UsedAppListScreenScreen(
                             ) { packageName ->
                                 onNavigate(
                                     Screen.ScreenAppUsageDetail(
-                                        packageName = packageName,
+                                        targetPackageName = packageName,
                                         targetDate = pagingData[page]!!.first.toMillis()
                                     )
                                 )

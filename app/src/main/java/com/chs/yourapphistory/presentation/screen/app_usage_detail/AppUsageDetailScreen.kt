@@ -36,7 +36,7 @@ import java.time.LocalDate
 @Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
-    onNavigate: () -> Unit,
+    onBack: ()-> Unit
 ) {
 
     val pagerState = if (state.datesList.isNotEmpty()) {
@@ -47,6 +47,10 @@ fun AppUsageDetailScreen(
         )
     } else {
         rememberPagerState(pageCount = { 0 })
+    }
+
+    BackHandler {
+        onBack()
     }
 
     Column(
@@ -67,7 +71,7 @@ fun AppUsageDetailScreen(
                     text = if (state.targetDate == LocalDate.now()) {
                         "오늘"
                     } else {
-                        state.targetDate!!.format(Constants.DATE_FORMAT)
+                        state.targetDate.format(Constants.DATE_FORMAT)
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp

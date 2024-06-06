@@ -39,14 +39,8 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                insertInfo()
-            }
-
-            state = state.copy(
-                appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
-                appIconList = getAppIconMapUseCase()
-            )
+            insertInfo()
+            getUsedAppList()
         }
     }
 
@@ -73,6 +67,16 @@ class UsedAppListViewModel @Inject constructor(
                     sortOption = option
                 )
             }
+        }
+    }
+
+
+    private fun getUsedAppList() {
+        viewModelScope.launch {
+            state = state.copy(
+                appInfoList = getDayUsedAppListUseCase().cachedIn(viewModelScope),
+                appIconList = getAppIconMapUseCase()
+            )
         }
     }
 

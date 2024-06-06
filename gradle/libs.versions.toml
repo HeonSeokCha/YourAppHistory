@@ -15,7 +15,7 @@ lifecycle = "2.8.1"
 room = "2.6.1"
 hilt = "2.50"
 kotlin = "2.0.0"
-ksp = "2.0.0-1.0.21"
+ksp = "2.0.0-1.0.22"
 kotlin-coroutine = "1.8.1"
 
 [libraries]
