@@ -33,16 +33,20 @@ import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
+import com.chs.yourapphistory.presentation.screen.common.placeholder
+import com.chs.yourapphistory.presentation.screen.common.shimmer
 
 @Composable
 fun ItemAppInfoSmall(
-    usedAppInfo: Pair<AppInfo, String>,
+    usedAppInfo: Pair<AppInfo, String>?,
     icon: Bitmap?,
     clickAble: (String) -> Unit
 ) {
-    val appInfo = usedAppInfo.first
-    val dayAppUsedTime = usedAppInfo.second
+    val appInfo = usedAppInfo?.first
+    val dayAppUsedTime = usedAppInfo?.second
 
     Card(
         colors = CardDefaults.cardColors(
@@ -58,7 +62,11 @@ fun ItemAppInfoSmall(
                     vertical = 8.dp,
                     horizontal = 12.dp
                 )
-                .clickable { clickAble(appInfo.packageName) },
+                .clickable {
+                    if (appInfo != null) {
+                        clickAble(appInfo.packageName)
+                    }
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
@@ -89,7 +97,12 @@ fun ItemAppInfoSmall(
 
                 Column {
                     Text(
-                        text = appInfo.label,
+                        modifier = Modifier
+                            .placeholder(
+                                visible = appInfo == null,
+                                highlight = PlaceholderHighlight.shimmer()
+                            ),
+                        text = appInfo?.label ?: Constants.TEXT_TITLE_PREVIEW,
                         fontSize = 18.sp,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -97,7 +110,7 @@ fun ItemAppInfoSmall(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = dayAppUsedTime,
+                        text = dayAppUsedTime ?: Constants.TEXT_TITLE_PREVIEW,
                         color = Color.LightGray
                     )
                 }

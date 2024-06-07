@@ -48,7 +48,7 @@ class ApplicationInfoSource @Inject constructor(
 
     suspend fun getApplicationLabel(packageName: String): String {
         return withContext(Dispatchers.Default) {
-           if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 context.packageManager.getApplicationLabel(
                     context.packageManager.getApplicationInfo(
                         packageName,
@@ -80,27 +80,13 @@ class ApplicationInfoSource @Inject constructor(
         }
     }
 
-    fun getUsageEvent(
-        usageType: UsageEventType,
-        beginTime: Long
-    ): List<AppUsageEventRawInfo> {
+    fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
-        val usageFilterList = when (usageType) {
-            is UsageEventType.AppUsageEvent -> {
-                Constants.APP_USAGE_EVENT_FILTER
-            }
-            is UsageEventType.AppNotifyEvent -> {
-                listOf(12)
-            }
-            is UsageEventType.AppForegroundUsageEvent -> {
-                Constants.APP_FOREGROUND_USAGE_EVENT_FILTER
-            }
-        }
 
         while (usageEvents.hasNextEvent()) {
             val currentEvent = UsageEvents.Event().apply {
@@ -112,21 +98,16 @@ class ApplicationInfoSource @Inject constructor(
             val className: String? = currentEvent.className
             val eventType: Int = currentEvent.eventType
 
-            if (usageFilterList.any { it == eventType }) {
-                resultArr.add(
-                    AppUsageEventRawInfo(
-                        packageName = packageName,
-                        className = className,
-                        eventType = eventType,
-                        eventTime = time
-                    )
+            resultArr.add(
+                AppUsageEventRawInfo(
+                    packageName = packageName,
+                    className = className,
+                    eventType = eventType,
+                    eventTime = time
                 )
-            }
+            )
         }
 
-//        resultArr.map {
-//            Log.e("RAW", "${it.packageName} : ${it.eventTime.toLocalDateTime().format(Constants.SIMPLE_DATE_FORMAT)} | ${it.eventType}")
-//        }
         return resultArr
     }
 
@@ -137,27 +118,29 @@ class ApplicationInfoSource @Inject constructor(
         val inCompletedUsageList: HashMap<String, AppForegroundUsageEntity> = hashMapOf()
         val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
 
-       usageEventList.filter {
-           (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
-                   || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
-               && installPackageNames.any { packageName -> packageName == it.packageName }
-       }.forEach {
-           if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
-               if (!inCompletedUsageList.containsKey(it.packageName))
-                inCompletedUsageList[it.packageName] = AppForegroundUsageEntity(
-                    packageName = it.packageName,
-                    beginUseTime = it.eventTime
-                )
-           } else {
-               if (inCompletedUsageList.containsKey(it.packageName)) {
-                   completedUsageList.add(inCompletedUsageList[it.packageName]!!.copy(
-                       endUseTime = it.eventTime
-                   ))
+        usageEventList.filter {
+            (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+                    || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
+                    && installPackageNames.any { packageName -> packageName == it.packageName }
+        }.forEach {
+            if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
+                if (!inCompletedUsageList.containsKey(it.packageName))
+                    inCompletedUsageList[it.packageName] = AppForegroundUsageEntity(
+                        packageName = it.packageName,
+                        beginUseTime = it.eventTime
+                    )
+            } else {
+                if (inCompletedUsageList.containsKey(it.packageName)) {
+                    completedUsageList.add(
+                        inCompletedUsageList[it.packageName]!!.copy(
+                            endUseTime = it.eventTime
+                        )
+                    )
 
-                   inCompletedUsageList.remove(it.packageName)
-               }
-           }
-       }
+                    inCompletedUsageList.remove(it.packageName)
+                }
+            }
+        }
         return completedUsageList
     }
 
@@ -167,7 +150,7 @@ class ApplicationInfoSource @Inject constructor(
     ): List<AppNotifyInfoEntity> {
         return usageEventList.filter {
             it.eventType == 12
-                && installPackageNames.any { packageName -> packageName == it.packageName }
+                    && installPackageNames.any { packageName -> packageName == it.packageName }
         }.map {
             AppNotifyInfoEntity(
                 packageName = it.packageName,

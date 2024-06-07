@@ -13,6 +13,8 @@ object Constants {
 
     const val KEY_TARGET_DATE: String = "targetDate"
     const val KEY_TARGET_PACKAGE_NAME: String = "targetPackageName"
+    const val TEXT_TITLE_PREVIEW: String = "Title Preview"
+    const val NUMBER_LOADING_COUNT: Int = 6
 
     val APP_USAGE_EVENT_FILTER = listOf(
         UsageEvents.Event.ACTIVITY_RESUMED,
@@ -26,6 +28,8 @@ object Constants {
         UsageEvents.Event.FOREGROUND_SERVICE_START,
         UsageEvents.Event.FOREGROUND_SERVICE_STOP
     )
+
+    val APP_NOTIFY_EVENT_FILTER = listOf(12)
 
     val USAGE_EVENT_TYPE_LIST = listOf(
         UsageEventType.AppUsageEvent,
