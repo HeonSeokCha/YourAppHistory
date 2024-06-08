@@ -5,8 +5,6 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -14,16 +12,11 @@ import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
-import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
 import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
 import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
-import com.chs.yourapphistory.data.toAppForegroundUsageInfo
-import com.chs.yourapphistory.data.toAppNotifyInfo
-import com.chs.yourapphistory.data.toAppUsageInfo
-import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
+import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.AppNotifyInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -125,7 +118,7 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>> {
+    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -133,7 +126,7 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, List<Pair<Long, Long>>>>>>> {
+    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -149,44 +142,8 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override suspend fun getAppUsageInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppBaseUsageInfo.AppUsageInfo> {
-        return appUsageDao.getDayUsageInfoList(
-            targetDate = date.toMillis(),
-            packageName = packageName
-        ).map {
-            it.toAppUsageInfo()
-        }
-    }
-
-    override suspend fun getAppForegroundUsageInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppBaseUsageInfo.AppForegroundUsageInfo> {
-        return appForegroundUsageDao.getDayForegroundUsageInfo(
-            targetDate = date.toMillis(),
-            packageName = packageName
-        ).map {
-            it.toAppForegroundUsageInfo()
-        }
-    }
-
-    override suspend fun getAppNotifyInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppNotifyInfo> {
-        return appNotifyInfoDao.getDayNotifyCount(
-            packageName = packageName,
-            targetDate = date.toMillis()
-        ).map {
-            it.toAppNotifyInfo()
-        }
-    }
-
-    override suspend fun getOldestAppUsageCollectDay(): LocalDate {
-        return appUsageDao.getFirstCollectTime().toLocalDate()
+    override fun getPagingAppDetailInfo(): Flow<PagingData<Pair<LocalDate, List<AppDetailInfo>>>> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getPackageLabel(packageName: String): String {

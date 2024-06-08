@@ -2,7 +2,7 @@ package com.chs.yourapphistory.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
-import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
+import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppNotifyInfo
 import kotlinx.coroutines.flow.Flow
@@ -14,28 +14,13 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<Pair<Long, Long>>>>>>>
+    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
 
-    fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, List<Pair<Long, Long>>>>>>>
+    fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
 
     fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getAppUsageInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppBaseUsageInfo.AppUsageInfo>
-
-    suspend fun getAppForegroundUsageInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppBaseUsageInfo.AppForegroundUsageInfo>
-
-    suspend fun getAppNotifyInfoList(
-        date: LocalDate,
-        packageName: String
-    ): List<AppNotifyInfo>
-
-    suspend fun getOldestAppUsageCollectDay(): LocalDate
+    fun getPagingAppDetailInfo(): Flow<PagingData<Pair<LocalDate, List<AppDetailInfo>>>>
 
     suspend fun getPackageLabel(packageName: String): String
 

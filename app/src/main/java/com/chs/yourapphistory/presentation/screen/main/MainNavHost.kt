@@ -50,7 +50,8 @@ fun MainNavHost(
             val viewmodel: UsedAppListViewModel = hiltViewModel(parentEntry)
             UsedAppListScreenScreen(
                 state = viewmodel.state,
-                onEvent = viewmodel::changeSortOption
+                onEvent = viewmodel::changeSortOption,
+                selectPackageLabel = { selectPackage(it) }
             ) {
                navController.navigate(it)
             }

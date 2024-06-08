@@ -41,7 +41,7 @@ import com.chs.yourapphistory.presentation.screen.common.shimmer
 
 @Composable
 fun ItemAppInfoSmall(
-    usedAppInfo: Pair<AppInfo, String>?,
+    usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
     clickAble: (String) -> Unit
 ) {

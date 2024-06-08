@@ -3,6 +3,7 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -27,9 +28,7 @@ class GetDayPagingNotifyList(
         val pageDate: LocalDate = params.key ?: LocalDate.now()
 
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
-            .datesUntil(pageDate.plusDays(1L))
-            .toList()
-            .reversed()
+            .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
                 date to appInfoDao.getDayNotifyList(date.toMillis()).map {
                     it.key.toAppInfo() to it.value.size

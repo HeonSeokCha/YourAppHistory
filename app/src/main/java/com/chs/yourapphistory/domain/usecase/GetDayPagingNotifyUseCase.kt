@@ -9,16 +9,10 @@ import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 
-class GetDayNotifyAppListUseCase @Inject constructor(
+class GetDayPagingNotifyUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, String>>>>> {
-        return repository.getDayNotifyAppList().map { pagingData ->
-            pagingData.map {
-                it.first to it.second.map {
-                    it.first to "${it.second}회"
-                }
-            }
-        }
+    operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        return repository.getDayNotifyAppList()
     }
 }

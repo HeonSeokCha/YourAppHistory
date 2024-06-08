@@ -37,6 +37,7 @@ import java.time.LocalDate
 fun UsedAppListScreenScreen(
     state: UsedAppListState,
     onEvent: (UsageEventType) -> Unit,
+    selectPackageLabel: (String) -> Unit,
     onNavigate: (Screen.ScreenAppUsageDetail) -> Unit
 ) {
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
@@ -123,6 +124,7 @@ fun UsedAppListScreenScreen(
                                 usedAppInfo = appInfo,
                                 icon = state.appIconList[appInfo.first.packageName]
                             ) { packageName ->
+                                selectPackageLabel(appInfo.first.label)
                                 onNavigate(
                                     Screen.ScreenAppUsageDetail(
                                         targetPackageName = packageName,

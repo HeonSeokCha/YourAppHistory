@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
 import android.os.Process
 import android.util.Log
-import com.chs.yourapphistory.domain.model.AppBaseUsageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.time.Instant
@@ -14,16 +13,6 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import kotlin.time.Duration.Companion.hours
-
-fun getUntilDateList(targetDate: LocalDate): List<LocalDate> {
-    return if (targetDate == LocalDate.now()) {
-        listOf(targetDate)
-    } else {
-        targetDate.datesUntil(LocalDate.now().plusDays(1L))
-            .toList()
-            .reversed()
-    }
-}
 
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT
@@ -41,6 +30,21 @@ fun Int.convertBetweenHourString(): String {
     return this.convert24HourString(true) +
             " ~ " +
             (this + 1).convert24HourString(false) + " "
+}
+
+fun Map<Long, Long>.toConvertDayUsedTime(): Int {
+    return this.map {
+        it.key.toLocalDateTime() to it.value.toLocalDateTime()
+    }.sumOf {
+        val (begin, end) = it.first to it.second
+        return@sumOf if (begin.dayOfMonth < end.dayOfMonth) {
+            end.toLocalDate().atStartOfDayToMillis() - begin.toMillis()
+        } else if (begin.dayOfMonth > end.dayOfMonth) {
+            begin.toLocalDate().atStartOfDayToMillis() - end.toMillis()
+        } else {
+            end.toMillis() - begin.toMillis()
+        }
+    }.toInt()
 }
 
 suspend fun calculateTimeZoneUsage(
@@ -105,22 +109,22 @@ fun Long.convertToRealUsageMinutes(): String {
     return "${(this / 1000) / 60}분"
 }
 
-fun Long.convertToRealUsageTime(): String {
-    val hour: Long = (this / 1000) / 60 / 60 % 24
-    val minutes: Long = (this / 1000) / 60 % 60
-    val second: Long = (this / 1000) % 60
+fun Int.convertToRealUsageTime(): String {
+    val hour: Int = (this / 1000) / 60 / 60 % 24
+    val minutes: Int = (this / 1000) / 60 % 60
+    val second: Int = (this / 1000) % 60
 
     return when {
-        hour != 0L -> {
-            if (minutes != 0L) {
+        hour != 0 -> {
+            if (minutes != 0) {
                 String.format("%02d시간 %02d분", hour, minutes)
             } else {
                 String.format("%02d시간", hour, minutes)
             }
         }
 
-        minutes != 0L -> {
-            if (second != 0L) {
+        minutes != 0 -> {
+            if (second != 0) {
                 String.format("%02d분 %02d초", minutes, second)
             } else {
                 String.format("%02d분", minutes, second)
@@ -128,7 +132,7 @@ fun Long.convertToRealUsageTime(): String {
         }
 
         else -> {
-            if (second == 0L) {
+            if (second == 0) {
                 String.format("%01d초", second)
             } else {
                 String.format("%02d초", second)
@@ -186,6 +190,12 @@ fun getUsagePermission(context: Context): Boolean {
     } catch (e: Exception) {
         false
     }
+}
+
+fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
+    return this.datesUntil(targetDate)
+        .toList()
+        .reversed()
 }
 
 fun chsLog(value: String) {
