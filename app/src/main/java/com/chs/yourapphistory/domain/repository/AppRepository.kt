@@ -20,9 +20,10 @@ interface AppRepository {
 
     fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
 
-    fun getPagingAppDetailInfo(): Flow<PagingData<Pair<LocalDate, List<AppDetailInfo>>>>
-
-    suspend fun getPackageLabel(packageName: String): String
+    fun getPagingAppDetailInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, AppDetailInfo>>>
 
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 }

@@ -31,8 +31,19 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName"
     )
-    abstract suspend fun getDayUsageInfoList(
+    abstract suspend fun getUsageInfoList(
         targetDate: Long,
         packageName: String
     ): List<AppUsageEntity>
+
+    @Query(
+        "SELECT beginUseTime " +
+          "FROM appUsage " +
+         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND packageName = :packageName"
+    )
+    abstract suspend fun getUsageBeginInfoList(
+        targetDate: Long,
+        packageName: String
+    ): List<Long>
 }

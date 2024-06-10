@@ -48,4 +48,14 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
         targetDate: Long
     ): Map<AppInfoEntity, List<AppNotifyInfoEntity>>
 
+    @Query(
+        "SELECT appInfo.*, COUNT(appUsage.packageName) " +
+          "FROM appInfo " +
+          "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND appInfo.packageName = appUsage.packageName "
+    )
+    abstract suspend fun getDayLaunchList(
+        targetDate: Long
+    ): Map<AppInfoEntity, Int>
+
 }

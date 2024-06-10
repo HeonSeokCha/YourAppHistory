@@ -32,15 +32,17 @@ fun Int.convertBetweenHourString(): String {
             (this + 1).convert24HourString(false) + " "
 }
 
-fun Map<Long, Long>.toConvertDayUsedTime(): Int {
+fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
     return this.map {
         it.key.toLocalDateTime() to it.value.toLocalDateTime()
     }.sumOf {
         val (begin, end) = it.first to it.second
         return@sumOf if (begin.dayOfMonth < end.dayOfMonth) {
-            end.toLocalDate().atStartOfDayToMillis() - begin.toMillis()
-        } else if (begin.dayOfMonth > end.dayOfMonth) {
-            begin.toLocalDate().atStartOfDayToMillis() - end.toMillis()
+            if (targetDate.dayOfMonth == end.dayOfMonth) {
+                end.toLocalDate().atStartOfDayToMillis() - begin.toMillis()
+            } else {
+                targetDate.atStartOfDayToMillis() - begin.toMillis()
+            }
         } else {
             end.toMillis() - begin.toMillis()
         }
@@ -61,41 +63,6 @@ suspend fun calculateTimeZoneUsage(
 
     withContext(Dispatchers.Default) {
         list.forEach { appUsageInfo ->
-            if (date.dayOfMonth < appUsageInfo.endUseTime.dayOfMonth) {
-                usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-                    val nextDayStartMilli = date.plusDays(1L).atStartOfDayToMillis()
-                    value + (nextDayStartMilli - appUsageInfo.beginUseTime.toMillis())
-                }
-                return@forEach
-            }
-
-            if (date.dayOfMonth > appUsageInfo.beginUseTime.dayOfMonth) {
-                usageMap.computeIfPresent(appUsageInfo.endUseTime.hour) { key, value ->
-                    val dayStartMilli = date.atStartOfDayToMillis()
-                    value + (appUsageInfo.endUseTime.toMillis() - dayStartMilli)
-                }
-                return@forEach
-            }
-
-            usageMap.computeIfPresent(appUsageInfo.beginUseTime.hour) { key, value ->
-                if (appUsageInfo.beginUseTime.hour < appUsageInfo.endUseTime.hour) {
-                    for (i in appUsageInfo.beginUseTime.hour + 1..appUsageInfo.endUseTime.hour) {
-                        val targetHour = date.atStartOfDay().plusHours(i.toLong())
-                        usageMap.computeIfPresent(i) { _, value1 ->
-                            if (i == appUsageInfo.endUseTime.hour) {
-                                value1 + (appUsageInfo.endUseTime.toMillis() - targetHour.toMillis())
-                            } else {
-                                1.hours.inWholeMilliseconds
-                            }
-                        }
-                    }
-                    val nextHour =
-                        date.atStartOfDay().plusHours((appUsageInfo.beginUseTime.hour + 1).toLong())
-                    value + (nextHour.toMillis() - appUsageInfo.beginUseTime.toMillis())
-                } else {
-                    value + (appUsageInfo.endUseTime.toMillis() - appUsageInfo.beginUseTime.toMillis())
-                }
-            }
         }
     }
     return usageMap.toList()

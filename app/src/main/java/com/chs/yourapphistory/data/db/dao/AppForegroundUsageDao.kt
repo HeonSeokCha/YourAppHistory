@@ -26,7 +26,7 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName "
     )
-    abstract suspend fun getDayForegroundUsageInfo(
+    abstract suspend fun getForegroundUsageInfo(
         targetDate: Long,
         packageName: String
     ): List<AppForegroundUsageEntity>

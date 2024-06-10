@@ -15,9 +15,11 @@ import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
 import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
 import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
+import com.chs.yourapphistory.data.paging.GetPagingAppDetailList
 import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
+import com.chs.yourapphistory.domain.usecase.GetPagingAppDetailUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -56,7 +58,7 @@ class AppRepositoryImpl @Inject constructor(
                 .filterNot { launcherPackageName ->
                     localList.any {
                         it.packageName == launcherPackageName
-                                && it.label == getPackageLabel(launcherPackageName)
+                                && it.label == applicationInfoSource.getApplicationLabel(launcherPackageName)
                     }
                 }.map { packageName ->
                     AppInfoEntity(
@@ -142,12 +144,19 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override fun getPagingAppDetailInfo(): Flow<PagingData<Pair<LocalDate, List<AppDetailInfo>>>> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun getPackageLabel(packageName: String): String {
-        return applicationInfoSource.getApplicationLabel(packageName)
+    override fun getPagingAppDetailInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, AppDetailInfo>>> {
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetPagingAppDetailList(
+                appInfo = appInfoDao,
+                targetDate = targetDate,
+                targetPackageName = packageName
+            )
+        }.flow
     }
 
     override suspend fun getAppIconMap(): HashMap<String, Bitmap?> {

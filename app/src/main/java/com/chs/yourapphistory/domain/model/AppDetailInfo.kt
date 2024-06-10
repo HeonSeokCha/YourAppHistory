@@ -5,5 +5,5 @@ data class AppDetailInfo(
     val foregroundUsageInfo: List<Pair<Int, Int>>,
     val usageInfo: List<Pair<Int, Int>>,
     val notifyInfo: List<Pair<Int, Int>>,
-    val launchCountInfo: Int
+    val launchCountInfo: List<Pair<Int, Int>>
 ) : BaseAppInfo
