@@ -5,14 +5,10 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toConvertDayUsedTime
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
-import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class GetDayPagingForegroundUsedList(
@@ -32,7 +28,7 @@ class GetDayPagingForegroundUsedList(
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
                 date to appInfoDao.getDayForegroundUsedList(date.toMillis()).map {
-                    it.key.toAppInfo() to it.value.toConvertDayUsedTime()
+                    it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(
                         { -it.second },

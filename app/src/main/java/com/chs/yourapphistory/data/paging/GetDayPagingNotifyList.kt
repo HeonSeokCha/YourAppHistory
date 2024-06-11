@@ -31,13 +31,8 @@ class GetDayPagingNotifyList(
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
                 date to appInfoDao.getDayNotifyList(date.toMillis()).map {
-                    it.key.toAppInfo() to it.value.size
-                }.sortedWith(
-                    compareBy(
-                        { -it.second },
-                        { it.first.label }
-                    )
-                )
+                    it.key.toAppInfo() to it.value
+                }
             }
 
         return LoadResult.Page(

@@ -152,7 +152,9 @@ class AppRepositoryImpl @Inject constructor(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingAppDetailList(
-                appInfo = appInfoDao,
+                appUsageDao = appUsageDao,
+                appForegroundUsageDao = appForegroundUsageDao,
+                appNotifyInfoDao = appNotifyInfoDao,
                 targetDate = targetDate,
                 targetPackageName = packageName
             )

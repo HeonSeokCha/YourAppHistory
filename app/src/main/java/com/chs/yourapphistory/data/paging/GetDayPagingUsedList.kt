@@ -36,7 +36,7 @@ class GetDayPagingUsedList(
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
                 date to appInfoDao.getDayUsedList(date.toMillis()).map {
-                    it.key.toAppInfo() to it.value.toConvertDayUsedTime()
+                    it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(
                         { -it.second },

@@ -1,6 +1,7 @@
 package com.chs.yourapphistory.data.db.dao
 
 import androidx.room.Dao
+import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 
@@ -20,7 +21,7 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     abstract suspend fun getLastEventTime(): Long
 
     @Query(
-        "SELECT * " +
+        "SELECT beginUseTime, endUseTime " +
           "FROM appForegroundUsage " +
          "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
@@ -29,5 +30,5 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     abstract suspend fun getForegroundUsageInfo(
         targetDate: Long,
         packageName: String
-    ): List<AppForegroundUsageEntity>
+    ): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
 }

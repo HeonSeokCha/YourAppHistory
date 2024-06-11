@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.common.toMillis
@@ -26,26 +27,43 @@ class GetPagingAppDetailList(
     private val appNotifyInfoDao: AppNotifyInfoDao,
     private val targetDate: LocalDate,
     private val targetPackageName: String
-) : PagingSource<LocalDate, Pair<LocalDate, AppDetailInfo>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, AppDetailInfo>>): LocalDate? {
+) : PagingSource<Long, Pair<LocalDate, AppDetailInfo>>() {
+
+    override fun getRefreshKey(state: PagingState<Long, Pair<LocalDate, AppDetailInfo>>): Long? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
-            page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
+            page?.prevKey?.minus(1) ?: page?.nextKey?.plus(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, AppDetailInfo>> {
-        val pageDate: LocalDate = params.key ?: LocalDate.now()
-        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
-            .reverseDateUntil(pageDate.plusDays(1L))
+    override suspend fun load(params: LoadParams<Long>): LoadResult<Long, Pair<LocalDate, AppDetailInfo>> {
+        val pageKey: Long = params.key ?: 1L
+
+        chsLog(targetDate.minusDays(pageKey).toString())
+
+        val bufferDate = if (pageKey == 1L) {
+            if (targetDate == LocalDate.now()) {
+                targetDate.plusDays(1L)
+            } else  if (targetDate > LocalDate.now().minusDays(Constants.PAGING_DAY)) {
+                LocalDate.now().plusDays(1L)
+            } else {
+                targetDate.plusDays(3L)
+            }
+        } else {
+            targetDate.minusDays(pageKey + 1)
+        }
+
+
+        val data = targetDate.run { this.minusDays(Constants.PAGING_DAY + pageKey + 1) }
+            .reverseDateUntil(bufferDate)
             .map {
                 it to withContext(Dispatchers.IO) {
                     val usageInfo = calcHourUsageList(
                         list = async {
-                            appUsageDao.getUsageInfoList(
+                            appUsageDao.getDayUsageInfoList(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
-                            ).map { it.beginUseTime to it.endUseTime }
+                            )
                         }.await(),
                         targetDate = targetDate
                     )
@@ -55,7 +73,7 @@ class GetPagingAppDetailList(
                             appForegroundUsageDao.getForegroundUsageInfo(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
-                            ).map { it.beginUseTime to it.endUseTime }
+                            )
                         }.await(),
                         targetDate = targetDate
                     )
@@ -65,16 +83,16 @@ class GetPagingAppDetailList(
                             appNotifyInfoDao.getDayNotifyCount(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
-                            ).map { it.notifyTime }
+                            )
                         }.await()
                     )
 
                     val launchInfo = calcHourUsageList(
                         list = async {
-                            appUsageDao.getUsageBeginInfoList(
+                            appUsageDao.getDayUsageBeginInfoList(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
-                            ).map { it }
+                            )
                         }.await()
                     )
 
@@ -90,14 +108,14 @@ class GetPagingAppDetailList(
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (pageDate >= LocalDate.now()) null else pageDate.plusDays(Constants.PAGING_DAY + 1),
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            prevKey = if (pageKey - Constants.PAGING_DAY <= 0) null else pageKey - Constants.PAGING_DAY,
+            nextKey = if (data.isEmpty()) null else Constants.PAGING_DAY + pageKey
         )
     }
 
     private fun calcHourUsageList(
         targetDate: LocalDate,
-        list: List<Pair<Long, Long>>
+        list: Map<Long, Long>
     ): List<Pair<Int, Int>> {
         val usageMap = object : HashMap<Int, Long>() {
             init {
@@ -108,7 +126,7 @@ class GetPagingAppDetailList(
         }
 
         list.forEach {
-            val (begin, end) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
+            val (begin, end) = it.key.toLocalDateTime() to it.value.toLocalDateTime()
 
             if (begin.dayOfMonth < end.dayOfMonth) {
                 usageMap.computeIfPresent(begin.hour) { key, value ->
@@ -153,7 +171,11 @@ class GetPagingAppDetailList(
         }
 
         list.forEach {
+            val begin = it.toLocalDateTime()
 
+            usageMap.computeIfPresent(begin.hour) { key, value ->
+                value + 1
+            }
         }
 
         return usageMap.toList().map { it.first to it.second.toInt() }

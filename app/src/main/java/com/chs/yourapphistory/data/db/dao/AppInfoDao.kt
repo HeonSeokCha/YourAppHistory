@@ -39,23 +39,26 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
 
     @Query(
-        "SELECT * " +
+        "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as cnt " +
           "FROM appInfo " +
           "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND appInfo.packageName = appNotifyInfo.packageName "
+           "AND appInfo.packageName = appNotifyInfo.packageName " +
+         "GROUP BY appInfo.packageName " +
+         "ORDER BY cnt DESC, appInfo.packageName ASC "
     )
     abstract suspend fun getDayNotifyList(
         targetDate: Long
-    ): Map<AppInfoEntity, List<AppNotifyInfoEntity>>
+    ): Map<AppInfoEntity, @MapColumn("cnt") Int>
 
     @Query(
-        "SELECT appInfo.*, COUNT(appUsage.packageName) " +
+        "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND appInfo.packageName = appUsage.packageName "
+           "AND appInfo.packageName = appUsage.packageName " +
+         "ORDER BY cnt DESC, appInfo.packageName ASC "
     )
     abstract suspend fun getDayLaunchList(
         targetDate: Long
-    ): Map<AppInfoEntity, Int>
+    ): Map<AppInfoEntity, @MapColumn("cnt") Int>
 
 }

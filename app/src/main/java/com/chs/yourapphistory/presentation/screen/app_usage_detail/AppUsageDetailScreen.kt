@@ -1,7 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -17,17 +16,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
+import androidx.paging.compose.collectAsLazyPagingItems
+import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
@@ -36,17 +35,23 @@ import java.time.LocalDate
 @Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
-    onBack: ()-> Unit
+    onBack: () -> Unit
 ) {
-
-    val pagerState = if (state.datesList.isNotEmpty()) {
+    var currentDate by remember { mutableStateOf(LocalDate.now()) }
+    val pagingData = state.pagingDetailInfo?.collectAsLazyPagingItems()
+    val pagerState = if (pagingData != null && pagingData.itemCount != 0) {
         rememberPagerState(
             pageCount = {
-                state.datesList.size
-            }, initialPage = state.datesList.indexOf(state.targetDate)
+                pagingData.itemCount
+            }, initialPage = 0
         )
     } else {
         rememberPagerState(pageCount = { 0 })
+    }
+    LaunchedEffect(pagerState.currentPage) {
+        if (pagingData != null && pagingData.itemCount != 0) {
+            currentDate = pagingData[pagerState.currentPage]?.first ?: LocalDate.now()
+        }
     }
 
     BackHandler {
@@ -58,25 +63,23 @@ fun AppUsageDetailScreen(
             .fillMaxSize()
     ) {
 
-        if (state.targetDate != null) {
-            Row(
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp)
+        ) {
+            Text(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 16.dp)
-            ) {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically),
-                    text = if (state.targetDate == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        state.targetDate.format(Constants.DATE_FORMAT)
-                    },
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            }
+                    .weight(1f)
+                    .align(Alignment.CenterVertically),
+                text = if (currentDate == LocalDate.now()) {
+                    "오늘"
+                } else {
+                    currentDate.format(Constants.DATE_FORMAT)
+                },
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
+            )
         }
 
 
@@ -84,46 +87,51 @@ fun AppUsageDetailScreen(
             state = pagerState,
             reverseLayout = true,
             userScrollEnabled = true,
+            key = pagingData?.itemKey { it.first }
         ) { page ->
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .verticalScroll(rememberScrollState())
             ) {
-                if (state.dayUsageList.isNotEmpty()) {
-                    UsageChart(
-                        title = state.dayUsageList.sumOf { it.second }.convertToRealUsageTime(),
-                        list = state.dayUsageList,
-                        convertText = { it.convertToRealUsageMinutes() }
-                    )
+                if (pagingData != null && pagingData.itemCount != 0) {
+                    val item = pagingData[page]?.second
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                    if (item != null) {
+                        UsageChart(
+                            title = item.usageInfo.sumOf { it.second }.convertToRealUsageTime(),
+                            list = item.usageInfo,
+                            convertText = { it.convertToRealUsageMinutes() }
+                        )
 
-                    UsageChart(
-                        title = "포그라운드 실행 시간 " +
-                                state.foregroundUsageList.sumOf { it.second }
-                                    .convertToRealUsageTime(),
-                        list = state.foregroundUsageList,
-                        convertText = { it.convertToRealUsageMinutes() }
-                    )
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                        UsageChart(
+                            title = "포그라운드 실행 시간 " +
+                                    item.foregroundUsageInfo.sumOf { it.second }
+                                        .convertToRealUsageTime(),
+                            list = item.foregroundUsageInfo,
+                            convertText = { it.convertToRealUsageMinutes() }
+                        )
 
-                    UsageChart(
-                        title = "알림 ${state.notifyCount.sumOf { it.second }}개",
-                        list = state.notifyCount,
-                        convertText = { "${it}개" }
-                    )
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                        UsageChart(
+                            title = "알림 ${item.notifyInfo.sumOf { it.second }}개",
+                            list = item.notifyInfo,
+                            convertText = { "${it}개" }
+                        )
 
-                    UsageChart(
-                        title = "총 실행 횟수 ${state.launchCount.sumOf { it.second }}회",
-                        list = state.launchCount,
-                        convertText = { "${it}회" }
-                    )
+                        Spacer(modifier = Modifier.height(32.dp))
 
-                    Spacer(modifier = Modifier.height(32.dp))
+                        UsageChart(
+                            title = "총 실행 횟수 ${item.launchCountInfo.sumOf { it.second }}회",
+                            list = item.launchCountInfo,
+                            convertText = { "${it}회" }
+                        )
+
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
                 }
             }
         }

@@ -14,7 +14,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     abstract suspend fun getLastEventTime(): Long
 
     @Query(
-        "SELECT * " +
+        "SELECT notifyTime " +
           "FROM appNotifyInfo " +
          "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
            "AND packageName = :packageName"
@@ -22,5 +22,5 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     abstract suspend fun getDayNotifyCount(
         packageName: String,
         targetDate: Long
-    ): List<AppNotifyInfoEntity>
+    ): List<Long>
 }

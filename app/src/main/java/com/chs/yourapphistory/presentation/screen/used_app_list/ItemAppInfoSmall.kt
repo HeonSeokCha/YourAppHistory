@@ -110,7 +110,7 @@ fun ItemAppInfoSmall(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = dayAppUsedTime ?: Constants.TEXT_TITLE_PREVIEW,
+                        text = "${dayAppUsedTime ?: Constants.TEXT_TITLE_PREVIEW}",
                         color = Color.LightGray
                     )
                 }

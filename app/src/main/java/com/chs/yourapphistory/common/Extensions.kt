@@ -49,30 +49,11 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
     }.toInt()
 }
 
-suspend fun calculateTimeZoneUsage(
-    date: LocalDate,
-    list: List<AppBaseUsageInfo>
-): List<Pair<Int, Long>> {
-    val usageMap = object : HashMap<Int, Long>() {
-        init {
-            for (i in 0..23) {
-                put(i, 0L)
-            }
-        }
-    }
+fun Long?.isZero(): Boolean = this == null || this == 0L
 
-    withContext(Dispatchers.Default) {
-        list.forEach { appUsageInfo ->
-        }
-    }
-    return usageMap.toList()
-}
+fun Int?.isZero(): Boolean = this == null || this == 0
 
-fun Long?.isZero(): Boolean {
-    return this == null || this == 0L
-}
-
-fun Long.convertToRealUsageMinutes(): String {
+fun Int.convertToRealUsageMinutes(): String {
     return "${(this / 1000) / 60}분"
 }
 
@@ -137,7 +118,7 @@ fun LocalDate.atEndOfDayToMillis(): Long {
     return this.atTime(LocalTime.MAX).toMillis()
 }
 
-fun calculateScale(viewHeightPx: Int, values: List<Long>): Double {
+fun calculateScale(viewHeightPx: Int, values: List<Int>): Double {
     return values.maxOrNull()?.let { max ->
         viewHeightPx.times(0.8).div(max)
     } ?: 1.0
