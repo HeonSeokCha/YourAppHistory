@@ -109,16 +109,13 @@ fun ItemVerticalChart(
             .height(250.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
-                onStart = { position ->
-                },
-                onCancel = { position ->
-                },
+                onStart = { },
+                onCancel = { },
                 onCompleted = {
                     scope.launch {
                         selectedPos = it
                     }
                 }
-
             )
     ) {
 

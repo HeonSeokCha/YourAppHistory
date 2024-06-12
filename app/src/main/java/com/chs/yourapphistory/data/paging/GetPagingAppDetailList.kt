@@ -16,6 +16,7 @@ import com.chs.yourapphistory.domain.model.AppDetailInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.hours
@@ -44,7 +45,7 @@ class GetPagingAppDetailList(
         val bufferDate = if (pageKey == 1L) {
             if (targetDate == LocalDate.now()) {
                 targetDate.plusDays(1L)
-            } else  if (targetDate > LocalDate.now().minusDays(Constants.PAGING_DAY)) {
+            } else if (targetDate > LocalDate.now().minusDays(Constants.PAGING_DAY)) {
                 LocalDate.now().plusDays(1L)
             } else {
                 targetDate.plusDays(3L)
@@ -65,7 +66,7 @@ class GetPagingAppDetailList(
                                 packageName = targetPackageName
                             )
                         }.await(),
-                        targetDate = targetDate
+                        targetDate = it
                     )
 
                     val foregroundInfo = calcHourUsageList(
@@ -75,7 +76,7 @@ class GetPagingAppDetailList(
                                 packageName = targetPackageName
                             )
                         }.await(),
-                        targetDate = targetDate
+                        targetDate = it
                     )
 
                     val notifyInfo = calcHourUsageList(
@@ -128,40 +129,66 @@ class GetPagingAppDetailList(
         list.forEach {
             val (begin, end) = it.key.toLocalDateTime() to it.value.toLocalDateTime()
 
-            if (begin.dayOfMonth < end.dayOfMonth) {
-                usageMap.computeIfPresent(begin.hour) { key, value ->
-                    val nextDayStartMilli = end.toLocalDate().atStartOfDayToMillis()
-                    value + (nextDayStartMilli - begin.toMillis())
+            if (targetDate.dayOfMonth < end.dayOfMonth) {
+                val targetDateZeroHour = targetDate.atStartOfDay()
+                for (i in begin.hour..23) {
+                    usageMap.computeIfPresent(i) { key, value ->
+                        val calc = if (i == begin.hour) {
+                            begin.toMillis() - targetDateZeroHour.plusHours(i.toLong()).toMillis()
+                        } else {
+                            1.hours.inWholeMilliseconds
+                        }
+
+                        value + calc
+                    }
+                    targetDateZeroHour.minusHours(i.toLong())
                 }
-            } else {
-                usageMap.computeIfPresent(begin.hour) { key, value ->
-                    if (begin.hour < end.hour) {
-                        for (i in begin.hour + 1..end.hour) {
-                            val targetHour = targetDate.atStartOfDay().plusHours(i.toLong())
-                            usageMap.computeIfPresent(i) { _, value1 ->
-                                if (i == end.hour) {
-                                    value1 + (end.toMillis() - targetHour.toMillis())
-                                } else {
-                                    1.hours.inWholeMilliseconds
-                                }
+                return@forEach
+            }
+
+            if (begin.dayOfMonth < targetDate.dayOfMonth) {
+                val targetDateZeroHour = targetDate.atStartOfDay()
+                for (i in 0..end.hour) {
+                    usageMap.computeIfPresent(i) { key, value ->
+                        val calc = if (i == end.hour) {
+                            end.toMillis() - targetDateZeroHour.plusHours(i.toLong()).toMillis()
+                        } else {
+                            1.hours.inWholeMilliseconds
+                        }
+                        value + calc
+                    }
+                    targetDateZeroHour.minusHours(i.toLong())
+                }
+
+                return@forEach
+            }
+
+            usageMap.computeIfPresent(begin.hour) { key, value ->
+                if (begin.hour < end.hour) {
+                    val targetDateZeroHour = targetDate.atStartOfDay()
+                    for (i in (begin.hour + 1)..end.hour) {
+                        val targetHour = targetDateZeroHour.plusHours(i.toLong())
+                        usageMap.computeIfPresent(i) { _, value1 ->
+                            if (i == end.hour) {
+                                value1 + (end.toMillis() - targetHour.toMillis())
+                            } else {
+                                1.hours.inWholeMilliseconds
                             }
                         }
-                        val nextHour = targetDate.atStartOfDay().plusHours(
-                            (begin.hour + 1).toLong()
-                        )
-                        value + (nextHour.toMillis() - begin.toMillis())
-                    } else {
-                        value + (end.toMillis() - begin.toMillis())
+                        targetDateZeroHour.minusHours(i.toLong())
                     }
+                    val nextHour = targetDate.atStartOfDay().plusHours((begin.hour + 1).toLong())
+                    value + (nextHour.toMillis() - begin.toMillis())
+                } else {
+                    value + (end.toMillis() - begin.toMillis())
                 }
             }
         }
+
         return usageMap.toList().map { it.first to it.second.toInt() }
     }
 
-    private fun calcHourUsageList(
-        list: List<Long>
-    ): List<Pair<Int, Int>> {
+    private fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
         val usageMap = object : HashMap<Int, Long>() {
             init {
                 for (i in 0..23) {

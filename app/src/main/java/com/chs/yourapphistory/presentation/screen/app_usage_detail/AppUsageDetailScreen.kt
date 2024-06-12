@@ -1,6 +1,8 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -12,6 +14,8 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Card
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,9 +31,13 @@ import androidx.compose.ui.unit.sp
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
+import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
+import com.chs.yourapphistory.presentation.screen.common.placeholder
+import com.chs.yourapphistory.presentation.screen.common.shimmer
 import java.time.LocalDate
 
 @Composable
@@ -43,15 +51,22 @@ fun AppUsageDetailScreen(
         rememberPagerState(
             pageCount = {
                 pagingData.itemCount
-            }, initialPage = 0
+            }, initialPage = if (pagingData.itemCount < 8) {
+                pagingData.itemCount - 6
+            } else 2
         )
     } else {
         rememberPagerState(pageCount = { 0 })
     }
+
     LaunchedEffect(pagerState.currentPage) {
         if (pagingData != null && pagingData.itemCount != 0) {
             currentDate = pagingData[pagerState.currentPage]?.first ?: LocalDate.now()
         }
+    }
+
+    LaunchedEffect(key1 = pagingData?.itemCount) {
+        chsLog(pagingData?.itemCount.toString())
     }
 
     BackHandler {
@@ -66,16 +81,23 @@ fun AppUsageDetailScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp)
+                .padding(vertical = 16.dp),
+            horizontalArrangement = Arrangement.Center
         ) {
             Text(
                 modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically),
-                text = if (currentDate == LocalDate.now()) {
-                    "오늘"
+                    .placeholder(
+                        visible = pagingData == null || pagingData.itemCount == 0,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
+                text = if (pagingData == null || pagingData.itemCount == 0) {
+                    Constants.TEXT_TITLE_PREVIEW
                 } else {
-                    currentDate.format(Constants.DATE_FORMAT)
+                    if (currentDate == LocalDate.now()) {
+                        "오늘"
+                    } else {
+                        currentDate.format(Constants.DATE_FORMAT)
+                    }
                 },
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp
@@ -130,6 +152,20 @@ fun AppUsageDetailScreen(
                             convertText = { "${it}회" }
                         )
 
+                        Spacer(modifier = Modifier.height(32.dp))
+                    }
+                } else {
+                    repeat(4) {
+                        Card(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(250.dp)
+                                .padding(horizontal = 8.dp)
+                                .placeholder(
+                                    visible = true,
+                                    highlight = PlaceholderHighlight.shimmer()
+                                )
+                        ) {}
                         Spacer(modifier = Modifier.height(32.dp))
                     }
                 }
