@@ -9,9 +9,8 @@ versionCode = "1"
 versionName = "1.0"
 
 activity = "1.9.0"
-compose-ui = "1.6.7"
-composeCompiler = "1.5.14"
-lifecycle = "2.8.1"
+compose-ui = "1.6.8"
+lifecycle = "2.8.2"
 room = "2.6.1"
 hilt = "2.50"
 kotlin = "2.0.0"
@@ -27,7 +26,7 @@ androidX-compose-material-icon-extend = { module = "androidx.compose.material:ma
 androidX-compose-material3 = "androidx.compose.material3:material3:1.2.1"
 androidX-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
-androidX-navigation-compose = "androidx.navigation:navigation-compose:2.8.0-beta02"
+androidX-navigation-compose = "androidx.navigation:navigation-compose:2.8.0-beta03"
 androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
 androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
 

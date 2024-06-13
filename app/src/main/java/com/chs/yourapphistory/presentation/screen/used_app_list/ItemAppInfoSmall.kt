@@ -34,6 +34,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.convertToRealUsageTime
+import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
@@ -43,10 +45,11 @@ import com.chs.yourapphistory.presentation.screen.common.shimmer
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
+    sortOption: UsageEventType,
     clickAble: (String) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
-    val dayAppUsedTime = usedAppInfo?.second
+    val value = usedAppInfo?.second
 
     Card(
         colors = CardDefaults.cardColors(
@@ -110,7 +113,11 @@ fun ItemAppInfoSmall(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = "${dayAppUsedTime ?: Constants.TEXT_TITLE_PREVIEW}",
+                        text = if (sortOption is UsageEventType.AppNotifyEvent) {
+                            "${value}회"
+                        } else {
+                            value?.convertToRealUsageTime() ?: Constants.TEXT_TITLE_PREVIEW
+                        },
                         color = Color.LightGray
                     )
                 }

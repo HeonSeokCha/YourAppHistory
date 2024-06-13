@@ -122,7 +122,8 @@ fun UsedAppListScreenScreen(
                             val appInfo = packageList[idx]
                             ItemAppInfoSmall(
                                 usedAppInfo = appInfo,
-                                icon = state.appIconList[appInfo.first.packageName]
+                                icon = state.appIconList[appInfo.first.packageName],
+                                sortOption = state.sortOption
                             ) { packageName ->
                                 selectPackageLabel(appInfo.first.label)
                                 onNavigate(
