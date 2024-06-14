@@ -113,7 +113,9 @@ fun ItemAppInfoSmall(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
-                        text = if (sortOption is UsageEventType.AppNotifyEvent) {
+                        text = if (sortOption is UsageEventType.AppNotifyEvent
+                            || sortOption is UsageEventType.AppLaunchEvent
+                        ) {
                             "${value}회"
                         } else {
                             value?.convertToRealUsageTime() ?: Constants.TEXT_TITLE_PREVIEW

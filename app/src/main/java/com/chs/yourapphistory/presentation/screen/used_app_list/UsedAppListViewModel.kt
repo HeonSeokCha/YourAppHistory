@@ -9,6 +9,7 @@ import androidx.paging.cachedIn
 import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingForegroundUsedUseCase
+import com.chs.yourapphistory.domain.usecase.GetDayPagingLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingUsedUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
@@ -26,6 +27,7 @@ class UsedAppListViewModel @Inject constructor(
     private val getDayPagingUsedUseCase: GetDayPagingUsedUseCase,
     private val getDayPagingForegroundUsedUseCase: GetDayPagingForegroundUsedUseCase,
     private val getDayPagingNotifyUseCase: GetDayPagingNotifyUseCase,
+    private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
     private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase
@@ -37,7 +39,7 @@ class UsedAppListViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             insertInfo()
-            getUsedAppList()
+            changeSortOption(state.sortOption)
         }
     }
 
@@ -46,33 +48,31 @@ class UsedAppListViewModel @Inject constructor(
         state = when (option) {
             UsageEventType.AppUsageEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingUsedUseCase(),
+                    appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
                     sortOption = option
                 )
             }
 
             UsageEventType.AppForegroundUsageEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingForegroundUsedUseCase(),
+                    appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
                     sortOption = option
                 )
             }
 
             UsageEventType.AppNotifyEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingNotifyUseCase(),
+                    appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope),
                     sortOption = option
                 )
             }
-        }
-    }
 
-
-    private fun getUsedAppList() {
-        viewModelScope.launch {
-            state = state.copy(
-                appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
-            )
+            UsageEventType.AppLaunchEvent -> {
+                state.copy(
+                    appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope),
+                    sortOption = option
+                )
+            }
         }
     }
 

@@ -13,6 +13,7 @@ import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
+import com.chs.yourapphistory.data.paging.GetDayPagingLaunchList
 import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
 import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
 import com.chs.yourapphistory.data.paging.GetPagingAppDetailList
@@ -141,6 +142,14 @@ class AppRepositoryImpl @Inject constructor(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetDayPagingNotifyList(appInfoDao = appInfoDao)
+        }.flow
+    }
+
+    override fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetDayPagingLaunchList(appInfoDao = appInfoDao)
         }.flow
     }
 

@@ -34,6 +34,7 @@ object Constants {
     val USAGE_EVENT_TYPE_LIST = listOf(
         UsageEventType.AppUsageEvent,
         UsageEventType.AppForegroundUsageEvent,
-        UsageEventType.AppNotifyEvent
+        UsageEventType.AppNotifyEvent,
+        UsageEventType.AppLaunchEvent
     )
 }
