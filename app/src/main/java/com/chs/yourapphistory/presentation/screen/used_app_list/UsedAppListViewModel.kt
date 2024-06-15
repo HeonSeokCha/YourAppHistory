@@ -28,8 +28,6 @@ class UsedAppListViewModel @Inject constructor(
     private val getDayPagingForegroundUsedUseCase: GetDayPagingForegroundUsedUseCase,
     private val getDayPagingNotifyUseCase: GetDayPagingNotifyUseCase,
     private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
-    private val insertInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
-    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase
 ) : ViewModel() {
 
@@ -38,8 +36,8 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            insertInfo()
             changeSortOption(state.sortOption)
+            state = state.copy(appIconList = getAppIconMapUseCase())
         }
     }
 
@@ -73,20 +71,6 @@ class UsedAppListViewModel @Inject constructor(
                     sortOption = option
                 )
             }
-        }
-    }
-
-    private suspend fun insertInfo() {
-        withContext(Dispatchers.IO) {
-            awaitAll(
-                async { insertInstallAppInfoUseCase() },
-                async { insertAppUsageInfoUseCase() },
-                async {
-                    state = state.copy(
-                        appIconList = getAppIconMapUseCase()
-                    )
-                }
-            )
         }
     }
 }

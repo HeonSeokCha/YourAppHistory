@@ -20,7 +20,6 @@ import com.chs.yourapphistory.data.paging.GetPagingAppDetailList
 import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
-import com.chs.yourapphistory.domain.usecase.GetPagingAppDetailUseCase
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -38,14 +37,16 @@ class AppRepositoryImpl @Inject constructor(
 ) : AppRepository {
 
     private suspend fun getLastEventTime(): Long {
-        return listOf(
-            appUsageDao.getLastEventTime(),
-            appForegroundUsageDao.getLastEventTime(),
-            appNotifyInfoDao.getLastEventTime()
-        ).min().run {
-            if (this == 0L) {
-                LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
-            } else this
+        return withContext(Dispatchers.IO) {
+            awaitAll(
+                async { appUsageDao.getLastEventTime() },
+                async { appUsageDao.getLastEventTime() },
+                async { appUsageDao.getLastEventTime() }
+            ).min().run {
+                if (this == 0L) {
+                    LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).toMillis()
+                } else this
+            }
         }
     }
 
