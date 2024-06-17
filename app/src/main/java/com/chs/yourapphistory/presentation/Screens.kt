@@ -9,5 +9,8 @@ sealed class Screen {
     @Serializable
     data object ScreenUsedAppList : Screen()
     @Serializable
-    class ScreenAppUsageDetail(val targetPackageName: String, val targetDate: Long) : Screen()
+    class ScreenAppUsageDetail(
+        val targetPackageName: String,
+        val targetDate: Long
+    ) : Screen()
 }

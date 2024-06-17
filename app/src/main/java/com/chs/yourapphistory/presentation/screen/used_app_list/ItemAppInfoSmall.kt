@@ -8,6 +8,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -86,13 +87,14 @@ fun ItemAppInfoSmall(
                         contentDescription = null
                     )
                 } else {
-                    Image(
+                    Box(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .background(Color.LightGray),
-                        imageVector = Icons.Filled.Android,
-                        contentDescription = null
+                            .placeholder(
+                                visible = true,
+                                highlight = PlaceholderHighlight.shimmer()
+                            ),
                     )
                 }
 
@@ -113,6 +115,11 @@ fun ItemAppInfoSmall(
                     Spacer(modifier = Modifier.height(6.dp))
 
                     Text(
+                        modifier = Modifier
+                            .placeholder(
+                                visible = appInfo == null,
+                                highlight = PlaceholderHighlight.shimmer()
+                            ),
                         text = if (sortOption is UsageEventType.AppNotifyEvent
                             || sortOption is UsageEventType.AppLaunchEvent
                         ) {

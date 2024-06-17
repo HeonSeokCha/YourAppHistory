@@ -63,9 +63,7 @@ fun MainNavHost(
                 navController.getBackStackEntry(arg)
             }
             val viewModel: AppUsageDetailViewModel = hiltViewModel(parentEntry)
-            AppUsageDetailScreen(
-                state = viewModel.state,
-            ) {
+            AppUsageDetailScreen(state = viewModel.state) {
                 selectPackage(null)
                 navController.navigateUp()
             }

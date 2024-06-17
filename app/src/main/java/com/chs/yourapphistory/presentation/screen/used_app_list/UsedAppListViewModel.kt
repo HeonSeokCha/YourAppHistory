@@ -18,6 +18,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
@@ -28,7 +29,9 @@ class UsedAppListViewModel @Inject constructor(
     private val getDayPagingForegroundUsedUseCase: GetDayPagingForegroundUsedUseCase,
     private val getDayPagingNotifyUseCase: GetDayPagingNotifyUseCase,
     private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
-    private val getAppIconMapUseCase: GetAppIconMapUseCase
+    private val getAppIconMapUseCase: GetAppIconMapUseCase,
+    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
+    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(UsedAppListState())
@@ -36,8 +39,15 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            awaitAll(
+                async { getInstallAppInfoUseCase() },
+                async { insertAppUsageInfoUseCase() },
+                async {
+                    state = state.copy(appIconList = getAppIconMapUseCase())
+                }
+            )
+
             changeSortOption(state.sortOption)
-            state = state.copy(appIconList = getAppIconMapUseCase())
         }
     }
 

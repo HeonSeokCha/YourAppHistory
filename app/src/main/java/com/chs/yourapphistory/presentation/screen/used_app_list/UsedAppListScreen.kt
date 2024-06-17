@@ -50,7 +50,6 @@ fun UsedAppListScreenScreen(
             .fillMaxSize()
     ) {
         if (pagingData != null) {
-
             Row {
                 if (pagingData.itemCount != 0) {
                     Text(
@@ -136,19 +135,6 @@ fun UsedAppListScreenScreen(
                         }
                     }
                 }
-            }
-
-
-            when (pagingData.loadState.append) {
-                is LoadState.Loading -> {
-
-                }
-
-                is LoadState.Error -> {
-
-                }
-
-                else -> Unit
             }
         }
     }
