@@ -51,8 +51,8 @@ fun AppUsageDetailScreen(
         rememberPagerState(
             pageCount = {
                 pagingData.itemCount
-            }, initialPage = if (pagingData.itemCount < 8) {
-                pagingData.itemCount - 6
+            }, initialPage = if (pagingData.itemCount < 6) {
+                pagingData.itemCount - 4
             } else 2
         )
     } else {

@@ -28,39 +28,44 @@ class GetPagingAppDetailList(
     private val appNotifyInfoDao: AppNotifyInfoDao,
     private val targetDate: LocalDate,
     private val targetPackageName: String
-) : PagingSource<Long, Pair<LocalDate, AppDetailInfo>>() {
+) : PagingSource<LocalDate, Pair<LocalDate, AppDetailInfo>>() {
 
-    override fun getRefreshKey(state: PagingState<Long, Pair<LocalDate, AppDetailInfo>>): Long? {
+    override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, AppDetailInfo>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
-            page?.prevKey?.minus(1) ?: page?.nextKey?.plus(1)
+            page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<Long>): LoadResult<Long, Pair<LocalDate, AppDetailInfo>> {
-        val pageKey: Long = params.key ?: 1L
-
-        chsLog(targetDate.minusDays(pageKey).toString())
-
-        val bufferDate = if (pageKey == 1L) {
-            if (targetDate == LocalDate.now()) {
-                targetDate.plusDays(1L)
-            } else if (targetDate > LocalDate.now().minusDays(Constants.PAGING_DAY)) {
-                LocalDate.now().plusDays(1L)
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, AppDetailInfo>> {
+        val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
+            if (params.key == null) {
+                targetDate
             } else {
-                targetDate.plusDays(3L)
+                this
             }
-        } else {
-            targetDate.minusDays(pageKey + 1)
         }
 
+        val bufferDate = if (params.key == null) {
+            if (pageDate == LocalDate.now()) {
+                pageDate
+            } else if (pageDate.plusDays(3) > LocalDate.now()) {
+                pageDate.plusDays(
+                    (LocalDate.now().dayOfMonth - pageDate.dayOfMonth).toLong()
+                )
+            } else {
+                pageDate.plusDays(2)
+            }
+        } else {
+            pageDate
+        }
 
-        val data = targetDate.run { this.minusDays(Constants.PAGING_DAY + pageKey + 1) }
-            .reverseDateUntil(bufferDate)
+        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
+            .reverseDateUntil(bufferDate.plusDays(1L))
             .map {
-                it to withContext(Dispatchers.IO) {
+                it to withContext(Dispatchers.Default) {
                     val usageInfo = calcHourUsageList(
-                        list = async {
+                        list = async(Dispatchers.IO) {
                             appUsageDao.getDayUsageInfoList(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
@@ -70,7 +75,7 @@ class GetPagingAppDetailList(
                     )
 
                     val foregroundInfo = calcHourUsageList(
-                        list = async {
+                        list = async(Dispatchers.IO) {
                             appForegroundUsageDao.getForegroundUsageInfo(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
@@ -80,7 +85,7 @@ class GetPagingAppDetailList(
                     )
 
                     val notifyInfo = calcHourUsageList(
-                        list = async {
+                        list = async(Dispatchers.IO) {
                             appNotifyInfoDao.getDayNotifyCount(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
@@ -89,7 +94,7 @@ class GetPagingAppDetailList(
                     )
 
                     val launchInfo = calcHourUsageList(
-                        list = async {
+                        list = async(Dispatchers.IO) {
                             appUsageDao.getDayUsageBeginInfoList(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
@@ -109,8 +114,12 @@ class GetPagingAppDetailList(
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (pageKey - Constants.PAGING_DAY <= 0) null else pageKey - Constants.PAGING_DAY,
-            nextKey = if (data.isEmpty()) null else Constants.PAGING_DAY + pageKey
+            prevKey = if (bufferDate.plusDays(Constants.PAGING_DAY + 1) > LocalDate.now()) {
+                null
+            } else {
+                bufferDate.plusDays(Constants.PAGING_DAY + 1)
+            },
+            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
 
