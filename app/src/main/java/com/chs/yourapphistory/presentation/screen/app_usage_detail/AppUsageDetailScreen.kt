@@ -65,10 +65,6 @@ fun AppUsageDetailScreen(
         }
     }
 
-    LaunchedEffect(key1 = pagingData?.itemCount) {
-        chsLog(pagingData?.itemCount.toString())
-    }
-
     BackHandler {
         onBack()
     }

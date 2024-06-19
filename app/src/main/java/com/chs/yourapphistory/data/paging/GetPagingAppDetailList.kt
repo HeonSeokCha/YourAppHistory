@@ -46,22 +46,9 @@ class GetPagingAppDetailList(
             }
         }
 
-        val bufferDate = if (params.key == null) {
-            if (pageDate == LocalDate.now()) {
-                pageDate
-            } else if (pageDate.plusDays(3) > LocalDate.now()) {
-                pageDate.plusDays(
-                    (LocalDate.now().dayOfMonth - pageDate.dayOfMonth).toLong()
-                )
-            } else {
-                pageDate.plusDays(2)
-            }
-        } else {
-            pageDate
-        }
 
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
-            .reverseDateUntil(bufferDate.plusDays(1L))
+            .reverseDateUntil(pageDate.plusDays(1L))
             .map {
                 it to withContext(Dispatchers.Default) {
                     val usageInfo = calcHourUsageList(
@@ -114,10 +101,10 @@ class GetPagingAppDetailList(
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (bufferDate.plusDays(Constants.PAGING_DAY + 1) > LocalDate.now()) {
+            prevKey = if (targetDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
                 null
             } else {
-                bufferDate.plusDays(Constants.PAGING_DAY + 1)
+                targetDate.plusDays(Constants.PAGING_DAY)
             },
             nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )

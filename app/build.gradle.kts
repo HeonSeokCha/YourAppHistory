@@ -62,8 +62,12 @@ dependencies {
     implementation(libs.bundles.room)
     implementation(libs.bundles.hilt)
     implementation(libs.bundles.kotlin)
+    implementation(libs.bundles.worker)
+
     implementation(libs.lottie)
+    implementation(libs.kotlin.serialization)
+    
     ksp(libs.hilt.compiler)
     ksp(libs.androidX.room.compiler)
-    implementation(libs.kotlin.serialization)
+    ksp(libs.hilt.worker.compiler)
 }
