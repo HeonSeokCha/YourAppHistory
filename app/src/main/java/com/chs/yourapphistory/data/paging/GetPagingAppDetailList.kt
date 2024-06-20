@@ -38,6 +38,7 @@ class GetPagingAppDetailList(
     }
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, AppDetailInfo>> {
+        chsLog(params.key.toString())
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -46,9 +47,13 @@ class GetPagingAppDetailList(
             }
         }
 
+        val buffetDate = if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+            LocalDate.now()
+        } else pageDate
+
 
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
-            .reverseDateUntil(pageDate.plusDays(1L))
+            .reverseDateUntil(buffetDate.plusDays(1L))
             .map {
                 it to withContext(Dispatchers.Default) {
                     val usageInfo = calcHourUsageList(
@@ -101,10 +106,12 @@ class GetPagingAppDetailList(
 
         return LoadResult.Page(
             data = data,
-            prevKey = if (targetDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+            prevKey = if (buffetDate == LocalDate.now()) {
                 null
             } else {
-                targetDate.plusDays(Constants.PAGING_DAY)
+                if (buffetDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+                    LocalDate.now()
+                } else buffetDate.plusDays(Constants.PAGING_DAY + 1)
             },
             nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )

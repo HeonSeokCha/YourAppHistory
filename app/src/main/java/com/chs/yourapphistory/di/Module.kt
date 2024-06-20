@@ -1,6 +1,7 @@
 package com.chs.yourapphistory.di
 
 import android.content.Context
+import androidx.work.WorkManager
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.YourAppHistoryDatabase
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -48,5 +49,13 @@ object Module {
     @Provides
     fun provideAppNotifyInfoDao(db: YourAppHistoryDatabase): AppNotifyInfoDao {
         return db.appNotifyInfoDao
+    }
+
+    @Singleton
+    @Provides
+    fun provideWorkManager(
+        @ApplicationContext context: Context,
+    ): WorkManager {
+        return WorkManager.getInstance(context)
     }
 }

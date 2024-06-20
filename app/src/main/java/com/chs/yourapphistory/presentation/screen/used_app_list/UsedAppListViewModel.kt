@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import androidx.work.WorkManager
 import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingForegroundUsedUseCase
@@ -15,12 +16,9 @@ import com.chs.yourapphistory.domain.usecase.GetDayPagingUsedUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -31,7 +29,8 @@ class UsedAppListViewModel @Inject constructor(
     private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
-    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
+    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
+    private val workManager : WorkManager
 ) : ViewModel() {
 
     var state by mutableStateOf(UsedAppListState())
