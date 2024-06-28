@@ -29,8 +29,7 @@ class UsedAppListViewModel @Inject constructor(
     private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
-    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase,
-    private val workManager : WorkManager
+    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
 
     var state by mutableStateOf(UsedAppListState())

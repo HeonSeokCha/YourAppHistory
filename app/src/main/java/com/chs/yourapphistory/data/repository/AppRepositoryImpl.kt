@@ -24,6 +24,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
@@ -35,6 +37,8 @@ class AppRepositoryImpl @Inject constructor(
     private val appForegroundUsageDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao
 ) : AppRepository {
+
+    private val mutex: Mutex by lazy { Mutex() }
 
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
@@ -60,7 +64,9 @@ class AppRepositoryImpl @Inject constructor(
                 .filterNot { launcherPackageName ->
                     localList.any {
                         it.packageName == launcherPackageName
-                                && it.label == applicationInfoSource.getApplicationLabel(launcherPackageName)
+                                && it.label == applicationInfoSource.getApplicationLabel(
+                            launcherPackageName
+                        )
                     }
                 }.map { packageName ->
                     AppInfoEntity(
@@ -82,43 +88,44 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun insertAppUsageInfo() {
-        val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-        val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+        mutex.withLock {
+            val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
+            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+            withContext(Dispatchers.IO) {
+                val appUsageInsert = async(Dispatchers.IO) {
+                    appUsageDao.upsert(
+                        *applicationInfoSource.getAppUsageInfoList(
+                            installPackageNames = installPackageNames,
+                            usageEventList = rangeList.filter { rawInfo ->
+                                Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                            }
+                        ).toTypedArray()
+                    )
+                }
 
-        withContext(Dispatchers.IO) {
-            val appUsageInsert = async(Dispatchers.IO) {
-                appUsageDao.upsert(
-                    *applicationInfoSource.getAppUsageInfoList(
-                        installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
-                    ).toTypedArray()
-                )
-            }
+                val appForegroundUsageInsert = async(Dispatchers.IO) {
+                    appForegroundUsageDao.upsert(
+                        *applicationInfoSource.getAppForeGroundUsageInfoList(
+                            installPackageNames = installPackageNames,
+                            usageEventList = rangeList.filter { rawInfo ->
+                                Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                            }
+                        ).toTypedArray()
+                    )
+                }
 
-            val appForegroundUsageInsert = async(Dispatchers.IO) {
-                appForegroundUsageDao.upsert(
-                    *applicationInfoSource.getAppForeGroundUsageInfoList(
-                        installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
-                    ).toTypedArray()
-                )
+                val appNotifyInfoUpsert = async(Dispatchers.IO) {
+                    appNotifyInfoDao.upsert(
+                        *applicationInfoSource.getAppNotifyInfoList(
+                            installPackageNames = installPackageNames,
+                            usageEventList = rangeList.filter { rawInfo ->
+                                Constants.APP_NOTIFY_EVENT_FILTER.any { it == rawInfo.eventType }
+                            }
+                        ).toTypedArray()
+                    )
+                }
+                awaitAll(appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
             }
-
-            val appNotifyInfoUpsert = async(Dispatchers.IO) {
-                appNotifyInfoDao.upsert(
-                    *applicationInfoSource.getAppNotifyInfoList(
-                        installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_NOTIFY_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
-                    ).toTypedArray()
-                )
-            }
-            awaitAll(appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
         }
     }
 

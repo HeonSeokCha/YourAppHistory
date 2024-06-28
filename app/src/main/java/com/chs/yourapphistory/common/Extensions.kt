@@ -5,14 +5,12 @@ import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
 import android.os.Process
 import android.util.Log
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
-import kotlin.time.Duration.Companion.hours
+import java.util.stream.Collectors
 
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT
@@ -142,7 +140,7 @@ fun getUsagePermission(context: Context): Boolean {
 
 fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
     return this.datesUntil(targetDate)
-        .toList()
+        .collect(Collectors.toList())
         .reversed()
 }
 
