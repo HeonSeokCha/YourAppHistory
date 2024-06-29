@@ -7,15 +7,21 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
+import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.toLocalDate
+import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.contracts.contract
 
 class ApplicationInfoSource @Inject constructor(
     private val context: Context
@@ -125,9 +131,7 @@ class ApplicationInfoSource @Inject constructor(
                         beginUseTime = it.eventTime
                     )
             } else {
-                if (inCompletedUsageList.containsKey(it.packageName)) {
-                    completedUsageList.add(
-                        inCompletedUsageList[it.packageName]!!.copy(
+                if (inCompletedUsageList.containsKey(it.packageName)) { completedUsageList.add( inCompletedUsageList[it.packageName]!!.copy(
                             endUseTime = it.eventTime
                         )
                     )
@@ -165,62 +169,80 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
+            if (usageEvent.eventTime.toLocalDate() <= LocalDate.now().minusDays(2L)) {
+            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+            }
+
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
-                    if (inCompletedUsageList[usageEvent.packageName] == null) {
-                        inCompletedUsageList[usageEvent.packageName] =
-                            AppUsageEntity(
-                                packageName = usageEvent.packageName,
-                                beginUseTime = usageEvent.eventTime
-                            )
+                    if (installPackageNames.contains(usageEvent.packageName)) {
+                        if (inCompletedUsageList[usageEvent.packageName] == null) {
+                            inCompletedUsageList[usageEvent.packageName] =
+                                AppUsageEntity(
+                                    packageName = usageEvent.packageName,
+                                    beginUseTime = usageEvent.eventTime
+                                )
+                        }
                     }
                     prevPackageName = usageEvent.packageName
                     prevActivityClassName = usageEvent.className
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
-                    inCompletedUsageList.computeIfPresent(
-                        usageEvent.packageName
-                    ) { key, value ->
+                    if (inCompletedUsageList[usageEvent.packageName] == null) {
+                        prevPackageName = null
+                        continue
+                    }
+
+                    inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
                             endUseTime = usageEvent.eventTime
                         )
                     }
 
                     if (isScreenOff) {
-                        if (installPackageNames.contains(usageEvent.packageName)) {
-                            if (inCompletedUsageList.containsKey(usageEvent.packageName)) {
-                                if (inCompletedUsageList[usageEvent.packageName]!!.endUseTime.isZero()) {
-                                    inCompletedUsageList[usageEvent.packageName] =
-                                        inCompletedUsageList[usageEvent.packageName]!!.copy(
-                                            endUseTime = usageEvent.eventTime
-                                        )
-                                }
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
-                            }
-                        }
-
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
+
+                    prevPackageName = null
                 }
 
                 UsageEvents.Event.ACTIVITY_STOPPED -> {
-                    if (inCompletedUsageList.containsKey(usageEvent.packageName)
-                        && (prevPackageName != usageEvent.packageName || prevActivityClassName == usageEvent.className)
-                    ) {
-                        if (installPackageNames.contains(usageEvent.packageName)) {
-                            if (inCompletedUsageList[usageEvent.packageName]!!.endUseTime.isZero()) {
-                                inCompletedUsageList[usageEvent.packageName] =
-                                    inCompletedUsageList[usageEvent.packageName]!!.copy(
-                                        endUseTime = usageEvent.eventTime
-                                    )
-                            }
+                    if (usageEvent.packageName == "com.chs.youranimelist") {
+                        Log.e("123", "123")
+                    }
+                    if (inCompletedUsageList[usageEvent.packageName] == null) {
+                        prevPackageName = null
+                        continue
+                    }
 
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
+                    if (inCompletedUsageList[usageEvent.packageName]?.endUseTime.isZero()) {
+                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                            value.copy(
+                                endUseTime = usageEvent.eventTime
+                            )
                         }
 
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
                         inCompletedUsageList.remove(usageEvent.packageName)
+                        continue
                     }
+
+                    if (usageEvent.className == prevActivityClassName) {
+                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                            value.copy(
+                                endUseTime = usageEvent.eventTime
+                            )
+                        }
+                    }
+
+                    if (usageEvent.packageName == prevPackageName) continue
+
+                    completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
+                    inCompletedUsageList.remove(usageEvent.packageName)
+
+                    prevPackageName = null
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
@@ -231,10 +253,6 @@ class ApplicationInfoSource @Inject constructor(
                 UsageEvents.Event.SCREEN_INTERACTIVE -> {
                     isScreenOff = false
                 }
-
-//                UsageEvents.Event.FOREGROUND_SERVICE_START, UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
-//                    Log.e("USAGE", usageEvent.toString())
-//                }
             }
         }
         return completedUsageList

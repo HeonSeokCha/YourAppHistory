@@ -26,6 +26,7 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.presentation.Screen
+import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
@@ -136,6 +137,8 @@ fun UsedAppListScreenScreen(
                     }
                 }
             }
+        } else {
+            CircleLoadingIndicator()
         }
     }
 

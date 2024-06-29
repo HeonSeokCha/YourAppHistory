@@ -5,7 +5,7 @@ import com.chs.yourapphistory.data.model.UsageEventType
 import java.time.format.DateTimeFormatter
 
 object Constants {
-    const val FIRST_COLLECT_DAY: Long = 10L
+    const val FIRST_COLLECT_DAY: Long = 3L
     const val PAGING_DAY: Long = 3L
     val SIMPLE_HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h")
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")

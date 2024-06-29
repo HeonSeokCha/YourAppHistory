@@ -16,9 +16,11 @@ import com.chs.yourapphistory.domain.usecase.GetDayPagingUsedUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
@@ -37,13 +39,15 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            awaitAll(
-                async { getInstallAppInfoUseCase() },
-                async { insertAppUsageInfoUseCase() },
-                async {
-                    state = state.copy(appIconList = getAppIconMapUseCase())
-                }
-            )
+            withContext(Dispatchers.IO) {
+                awaitAll(
+                    async { getInstallAppInfoUseCase() },
+                    async { insertAppUsageInfoUseCase() },
+                    async {
+                        state = state.copy(appIconList = getAppIconMapUseCase())
+                    }
+                )
+            }
 
             changeSortOption(state.sortOption)
         }
