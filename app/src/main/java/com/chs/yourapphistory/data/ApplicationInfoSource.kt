@@ -169,9 +169,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime.toLocalDate() <= LocalDate.now().minusDays(2L)) {
             chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
-            }
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -205,44 +203,33 @@ class ApplicationInfoSource @Inject constructor(
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
 
+                    if (usageEvent.packageName == prevPackageName && usageEvent.className != prevActivityClassName) continue
+
                     prevPackageName = null
                 }
 
                 UsageEvents.Event.ACTIVITY_STOPPED -> {
-                    if (usageEvent.packageName == "com.chs.youranimelist") {
-                        Log.e("123", "123")
-                    }
                     if (inCompletedUsageList[usageEvent.packageName] == null) {
-                        prevPackageName = null
                         continue
                     }
 
                     if (inCompletedUsageList[usageEvent.packageName]?.endUseTime.isZero()) {
-                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                            value.copy(
-                                endUseTime = usageEvent.eventTime
-                            )
-                        }
-
-                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
-                        inCompletedUsageList.remove(usageEvent.packageName)
                         continue
                     }
 
-                    if (usageEvent.className == prevActivityClassName) {
-                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                            value.copy(
-                                endUseTime = usageEvent.eventTime
-                            )
-                        }
-                    }
+//                    if (usageEvent.className == prevActivityClassName) {
+//                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+//                            value.copy(
+//                                endUseTime = usageEvent.eventTime
+//                            )
+//                        }
+//                    }
 
                     if (usageEvent.packageName == prevPackageName) continue
 
                     completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
                     inCompletedUsageList.remove(usageEvent.packageName)
 
-                    prevPackageName = null
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
