@@ -131,7 +131,9 @@ class ApplicationInfoSource @Inject constructor(
                         beginUseTime = it.eventTime
                     )
             } else {
-                if (inCompletedUsageList.containsKey(it.packageName)) { completedUsageList.add( inCompletedUsageList[it.packageName]!!.copy(
+                if (inCompletedUsageList.containsKey(it.packageName)) {
+                    completedUsageList.add(
+                        inCompletedUsageList[it.packageName]!!.copy(
                             endUseTime = it.eventTime
                         )
                     )
@@ -163,13 +165,12 @@ class ApplicationInfoSource @Inject constructor(
         usageEventList: List<AppUsageEventRawInfo>
     ): List<AppUsageEntity> {
         var prevPackageName: String? = null
-        var prevActivityClassName: String? = null
-        val inCompletedUsageList: HashMap<String, AppUsageEntity> = hashMapOf()
+        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, Int>> = hashMapOf()
         var isScreenOff: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+//            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -179,61 +180,47 @@ class ApplicationInfoSource @Inject constructor(
                                 AppUsageEntity(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
+                                ) to 1
+                        } else {
+                            inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                                value.copy(
+                                    second = value.second + 1
                                 )
+                            }
                         }
                     }
                     prevPackageName = usageEvent.packageName
-                    prevActivityClassName = usageEvent.className
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
-                    if (inCompletedUsageList[usageEvent.packageName] == null) {
-                        prevPackageName = null
-                        continue
-                    }
+                    if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        value.copy(
-                            endUseTime = usageEvent.eventTime
-                        )
+                        value.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
                     }
-
-                    if (isScreenOff) {
-                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
-                        inCompletedUsageList.remove(usageEvent.packageName)
-                    }
-
-                    if (usageEvent.packageName == prevPackageName && usageEvent.className != prevActivityClassName) continue
-
-                    prevPackageName = null
                 }
 
                 UsageEvents.Event.ACTIVITY_STOPPED -> {
-                    if (inCompletedUsageList[usageEvent.packageName] == null) {
-                        continue
+                    if (inCompletedUsageList[usageEvent.packageName] == null) continue
+
+                    inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                        var copyValue = value
+                        if (value.first.endUseTime.isZero()) {
+                            copyValue = copyValue.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
+                        }
+                        copyValue.copy(second = copyValue.second - 1)
                     }
 
-                    if (inCompletedUsageList[usageEvent.packageName]?.endUseTime.isZero()) {
-                        continue
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                        || usageEvent.packageName != prevPackageName
+                        || isScreenOff
+                    ) {
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
                     }
-
-//                    if (usageEvent.className == prevActivityClassName) {
-//                        inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-//                            value.copy(
-//                                endUseTime = usageEvent.eventTime
-//                            )
-//                        }
-//                    }
-
-                    if (usageEvent.packageName == prevPackageName) continue
-
-                    completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!)
-                    inCompletedUsageList.remove(usageEvent.packageName)
-
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
-                    prevPackageName = usageEvent.packageName
                     isScreenOff = true
                 }
 
