@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
@@ -43,102 +44,89 @@ fun UsedAppListScreenScreen(
 ) {
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
     var filterDialogShow by remember { mutableStateOf(false) }
-    val pagerState = rememberPagerState(pageCount = { pagingData?.itemCount ?: Constants.NUMBER_LOADING_COUNT })
+    val pagerState =
+        rememberPagerState(pageCount = { pagingData?.itemCount ?: Constants.NUMBER_LOADING_COUNT })
     val coroutineScope = rememberCoroutineScope()
 
     Column(
         modifier = Modifier
             .fillMaxSize()
     ) {
-        if (pagingData != null) {
-            Row {
-                if (pagingData.itemCount != 0) {
-                    Text(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterVertically),
-                        text = pagingData[pagerState.currentPage]?.first.run {
-                            if (this == LocalDate.now()) {
-                                "오늘"
-                            } else this.toString()
-                        },
-                        textAlign = TextAlign.Center,
-                        fontSize = 24.sp
-                    )
+        Row {
+            Text(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterVertically)
+                    .placeholder(
+                        visible = pagingData == null || pagingData.itemCount == 0,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
+                text = if (pagingData == null || pagingData.itemCount == 0) {
+                    Constants.TEXT_TITLE_PREVIEW
                 } else {
-                    when (pagingData.loadState.refresh) {
-                        is LoadState.Loading -> {
-                            Text(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .align(Alignment.CenterVertically)
-                                    .placeholder(
-                                        visible = true,
-                                        highlight = PlaceholderHighlight.shimmer()
-                                    ),
-                                text = Constants.TEXT_TITLE_PREVIEW,
-                                textAlign = TextAlign.Center,
-                                fontSize = 24.sp
+                    pagingData[pagerState.currentPage]?.first.run {
+                        if (this == LocalDate.now()) {
+                            "오늘"
+                        } else this.toString()
+                    }
+                },
+                textAlign = TextAlign.Center,
+                fontSize = 24.sp
+            )
+        }
+
+        Row {
+            Text(
+                modifier = Modifier
+                    .weight(1f)
+                    .align(Alignment.CenterVertically)
+                    .clickable {
+                        filterDialogShow = true
+                    },
+                text = state.sortOption.name,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
+            )
+        }
+
+        HorizontalPager(
+            state = pagerState,
+            reverseLayout = true,
+            userScrollEnabled = true,
+            key = pagingData?.itemKey { it.first }
+        ) { page ->
+
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                if (pagingData != null && pagingData.itemCount != 0) {
+                    val packageList = pagingData[page]!!.second
+                    items(
+                        count = packageList.size,
+                        key = { packageList[it].first.packageName }
+                    ) { idx ->
+                        val appInfo = packageList[idx]
+                        ItemAppInfoSmall(
+                            usedAppInfo = appInfo,
+                            icon = state.appIconList[appInfo.first.packageName],
+                            sortOption = state.sortOption
+                        ) { packageName ->
+                            selectPackageLabel(appInfo.first.label)
+                            onNavigate(
+                                Screen.ScreenAppUsageDetail(
+                                    targetPackageName = packageName,
+                                    targetDate = pagingData[page]!!.first.toMillis()
+                                )
                             )
                         }
-                        else -> Unit
+                    }
+                } else {
+                    items(12) {
+                        ItemAppInfoSmall(null, null) { }
                     }
                 }
             }
-
-
-            Row {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically)
-                        .clickable {
-                            filterDialogShow = true
-                        },
-                    text = state.sortOption.name,
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            }
-
-            HorizontalPager(
-                state = pagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-                key = pagingData.itemKey { it.first }
-            ) { page ->
-                val packageList = pagingData[page]!!.second
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                ) {
-                    if (packageList.isNotEmpty()) {
-                        items(
-                            count = packageList.size,
-                            key = {
-                                packageList[it].first.packageName
-                            }
-                        ) { idx ->
-                            val appInfo = packageList[idx]
-                            ItemAppInfoSmall(
-                                usedAppInfo = appInfo,
-                                icon = state.appIconList[appInfo.first.packageName],
-                                sortOption = state.sortOption
-                            ) { packageName ->
-                                selectPackageLabel(appInfo.first.label)
-                                onNavigate(
-                                    Screen.ScreenAppUsageDetail(
-                                        targetPackageName = packageName,
-                                        targetDate = pagingData[page]!!.first.toMillis()
-                                    )
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        } else {
-            CircleLoadingIndicator()
         }
     }
 

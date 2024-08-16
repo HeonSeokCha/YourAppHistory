@@ -44,10 +44,7 @@ fun MainNavHost(
         }
 
         composable<Screen.ScreenUsedAppList> {
-            val parentEntry = remember(it) {
-                navController.getBackStackEntry(Screen.ScreenUsedAppList)
-            }
-            val viewmodel: UsedAppListViewModel = hiltViewModel(parentEntry)
+            val viewmodel: UsedAppListViewModel = hiltViewModel()
             UsedAppListScreenScreen(
                 state = viewmodel.state,
                 onEvent = viewmodel::changeSortOption,

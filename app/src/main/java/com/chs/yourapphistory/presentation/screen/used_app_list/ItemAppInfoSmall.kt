@@ -46,7 +46,7 @@ import com.chs.yourapphistory.presentation.screen.common.shimmer
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
-    sortOption: UsageEventType,
+    sortOption: UsageEventType = UsageEventType.AppUsageEvent,
     clickAble: (String) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
