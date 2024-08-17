@@ -35,15 +35,16 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
         it.key.toLocalDateTime() to it.value.toLocalDateTime()
     }.sumOf {
         val (begin, end) = it.first to it.second
-        return@sumOf if (begin.dayOfMonth < end.dayOfMonth) {
-            if (targetDate.dayOfMonth == end.dayOfMonth) {
-                end.toLocalDate().atStartOfDayToMillis() - begin.toMillis()
-            } else {
-                targetDate.atStartOfDayToMillis() - begin.toMillis()
-            }
-        } else {
-            end.toMillis() - begin.toMillis()
+
+        if (targetDate.dayOfMonth > begin.dayOfMonth) {
+            return@sumOf end.toMillis() - targetDate.atStartOfDayToMillis()
         }
+
+        if (targetDate.dayOfMonth < end.dayOfMonth) {
+            return@sumOf targetDate.plusDays(1L).atStartOfDayToMillis() - begin.toMillis()
+        }
+
+        return@sumOf end.toMillis() - begin.toMillis()
     }.toInt()
 }
 

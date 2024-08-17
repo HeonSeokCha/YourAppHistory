@@ -137,7 +137,7 @@ class GetPagingAppDetailList(
                 for (i in begin.hour..23) {
                     usageMap.computeIfPresent(i) { key, value ->
                         val calc = if (i == begin.hour) {
-                            begin.toMillis() - targetDateZeroHour.plusHours(i.toLong()).toMillis()
+                            targetDateZeroHour.plusHours(i + 1L).toMillis() - begin.toMillis()
                         } else {
                             1.hours.inWholeMilliseconds
                         }
