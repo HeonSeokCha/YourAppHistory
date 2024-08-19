@@ -9,6 +9,8 @@ import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
 import androidx.core.graphics.drawable.toBitmap
+import androidx.room.util.copy
+import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
@@ -84,7 +86,7 @@ class ApplicationInfoSource @Inject constructor(
     fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-                queryEvents(beginTime, System.currentTimeMillis())
+                queryEvents(LocalDate.now().minusDays(1L).atStartOfDayToMillis(), System.currentTimeMillis())
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
@@ -170,19 +172,20 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-//            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
                     if (installPackageNames.contains(usageEvent.packageName)) {
                         if (inCompletedUsageList[usageEvent.packageName] == null) {
                             inCompletedUsageList[usageEvent.packageName] =
-                                AppUsageEntity(
-                                    packageName = usageEvent.packageName,
-                                    beginUseTime = usageEvent.eventTime
-                                ) to 1
+                                    AppUsageEntity(
+                                        packageName = usageEvent.packageName,
+                                        beginUseTime = usageEvent.eventTime
+                                    ) to 1
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                                if (isScreenOff) return@computeIfPresent value
                                 value.copy(
                                     second = value.second + 1
                                 )
@@ -196,7 +199,23 @@ class ApplicationInfoSource @Inject constructor(
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        value.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
+                        var copyValue = value
+                       copyValue = copyValue.copy(value.first.copy(endUseTime = usageEvent.eventTime))
+
+                        if (usageEvent.packageName != prevPackageName && isScreenOff) {
+                            copyValue.copy(second = value.second - 1)
+                        } else copyValue
+                    }
+
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0) {
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
+                    }
+
+                    if (usageEvent.packageName == "com.tplink.iot") {
+                        inCompletedUsageList.filter { it.key == "com.tplink.iot" }.map {
+                            Log.e("CHS_123", "${it.value.first.beginUseTime.toLocalDateTime()} - ${it.value.first.endUseTime.toLocalDateTime()} -> ${it.value.second}")
+                        }
                     }
                 }
 
@@ -204,16 +223,15 @@ class ApplicationInfoSource @Inject constructor(
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        var copyValue = value
                         if (value.first.endUseTime.isZero()) {
-                            copyValue = copyValue.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
+                            value.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
+                        } else {
+                            value.copy(second = value.second - 1)
                         }
-                        copyValue.copy(second = copyValue.second - 1)
                     }
 
                     if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                        || usageEvent.packageName != prevPackageName
-                        || isScreenOff
+                        && usageEvent.packageName != prevPackageName
                     ) {
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
@@ -228,6 +246,9 @@ class ApplicationInfoSource @Inject constructor(
                     isScreenOff = false
                 }
             }
+        }
+        completedUsageList.map {
+            Log.e("CHS_LOG2", "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()}")
         }
         return completedUsageList
     }
