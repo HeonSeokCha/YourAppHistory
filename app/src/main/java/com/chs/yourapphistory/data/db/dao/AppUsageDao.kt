@@ -46,4 +46,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         targetDate: Long,
         packageName: String
     ): List<Long>
+
+    @Query("DELETE FROM appUsage")
+    abstract suspend fun deleteAllUsageInfo()
 }
