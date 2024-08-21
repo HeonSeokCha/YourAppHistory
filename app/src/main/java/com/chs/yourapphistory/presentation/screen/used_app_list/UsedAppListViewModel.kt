@@ -43,9 +43,7 @@ class UsedAppListViewModel @Inject constructor(
                 awaitAll(
                     async { getInstallAppInfoUseCase() },
                     async { insertAppUsageInfoUseCase() },
-                    async {
-                        state = state.copy(appIconList = getAppIconMapUseCase())
-                    }
+                    async { state = state.copy(appIconList = getAppIconMapUseCase()) }
                 )
             }
 

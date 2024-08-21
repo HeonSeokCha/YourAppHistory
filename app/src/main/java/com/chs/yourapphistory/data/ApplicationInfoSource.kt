@@ -88,6 +88,10 @@ class ApplicationInfoSource @Inject constructor(
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
+//                queryEvents(
+//                    LocalDate.now().minusDays(4L).atStartOfDayToMillis(),
+//                    LocalDate.now().minusDays(3L).atStartOfDayToMillis()
+//                )
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
@@ -187,35 +191,34 @@ class ApplicationInfoSource @Inject constructor(
                                 ) to 1
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                                if (isScreenOff) return@computeIfPresent value
-
-                                if (prevClassName == usageEvent.className) return@computeIfPresent value
-
-                                value.copy(second = value.second + 1)
+                                value.copy(
+                                    first = value.first.copy(endUseTime = 0L),
+                                    second = value.second + 1
+                                )
                             }
                         }
                     }
+
+                    if (prevPackageName != null && prevPackageName != usageEvent.packageName) {
+                        if (inCompletedUsageList[prevPackageName] != null && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L) {
+                            inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                                value.copy(second = value.second - 2)
+                            }
+                            if (inCompletedUsageList[prevPackageName]!!.second <= 1) {
+                                completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
+                                inCompletedUsageList.remove(prevPackageName)
+                            }
+                        }
+                    }
+
                     prevPackageName = usageEvent.packageName
-                    prevClassName = usageEvent.className
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        var copyValue = value
-                        copyValue = copyValue.copy(
-                            first = value.first.copy(endUseTime = usageEvent.eventTime)
-                        )
-
-                        if (usageEvent.packageName != prevPackageName && isScreenOff) {
-                            copyValue.copy(second = value.second - 1)
-                        } else copyValue
-                    }
-
-                    if (isScreenOff && inCompletedUsageList[usageEvent.packageName]!!.second <= 0) {
-                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                        inCompletedUsageList.remove(usageEvent.packageName)
+                        value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
                     }
                 }
 
@@ -223,11 +226,14 @@ class ApplicationInfoSource @Inject constructor(
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        if (value.first.endUseTime.isZero()) {
-                            value.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
-                        } else {
-                            value.copy(second = value.second - 1)
-                        }
+                        value.copy(
+                            first = if (value.first.endUseTime.isZero()) {
+                                value.first.copy(endUseTime = usageEvent.eventTime)
+                            } else {
+                                value.first
+                            },
+                            second = value.second - 1
+                        )
                     }
 
                     if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
