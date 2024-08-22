@@ -11,6 +11,7 @@ import android.util.Log
 import androidx.compose.ui.util.packInts
 import androidx.core.graphics.drawable.toBitmap
 import androidx.room.util.copy
+import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.isZero
@@ -87,11 +88,11 @@ class ApplicationInfoSource @Inject constructor(
     fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-                queryEvents(beginTime, System.currentTimeMillis())
-//                queryEvents(
-//                    LocalDate.now().minusDays(4L).atStartOfDayToMillis(),
-//                    LocalDate.now().minusDays(3L).atStartOfDayToMillis()
-//                )
+//                queryEvents(beginTime, System.currentTimeMillis())
+                queryEvents(
+                    LocalDate.now().minusDays(1L).atStartOfDayToMillis(),
+                    LocalDate.now().minusDays(0L).atEndOfDayToMillis()
+                )
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
@@ -192,25 +193,11 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
-                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second + 1
                                 )
                             }
                         }
                     }
-
-                    if (prevPackageName != null && prevPackageName != usageEvent.packageName) {
-                        if (inCompletedUsageList[prevPackageName] != null && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L) {
-                            inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                                value.copy(second = value.second - 2)
-                            }
-                            if (inCompletedUsageList[prevPackageName]!!.second <= 1) {
-                                completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
-                                inCompletedUsageList.remove(prevPackageName)
-                            }
-                        }
-                    }
-
                     prevPackageName = usageEvent.packageName
                 }
 
@@ -229,9 +216,7 @@ class ApplicationInfoSource @Inject constructor(
                         value.copy(
                             first = if (value.first.endUseTime.isZero()) {
                                 value.first.copy(endUseTime = usageEvent.eventTime)
-                            } else {
-                                value.first
-                            },
+                            } else value.first,
                             second = value.second - 1
                         )
                     }
