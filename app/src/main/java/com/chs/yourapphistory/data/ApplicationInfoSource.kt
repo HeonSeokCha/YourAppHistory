@@ -90,7 +90,7 @@ class ApplicationInfoSource @Inject constructor(
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
 //                queryEvents(beginTime, System.currentTimeMillis())
                 queryEvents(
-                    LocalDate.now().minusDays(1L).atStartOfDayToMillis(),
+                    LocalDate.now().minusDays(0L).atStartOfDayToMillis(),
                     LocalDate.now().minusDays(0L).atEndOfDayToMillis()
                 )
             }
@@ -199,6 +199,7 @@ class ApplicationInfoSource @Inject constructor(
                         }
                     }
                     prevPackageName = usageEvent.packageName
+                    prevClassName = usageEvent.className
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
@@ -225,6 +226,40 @@ class ApplicationInfoSource @Inject constructor(
                         || usageEvent.packageName != prevPackageName
                         || isScreenOff
                     ) {
+
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0 && isScreenOff) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
+                            continue
+                        }
+
+                        if (isScreenOff) {
+                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                                && usageEvent.packageName == prevPackageName
+                            ) {
+                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                                inCompletedUsageList.remove(usageEvent.packageName)
+                                continue
+                            }
+
+                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                                && usageEvent.packageName != prevPackageName
+                            ) {
+                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                                inCompletedUsageList.remove(usageEvent.packageName)
+                                continue
+                            }
+
+                            continue
+                        }
+
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                            && usageEvent.packageName == prevPackageName
+                            && usageEvent.className != prevClassName
+                        ) {
+                            continue
+                        }
+
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
