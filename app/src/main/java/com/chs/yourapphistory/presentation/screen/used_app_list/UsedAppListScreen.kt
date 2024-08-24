@@ -58,7 +58,7 @@ fun UsedAppListScreenScreen(
                     .fillMaxWidth()
                     .align(Alignment.CenterVertically)
                     .placeholder(
-                        visible = pagingData == null || pagingData.itemCount == 0,
+                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
                 text = if (pagingData == null || pagingData.itemCount == 0) {
@@ -100,7 +100,7 @@ fun UsedAppListScreenScreen(
                 modifier = Modifier.fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
-                if (pagingData != null && pagingData.itemCount != 0) {
+                if (pagingData!= null) {
                     val packageList = pagingData[page]!!.second
                     items(
                         count = packageList.size,
@@ -121,8 +121,42 @@ fun UsedAppListScreenScreen(
                             )
                         }
                     }
+
+
+                    when (pagingData.loadState.refresh) {
+                        is LoadState.Loading -> {
+                            items(10) {
+                                ItemAppInfoSmall(null, null) { }
+                            }
+                        }
+
+                        is LoadState.Error -> {
+                            item {
+                                Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                            }
+                        }
+
+                        else -> Unit
+                    }
+
+
+                    when (pagingData.loadState.append) {
+                        is LoadState.Loading -> {
+                            items(10) {
+                                ItemAppInfoSmall(null, null) { }
+                            }
+                        }
+
+                        is LoadState.Error -> {
+                            item {
+                                Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                            }
+                        }
+
+                        else -> Unit
+                    }
                 } else {
-                    items(12) {
+                    items(10) {
                         ItemAppInfoSmall(null, null) { }
                     }
                 }

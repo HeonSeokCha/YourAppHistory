@@ -15,7 +15,6 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,15 +22,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
@@ -73,7 +71,6 @@ fun AppUsageDetailScreen(
         modifier = Modifier
             .fillMaxSize()
     ) {
-
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -83,7 +80,7 @@ fun AppUsageDetailScreen(
             Text(
                 modifier = Modifier
                     .placeholder(
-                        visible = pagingData == null || pagingData.itemCount == 0,
+                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
                 text = if (pagingData == null || pagingData.itemCount == 0) {

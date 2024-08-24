@@ -88,11 +88,11 @@ class ApplicationInfoSource @Inject constructor(
     fun getUsageEvent(beginTime: Long): List<AppUsageEventRawInfo> {
         val usageEvents: UsageEvents =
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
-//                queryEvents(beginTime, System.currentTimeMillis())
-                queryEvents(
-                    LocalDate.now().minusDays(0L).atStartOfDayToMillis(),
-                    LocalDate.now().minusDays(0L).atEndOfDayToMillis()
-                )
+                queryEvents(beginTime, System.currentTimeMillis())
+//                queryEvents(
+//                    LocalDate.now().minusDays(0L).atStartOfDayToMillis(),
+//                    LocalDate.now().minusDays(0L).atEndOfDayToMillis()
+//                )
             }
 
         val resultArr: ArrayList<AppUsageEventRawInfo> = arrayListOf()
@@ -179,7 +179,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+//            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -274,12 +274,12 @@ class ApplicationInfoSource @Inject constructor(
                 }
             }
         }
-        completedUsageList.map {
-            Log.e(
-                "CHS_123",
-                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()}"
-            )
-        }
+//        completedUsageList.map {
+//            Log.e(
+//                "CHS_123",
+//                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()}"
+//            )
+//        }
         return completedUsageList
     }
 }
