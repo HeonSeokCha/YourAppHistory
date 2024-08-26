@@ -130,8 +130,7 @@ class ApplicationInfoSource @Inject constructor(
         usageEventList.filter {
             (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
                     || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
-                    && installPackageNames.any { packageName -> packageName == it.packageName }
-        }.forEach {
+                    && installPackageNames.any { packageName -> packageName == it.packageName } }.forEach {
             if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
                 if (!inCompletedUsageList.containsKey(it.packageName))
                     inCompletedUsageList[it.packageName] = AppForegroundUsageEntity(
@@ -192,6 +191,8 @@ class ApplicationInfoSource @Inject constructor(
                                 ) to 1
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
+                                if (prevClassName == usageEvent.className) return@computeIfPresent value
+
                                 value.copy(
                                     second = value.second + 1
                                 )

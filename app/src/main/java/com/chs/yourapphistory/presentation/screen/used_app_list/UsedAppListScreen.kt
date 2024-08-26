@@ -1,10 +1,13 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -19,6 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
@@ -61,7 +65,7 @@ fun UsedAppListScreenScreen(
                         visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
-                text = if (pagingData == null || pagingData.itemCount == 0) {
+                text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
                     Constants.TEXT_TITLE_PREVIEW
                 } else {
                     pagingData[pagerState.currentPage]?.first.run {
@@ -82,25 +86,30 @@ fun UsedAppListScreenScreen(
                     .align(Alignment.CenterVertically)
                     .clickable {
                         filterDialogShow = true
-                    },
+                    }
+                    .placeholder(
+                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
                 text = state.sortOption.name,
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp
             )
         }
 
+
         HorizontalPager(
+            modifier = Modifier.fillMaxSize(),
             state = pagerState,
             reverseLayout = true,
             userScrollEnabled = true,
             key = pagingData?.itemKey { it.first }
         ) { page ->
-
             LazyColumn(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (pagingData!= null) {
+                if (pagingData != null && pagingData.itemCount != 0) {
                     val packageList = pagingData[page]!!.second
                     items(
                         count = packageList.size,
@@ -121,7 +130,6 @@ fun UsedAppListScreenScreen(
                             )
                         }
                     }
-
 
                     when (pagingData.loadState.refresh) {
                         is LoadState.Loading -> {
