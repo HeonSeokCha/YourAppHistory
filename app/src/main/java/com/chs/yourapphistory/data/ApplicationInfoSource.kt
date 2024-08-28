@@ -15,6 +15,7 @@ import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
+import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
@@ -91,8 +92,8 @@ class ApplicationInfoSource @Inject constructor(
             (context.getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager).run {
                 queryEvents(beginTime, System.currentTimeMillis())
 //                queryEvents(
-//                    LocalDate.now().minusDays(4L).atStartOfDayToMillis(),
-//                    LocalDate.now().minusDays(4L).atEndOfDayToMillis()
+//                    LocalDate.now().minusDays(2L).atStartOfDayToMillis(),
+//                    LocalDate.now().minusDays(2L).atEndOfDayToMillis()
 //                )
             }
 
@@ -180,7 +181,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+//            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -194,9 +195,20 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
+                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second + 1
                                 )
                             }
+                        }
+                    }
+
+                    if (prevPackageName != null && usageEvent.packageName != prevPackageName) {
+                        if (inCompletedUsageList[prevPackageName] != null
+                            && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L
+                            && inCompletedUsageList[prevPackageName]!!.second == 1
+                        ) {
+                            completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
+                            inCompletedUsageList.remove(prevPackageName)
                         }
                     }
 
@@ -226,7 +238,9 @@ class ApplicationInfoSource @Inject constructor(
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
-                            first = if (value.first.endUseTime.isZero()) {
+                            first = if ((usageEvent.packageName != prevPackageName || value.second == 1)
+                                && value.first.endUseTime.isZero()
+                            ) {
                                 value.first.copy(endUseTime = usageEvent.eventTime)
                             } else value.first,
                             second = value.second - 1
@@ -235,6 +249,7 @@ class ApplicationInfoSource @Inject constructor(
 
                     if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
                         || usageEvent.packageName != prevPackageName
+                        || usageEvent.className == prevClassName
                         || isScreenOff
                     ) {
 
@@ -271,6 +286,20 @@ class ApplicationInfoSource @Inject constructor(
                             continue
                         }
 
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                            && usageEvent.packageName == prevPackageName
+                            && usageEvent.className != prevClassName
+                        ) {
+                            continue
+                        }
+
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                            && usageEvent.packageName == prevPackageName
+                            && usageEvent.className == prevClassName
+                        ) {
+                            continue
+                        }
+
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
@@ -285,14 +314,15 @@ class ApplicationInfoSource @Inject constructor(
                 }
             }
         }
-        completedUsageList.map {
-            Log.e(
-                "CHS_123",
-                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
-                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageMinutes()
-                }"
-            )
-        }
+
+//        completedUsageList.map {
+//            Log.e(
+//                "CHS_123",
+//                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
+//                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageTime()
+//                }"
+//            )
+//        }
         return completedUsageList
     }
 }
