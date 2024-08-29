@@ -202,16 +202,6 @@ class ApplicationInfoSource @Inject constructor(
                         }
                     }
 
-                    if (prevPackageName != null && usageEvent.packageName != prevPackageName) {
-                        if (inCompletedUsageList[prevPackageName] != null
-                            && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L
-                            && inCompletedUsageList[prevPackageName]!!.second == 1
-                        ) {
-                            completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
-                            inCompletedUsageList.remove(prevPackageName)
-                        }
-                    }
-
                     prevPackageName = usageEvent.packageName
                     prevClassName = usageEvent.className
                 }

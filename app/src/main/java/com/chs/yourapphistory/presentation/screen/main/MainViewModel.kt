@@ -17,6 +17,7 @@ class MainViewModel @Inject constructor(
 
     fun executeWorker() {
         val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
+            .setInitialDelay(1, TimeUnit.MINUTES)
             .build()
 
         workManager.enqueueUniquePeriodicWork(
