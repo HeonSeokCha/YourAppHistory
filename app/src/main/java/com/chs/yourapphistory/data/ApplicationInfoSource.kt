@@ -192,6 +192,7 @@ class ApplicationInfoSource @Inject constructor(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
                                 ) to 1
+
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
@@ -201,7 +202,6 @@ class ApplicationInfoSource @Inject constructor(
                             }
                         }
                     }
-
                     prevPackageName = usageEvent.packageName
                     prevClassName = usageEvent.className
                 }
@@ -215,6 +215,7 @@ class ApplicationInfoSource @Inject constructor(
                             inCompletedUsageList.remove(prevPackageName)
                         }
                     }
+
 
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
@@ -244,6 +245,13 @@ class ApplicationInfoSource @Inject constructor(
                     ) {
 
                         if (isScreenOff) {
+                            if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                                && usageEvent.packageName == prevPackageName
+                                && usageEvent.className != prevClassName
+                            ) {
+                                continue
+                            }
+
                             if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
                                 completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                                 inCompletedUsageList.remove(usageEvent.packageName)
@@ -287,12 +295,19 @@ class ApplicationInfoSource @Inject constructor(
                             && usageEvent.packageName == prevPackageName
                             && usageEvent.className == prevClassName
                         ) {
+                            if (inCompletedUsageList[usageEvent.packageName]!!.second == 1
+                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
+                            ) {
+                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                                inCompletedUsageList.remove(usageEvent.packageName)
+                            }
                             continue
                         }
 
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
+
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
