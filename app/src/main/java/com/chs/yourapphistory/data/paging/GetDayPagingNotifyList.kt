@@ -15,7 +15,7 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class GetDayPagingNotifyList(
-    private val appInfoDao: AppInfoDao,
+    private val appNotifyInfoDao: AppNotifyInfoDao
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -30,7 +30,7 @@ class GetDayPagingNotifyList(
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
-                date to appInfoDao.getDayNotifyList(date.toMillis()).map {
+                date to appNotifyInfoDao.getDayNotifyList(date.toMillis()).map {
                     it.key.toAppInfo() to it.value
                 }
             }

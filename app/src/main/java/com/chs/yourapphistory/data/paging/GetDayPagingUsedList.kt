@@ -18,7 +18,7 @@ import java.time.LocalDate
 import kotlin.streams.toList
 
 class GetDayPagingUsedList(
-    private val appInfoDao: AppInfoDao,
+    private val appUsageDao: AppUsageDao
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -33,7 +33,7 @@ class GetDayPagingUsedList(
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
-                date to appInfoDao.getDayUsedList(date.toMillis()).map {
+                date to appUsageDao.getDayUsedList(date.toMillis()).map {
                     it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(

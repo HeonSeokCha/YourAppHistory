@@ -6,13 +6,14 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toConvertDayUsedTime
 import com.chs.yourapphistory.common.toMillis
+import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import java.time.LocalDate
 
 class GetDayPagingForegroundUsedList(
-    private val appInfoDao: AppInfoDao,
+    private val appForegroundUsageDao: AppForegroundUsageDao
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -27,7 +28,7 @@ class GetDayPagingForegroundUsedList(
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
-                date to appInfoDao.getDayForegroundUsedList(date.toMillis()).map {
+                date to appForegroundUsageDao.getDayForegroundUsedList(date.toMillis()).map {
                     it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(

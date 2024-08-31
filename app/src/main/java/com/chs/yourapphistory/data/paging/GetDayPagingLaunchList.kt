@@ -11,7 +11,7 @@ import com.chs.yourapphistory.domain.model.AppInfo
 import java.time.LocalDate
 
 class GetDayPagingLaunchList(
-private val appInfoDao: AppInfoDao,
+    private val appInfoDao: AppInfoDao,
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -34,7 +34,9 @@ private val appInfoDao: AppInfoDao,
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (data.isEmpty()) {
+                null
+            } else pageDate.minusDays(Constants.PAGING_DAY + 1)
         )
     }
 }
