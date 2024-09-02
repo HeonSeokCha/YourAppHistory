@@ -25,18 +25,28 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteUsageInfo(packageNames: List<String>)
 
-
     @Query(
         "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
-          "FROM appUsage " +
-          "LEFT JOIN appInfo ON appInfo.packageName = appUsage.packageName " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+          "FROM appInfo " +
+          "LEFT JOIN appUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
-         "ORDER BY (endUseTime - beginUseTime) DESC, appInfo.label ASC"
+           "AND appInfo.packageName = appUsage.packageName "
     )
-    abstract suspend fun getDayUsedList(
+    abstract suspend fun getDayAppUsedInfo(
         targetDate: Long
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+
+    @Query(
+        "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
+          "FROM appInfo " +
+          "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND appInfo.packageName = appUsage.packageName " +
+         "GROUP BY appInfo.packageName " +
+         "ORDER BY cnt DESC, appInfo.label ASC "
+    )
+    abstract suspend fun getDayAppLaunchInfo(
+        targetDate: Long
+    ): Map<AppInfoEntity, @MapColumn("cnt") Int>
 
     @Query(
         "SELECT beginUseTime, endUseTime " +
@@ -45,7 +55,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName"
     )
-    abstract suspend fun getDayUsageInfoList(
+    abstract suspend fun getDayPackageUsageInfo(
         targetDate: Long,
         packageName: String
     ): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
@@ -56,7 +66,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
          "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
            "AND packageName = :packageName"
     )
-    abstract suspend fun getDayUsageBeginInfoList(
+    abstract suspend fun getDayPackageLaunchInfo(
         targetDate: Long,
         packageName: String
     ): List<Long>

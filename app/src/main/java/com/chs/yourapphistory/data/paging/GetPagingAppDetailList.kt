@@ -53,7 +53,7 @@ class GetPagingAppDetailList(
                 it to withContext(Dispatchers.Default) {
                     val usageInfo = calcHourUsageList(
                         list = async(Dispatchers.IO) {
-                            appUsageDao.getDayUsageInfoList(
+                            appUsageDao.getDayPackageUsageInfo(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
                             )
@@ -82,7 +82,7 @@ class GetPagingAppDetailList(
 
                     val launchInfo = calcHourUsageList(
                         list = async(Dispatchers.IO) {
-                            appUsageDao.getDayUsageBeginInfoList(
+                            appUsageDao.getDayPackageLaunchInfo(
                                 targetDate = it.toMillis(),
                                 packageName = targetPackageName
                             )

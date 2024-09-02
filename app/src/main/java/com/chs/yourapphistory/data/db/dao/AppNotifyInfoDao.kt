@@ -17,11 +17,11 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
 
     @Query(
         "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as cnt " +
-          "FROM appNotifyInfo " +
-          "LEFT JOIN appInfo ON appInfo.packageName = appNotifyInfo.packageName " +
-         "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-        "GROUP BY appInfo.packageName " +
-        "ORDER BY cnt DESC, appInfo.label ASC "
+          "FROM appInfo " +
+          "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND appInfo.packageName = appNotifyInfo.packageName " +
+         "GROUP BY appInfo.packageName " +
+         "ORDER BY cnt DESC, appInfo.label ASC "
     )
     abstract suspend fun getDayNotifyList(
         targetDate: Long

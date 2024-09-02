@@ -26,6 +26,7 @@ class GetDayPagingNotifyList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
+        val minDate: LocalDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
 
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .reverseDateUntil(pageDate.plusDays(1L))
@@ -38,7 +39,13 @@ class GetDayPagingNotifyList(
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (pageDate <= minDate) {
+                null
+            } else if (pageDate.minusDays(Constants.PAGING_DAY + 1) <= minDate) {
+                minDate
+            } else {
+                pageDate.minusDays(Constants.PAGING_DAY + 1)
+            }
         )
     }
 }

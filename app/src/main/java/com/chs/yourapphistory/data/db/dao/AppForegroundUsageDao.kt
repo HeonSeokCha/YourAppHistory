@@ -23,12 +23,10 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
 
     @Query(
         "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
-          "FROM appForegroundUsage " +
-          "LEFT JOIN appInfo ON appInfo.packageName = appForegroundUsage.packageName " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+          "FROM appInfo " +
+          "LEFT JOIN appForegroundUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
-           "AND appInfo.packageName = appForegroundUsage.packageName " +
-         "ORDER BY (endUseTime - beginUseTime) DESC, appInfo.label ASC"
+           "AND appInfo.packageName = appForegroundUsage.packageName "
     )
     abstract suspend fun getDayForegroundUsedList(
         targetDate: Long

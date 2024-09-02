@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toConvertDayUsedTime
+import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -24,6 +25,7 @@ class GetDayPagingForegroundUsedList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
+        val minDate: LocalDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
 
         val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
             .reverseDateUntil(pageDate.plusDays(1L))
@@ -41,7 +43,13 @@ class GetDayPagingForegroundUsedList(
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (pageDate <= minDate) {
+                null
+            } else if (pageDate.minusDays(Constants.PAGING_DAY + 1) <= minDate) {
+                minDate
+            } else {
+                pageDate.minusDays(Constants.PAGING_DAY + 1)
+            }
         )
     }
 }

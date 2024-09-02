@@ -136,7 +136,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingUsedList(appInfoDao = appInfoDao)
+            GetDayPagingUsedList(appUsageDao = appUsageDao)
         }.flow
     }
 
@@ -144,7 +144,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingForegroundUsedList(appInfoDao = appInfoDao)
+            GetDayPagingForegroundUsedList(appForegroundUsageDao = appForegroundUsageDao)
         }.flow
     }
 
@@ -152,7 +152,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingNotifyList(appInfoDao = appInfoDao)
+            GetDayPagingNotifyList(appNotifyInfoDao = appNotifyInfoDao)
         }.flow
     }
 
@@ -160,7 +160,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingLaunchList(appInfoDao = appInfoDao)
+            GetDayPagingLaunchList(appUsageDao = appUsageDao)
         }.flow
     }
 
