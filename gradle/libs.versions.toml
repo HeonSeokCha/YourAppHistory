@@ -2,7 +2,7 @@
 androidGradlePlugin = "8.5.2"
 
 compileSdkVersion = "35"
-desugar_jdk_libs = "2.1.0"
+desugar_jdk_libs = "2.1.1"
 minSdkVersion = "29"
 targetSdkVersion = "34"
 versionCode = "1"
@@ -35,7 +35,7 @@ androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidX-paging-paging-compose = "androidx.paging:paging-compose:3.3.2"
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-lottie = "com.airbnb.android:lottie-compose:6.5.0"
+lottie = "com.airbnb.android:lottie-compose:6.5.1"
 
 ## Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -48,7 +48,7 @@ workmanager = "androidx.work:work-runtime-ktx:2.9.1"
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.1"
+kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2"
 
 
 

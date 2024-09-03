@@ -27,7 +27,10 @@ class GetDayPagingForegroundUsedList(
         val pageDate: LocalDate = params.key ?: LocalDate.now()
         val minDate: LocalDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
 
-        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
+        val data = pageDate.run {
+            if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
+            else this.minusDays(Constants.PAGING_DAY)
+        }
             .reverseDateUntil(pageDate.plusDays(1L))
             .map { date ->
                 date to appForegroundUsageDao.getDayForegroundUsedList(date.toMillis()).map {
@@ -43,10 +46,8 @@ class GetDayPagingForegroundUsedList(
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = if (pageDate <= minDate) {
+            nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
                 null
-            } else if (pageDate.minusDays(Constants.PAGING_DAY + 1) <= minDate) {
-                minDate
             } else {
                 pageDate.minusDays(Constants.PAGING_DAY + 1)
             }
