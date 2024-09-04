@@ -30,6 +30,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
@@ -43,15 +44,15 @@ fun AppUsageDetailScreen(
     state: AppUsageDetailState,
     onBack: () -> Unit
 ) {
-    var currentDate by remember { mutableStateOf(LocalDate.now()) }
+    var currentDate by remember { mutableStateOf(state.targetDate) }
     val pagingData = state.pagingDetailInfo?.collectAsLazyPagingItems()
     val pagerState = if (pagingData != null && pagingData.itemCount != 0) {
         rememberPagerState(
             pageCount = {
                 pagingData.itemCount
-            }, initialPage = if (pagingData.itemCount < 6) {
-                pagingData.itemCount - 4
-            } else 2
+            }, initialPage = pagingData.itemSnapshotList.items.map {
+                it.first
+            }.indexOf(state.targetDate)
         )
     } else {
         rememberPagerState(pageCount = { 0 })

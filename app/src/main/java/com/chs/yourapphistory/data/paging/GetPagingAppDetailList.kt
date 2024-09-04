@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntil
+import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -13,6 +14,7 @@ import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.domain.model.AppDetailInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.hours
@@ -33,7 +35,14 @@ class GetPagingAppDetailList(
     }
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, AppDetailInfo>> {
-        chsLog(params.key.toString())
+        val minDate: LocalDate = withContext(Dispatchers.Default) {
+            awaitAll(
+                async(Dispatchers.IO) { appUsageDao.getFirstCollectTime() },
+                async(Dispatchers.IO) { appForegroundUsageDao.getFirstCollectTime() },
+                async(Dispatchers.IO) { appNotifyInfoDao.getFirstCollectTime() }
+            ).min().toLocalDate()
+        }
+
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -44,10 +53,12 @@ class GetPagingAppDetailList(
 
         val buffetDate = if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
             LocalDate.now()
-        } else pageDate
+        } else pageDate.plusDays(Constants.PAGING_DAY)
 
-
-        val data = pageDate.run { this.minusDays(Constants.PAGING_DAY) }
+        val data = pageDate.run {
+            if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
+            else this.minusDays(Constants.PAGING_DAY)
+        }
             .reverseDateUntil(buffetDate.plusDays(1L))
             .map {
                 it to withContext(Dispatchers.Default) {
@@ -108,7 +119,11 @@ class GetPagingAppDetailList(
                     LocalDate.now()
                 } else buffetDate.plusDays(Constants.PAGING_DAY + 1)
             },
-            nextKey = if (data.isEmpty()) null else pageDate.minusDays(Constants.PAGING_DAY + 1)
+            nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
+                null
+            } else {
+                pageDate.minusDays(Constants.PAGING_DAY + 1)
+            }
         )
     }
 

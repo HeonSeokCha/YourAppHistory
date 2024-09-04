@@ -34,7 +34,8 @@ class AppUsageDetailViewModel @Inject constructor(
             pagingDetailInfo = getPagingAppDetailUseCase(
                 packageName = targetPackageName,
                 targetDate = targetDate
-            ).cachedIn(viewModelScope)
+            ).cachedIn(viewModelScope),
+            targetDate = targetDate
         )
     }
 }

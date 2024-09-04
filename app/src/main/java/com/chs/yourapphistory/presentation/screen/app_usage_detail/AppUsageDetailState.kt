@@ -7,6 +7,6 @@ import java.time.LocalDate
 
 
 data class AppUsageDetailState(
-    val targetDate: LocalDate? = null,
+    val targetDate: LocalDate = LocalDate.now(),
     val pagingDetailInfo: Flow<PagingData<Pair<LocalDate, AppDetailInfo>>>? = null,
 )
