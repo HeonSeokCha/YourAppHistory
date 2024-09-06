@@ -33,9 +33,11 @@ import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
+import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import com.chs.yourapphistory.presentation.screen.common.shimmer
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -51,126 +53,141 @@ fun UsedAppListScreenScreen(
     val pagerState =
         rememberPagerState(pageCount = { pagingData?.itemCount ?: Constants.NUMBER_LOADING_COUNT })
     val coroutineScope = rememberCoroutineScope()
+    var isRefreshing by remember { mutableStateOf(false) }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
+    ItemPullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
+            coroutineScope.launch {
+                onEvent(UsageEventType.AppUsageEvent)
+                delay(500L)
+                isRefreshing = false
+            }
+        }
     ) {
-        Row {
-            Text(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterVertically)
-                    .placeholder(
-                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
-                        highlight = PlaceholderHighlight.shimmer()
-                    ),
-                text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
-                    Constants.TEXT_TITLE_PREVIEW
-                } else {
-                    pagingData[pagerState.currentPage]?.first.run {
-                        if (this == LocalDate.now()) {
-                            "오늘"
-                        } else this.toString()
-                    }
-                },
-                textAlign = TextAlign.Center,
-                fontSize = 24.sp
-            )
-        }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+        ) {
+            Row {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterVertically)
+                        .placeholder(
+                            visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
+                    text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
+                        Constants.TEXT_TITLE_PREVIEW
+                    } else {
+                        pagingData[pagerState.currentPage]?.first.run {
+                            if (this == LocalDate.now()) {
+                                "오늘"
+                            } else this.toString()
+                        }
+                    },
+                    textAlign = TextAlign.Center,
+                    fontSize = 24.sp
+                )
+            }
 
-        Row {
-            Text(
-                modifier = Modifier
-                    .weight(1f)
-                    .align(Alignment.CenterVertically)
-                    .clickable {
-                        filterDialogShow = true
-                    }
-                    .placeholder(
-                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
-                        highlight = PlaceholderHighlight.shimmer()
-                    ),
-                text = state.sortOption.name,
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp
-            )
-        }
+            Row {
+                Text(
+                    modifier = Modifier
+                        .weight(1f)
+                        .align(Alignment.CenterVertically)
+                        .clickable {
+                            filterDialogShow = true
+                        }
+                        .placeholder(
+                            visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                            highlight = PlaceholderHighlight.shimmer()
+                        ),
+                    text = state.sortOption.name,
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
+                )
+            }
 
 
-        HorizontalPager(
-            modifier = Modifier.fillMaxSize(),
-            state = pagerState,
-            reverseLayout = true,
-            userScrollEnabled = true,
-            key = pagingData?.itemKey { it.first }
-        ) { page ->
-            LazyColumn(
+            HorizontalPager(
                 modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                if (pagingData != null && pagingData.itemCount != 0) {
-                    val packageList = pagingData[page]!!.second
-                    items(
-                        count = packageList.size,
-                        key = { packageList[it].first.packageName }
-                    ) { idx ->
-                        val appInfo = packageList[idx]
-                        ItemAppInfoSmall(
-                            usedAppInfo = appInfo,
-                            icon = state.appIconList[appInfo.first.packageName],
-                            sortOption = state.sortOption
-                        ) { packageName ->
-                            selectPackageLabel(appInfo.first.label)
-                            onNavigate(
-                                Screen.ScreenAppUsageDetail(
-                                    targetPackageName = packageName,
-                                    targetDate = pagingData[page]!!.first.toMillis()
+                state = pagerState,
+                reverseLayout = true,
+                userScrollEnabled = true,
+                key = pagingData?.itemKey { it.first }
+            ) { page ->
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (pagingData != null && pagingData.itemCount != 0) {
+                        val packageList = pagingData[page]!!.second
+                        items(
+                            count = packageList.size,
+                            key = { packageList[it].first.packageName }
+                        ) { idx ->
+                            val appInfo = packageList[idx]
+                            ItemAppInfoSmall(
+                                usedAppInfo = appInfo,
+                                icon = state.appIconList[appInfo.first.packageName],
+                                sortOption = state.sortOption
+                            ) { packageName ->
+                                selectPackageLabel(appInfo.first.label)
+                                onNavigate(
+                                    Screen.ScreenAppUsageDetail(
+                                        targetPackageName = packageName,
+                                        targetDate = pagingData[page]!!.first.toMillis()
+                                    )
                                 )
-                            )
-                        }
-                    }
-
-                    when (pagingData.loadState.refresh) {
-                        is LoadState.Loading -> {
-                            items(10) {
-                                ItemAppInfoSmall(null, null) { }
                             }
                         }
 
-                        is LoadState.Error -> {
-                            item {
-                                Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                        when (pagingData.loadState.refresh) {
+                            is LoadState.Loading -> {
+                                items(10) {
+                                    ItemAppInfoSmall(null, null) { }
+                                }
                             }
+
+                            is LoadState.Error -> {
+                                item {
+                                    Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                                }
+                            }
+
+                            else -> Unit
                         }
 
-                        else -> Unit
-                    }
 
-
-                    when (pagingData.loadState.append) {
-                        is LoadState.Loading -> {
-                            items(10) {
-                                ItemAppInfoSmall(null, null) { }
+                        when (pagingData.loadState.append) {
+                            is LoadState.Loading -> {
+                                items(10) {
+                                    ItemAppInfoSmall(null, null) { }
+                                }
                             }
-                        }
 
-                        is LoadState.Error -> {
-                            item {
-                                Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                            is LoadState.Error -> {
+                                item {
+                                    Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                                }
                             }
-                        }
 
-                        else -> Unit
-                    }
-                } else {
-                    items(10) {
-                        ItemAppInfoSmall(null, null) { }
+                            else -> Unit
+                        }
+                    } else {
+                        items(10) {
+                            ItemAppInfoSmall(null, null) { }
+                        }
                     }
                 }
             }
         }
     }
+
+
 
     if (filterDialogShow) {
         FilterDialog(

@@ -38,4 +38,10 @@ class AppUsageDetailViewModel @Inject constructor(
             targetDate = targetDate
         )
     }
+
+    private fun getPackageUsageInfo() {
+
+    }
+
+
 }
