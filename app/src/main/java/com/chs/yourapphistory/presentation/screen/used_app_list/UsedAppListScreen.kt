@@ -29,7 +29,6 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toMillis
-import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.common.CircleLoadingIndicator
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
@@ -44,7 +43,7 @@ import java.time.LocalDate
 @Composable
 fun UsedAppListScreenScreen(
     state: UsedAppListState,
-    onEvent: (UsageEventType) -> Unit,
+    onEvent: (UsedAppEvent) -> Unit,
     selectPackageLabel: (String) -> Unit,
     onNavigate: (Screen.ScreenAppUsageDetail) -> Unit
 ) {
@@ -60,7 +59,7 @@ fun UsedAppListScreenScreen(
         onRefresh = {
             isRefreshing = true
             coroutineScope.launch {
-                onEvent(UsageEventType.AppUsageEvent)
+                onEvent(UsedAppEvent.RefreshAppUsageInfo)
                 delay(500L)
                 isRefreshing = false
             }

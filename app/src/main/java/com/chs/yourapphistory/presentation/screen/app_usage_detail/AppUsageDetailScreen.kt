@@ -47,6 +47,7 @@ import java.time.LocalDate
 @Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
+    onRefresh: () -> Unit,
     onBack: () -> Unit
 ) {
     var currentDate by remember { mutableStateOf(state.targetDate) }
@@ -71,16 +72,14 @@ fun AppUsageDetailScreen(
         }
     }
 
-    BackHandler {
-        onBack()
-    }
+    BackHandler { onBack() }
 
     ItemPullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
             coroutineScope.launch {
-
+                onRefresh()
                 delay(500L)
                 isRefreshing = false
             }

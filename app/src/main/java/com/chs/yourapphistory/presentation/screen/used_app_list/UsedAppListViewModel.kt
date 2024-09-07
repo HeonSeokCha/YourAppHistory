@@ -6,8 +6,6 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
-import androidx.work.WorkManager
-import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingForegroundUsedUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayPagingLaunchUseCase
@@ -39,46 +37,52 @@ class UsedAppListViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
-            withContext(Dispatchers.IO) {
-                awaitAll(
-                    async { getInstallAppInfoUseCase() },
-                    async { insertAppUsageInfoUseCase() },
-                    async { state = state.copy(appIconList = getAppIconMapUseCase()) }
-                )
-            }
-
+            getApplicationsInfo()
             changeSortOption(state.sortOption)
         }
     }
 
+    private suspend fun getApplicationsInfo() {
+        withContext(Dispatchers.IO) {
+            awaitAll(
+                async { getInstallAppInfoUseCase() },
+                async { insertAppUsageInfoUseCase() },
+                async { state = state.copy(appIconList = getAppIconMapUseCase()) }
+            )
+        }
+    }
 
-    fun changeSortOption(option: UsageEventType) {
+    fun changeSortOption(option: UsedAppEvent) {
         state = when (option) {
-            UsageEventType.AppUsageEvent -> {
+            UsedAppEvent.RefreshAppUsageInfo -> {
+                viewModelScope.launch {
+                    getApplicationsInfo()
+                    changeSortOption(state.sortOption)
+                }
                 state.copy(
-                    appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
-                    sortOption = option
+                    appInfoList = null,
+                    appIconList = hashMapOf()
                 )
             }
 
-            UsageEventType.AppForegroundUsageEvent -> {
+            UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
-                    sortOption = option
+                    appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope)
                 )
             }
-
-            UsageEventType.AppNotifyEvent -> {
+            UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope),
-                    sortOption = option
+                    appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope)
                 )
             }
-
-            UsageEventType.AppLaunchEvent -> {
+            UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
                 state.copy(
-                    appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope),
-                    sortOption = option
+                    appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope)
+                )
+            }
+            UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
+                state.copy(
+                    appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope)
                 )
             }
         }

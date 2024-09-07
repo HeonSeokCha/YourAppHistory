@@ -36,7 +36,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.convertToRealUsageTime
-import com.chs.yourapphistory.data.model.UsageEventType
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
@@ -46,7 +45,7 @@ import com.chs.yourapphistory.presentation.screen.common.shimmer
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
-    sortOption: UsageEventType = UsageEventType.AppUsageEvent,
+    sortOption: UsedAppEvent = UsedAppEvent.GetUsageEvent.AppUsageEvent,
     clickAble: (String) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
@@ -120,8 +119,8 @@ fun ItemAppInfoSmall(
                                 visible = appInfo == null,
                                 highlight = PlaceholderHighlight.shimmer()
                             ),
-                        text = if (sortOption is UsageEventType.AppNotifyEvent
-                            || sortOption is UsageEventType.AppLaunchEvent
+                        text = if (sortOption is UsedAppEvent.GetUsageEvent.AppNotifyEvent
+                            || sortOption is UsedAppEvent.GetUsageEvent.AppLaunchEvent
                         ) {
                             "${value}회"
                         } else {

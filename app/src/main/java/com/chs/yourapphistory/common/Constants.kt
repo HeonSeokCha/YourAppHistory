@@ -1,7 +1,7 @@
 package com.chs.yourapphistory.common
 
 import android.app.usage.UsageEvents
-import com.chs.yourapphistory.data.model.UsageEventType
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppEvent
 import java.time.format.DateTimeFormatter
 
 object Constants {
@@ -33,9 +33,9 @@ object Constants {
     val APP_NOTIFY_EVENT_FILTER = listOf(12)
 
     val USAGE_EVENT_TYPE_LIST = listOf(
-        UsageEventType.AppUsageEvent,
-        UsageEventType.AppForegroundUsageEvent,
-        UsageEventType.AppNotifyEvent,
-        UsageEventType.AppLaunchEvent
+        UsedAppEvent.GetUsageEvent.AppUsageEvent,
+        UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent,
+        UsedAppEvent.GetUsageEvent.AppNotifyEvent,
+        UsedAppEvent.GetUsageEvent.AppLaunchEvent
     )
 }
