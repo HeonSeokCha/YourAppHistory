@@ -6,6 +6,7 @@ import androidx.compose.runtime.setValue
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.navigation.toRoute
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.getUsagePermission
@@ -14,6 +15,7 @@ import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppDetailUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
+import com.chs.yourapphistory.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -35,9 +37,9 @@ class AppUsageDetailViewModel @Inject constructor(
         private set
 
     private val targetPackageName: String =
-        savedStateHandle[Constants.KEY_TARGET_PACKAGE_NAME] ?: ""
+        savedStateHandle.toRoute<Screen.ScreenAppUsageDetail>().targetPackageName
     private val targetDate: LocalDate =
-        (savedStateHandle[Constants.KEY_TARGET_DATE] ?: 0L).toLocalDate()
+        savedStateHandle.toRoute<Screen.ScreenAppUsageDetail>().targetDate.toLocalDate()
 
     init {
         getPackageUsageInfo()

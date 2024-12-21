@@ -11,8 +11,6 @@ object Constants {
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")
     val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
 
-    const val KEY_TARGET_DATE: String = "targetDate"
-    const val KEY_TARGET_PACKAGE_NAME: String = "targetPackageName"
     const val TEXT_TITLE_PREVIEW: String = "Title Preview"
     const val NUMBER_LOADING_COUNT: Int = 6
     const val TAG_WORKER_NAME: String = "app_worker"
