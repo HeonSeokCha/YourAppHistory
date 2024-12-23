@@ -13,7 +13,7 @@ import androidx.navigation.toRoute
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreen
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
-import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreen
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListViewModel
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreen
 
@@ -45,13 +45,20 @@ fun MainNavHost(
 
         composable<Screen.ScreenUsedAppList> {
             val viewmodel: UsedAppListViewModel = hiltViewModel()
-            UsedAppListScreenScreen(
-                state = viewmodel.state,
-                onEvent = viewmodel::changeSortOption,
-                selectPackageLabel = { selectPackage(it) }
-            ) {
-               navController.navigate(it)
-            }
+
+            UsedAppListScreenScreenRoot(
+                viewModel = viewmodel,
+                onClickApp = { appInfo, targetDateMillis ->
+                    selectPackage(appInfo.label)
+
+                    navController.navigate(
+                        Screen.ScreenAppUsageDetail(
+                            targetPackageName = appInfo.packageName,
+                            targetDate = targetDateMillis
+                        )
+                    )
+                }
+            )
         }
 
         composable<Screen.ScreenAppUsageDetail> {

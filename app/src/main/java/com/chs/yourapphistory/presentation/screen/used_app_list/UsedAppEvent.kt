@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import com.chs.yourapphistory.domain.model.AppInfo
 
 sealed interface UsedAppEvent {
     sealed class GetUsageEvent(val name: String): UsedAppEvent {
@@ -8,5 +9,11 @@ sealed interface UsedAppEvent {
         data object AppNotifyEvent : GetUsageEvent("앱 알림 횟수")
         data object AppLaunchEvent : GetUsageEvent("앱 실행 횟수")
     }
+
+    data class ClickApplication(
+        val appInfo: AppInfo,
+        val targetDate: Long
+    ) : UsedAppEvent
+
     data object RefreshAppUsageInfo : UsedAppEvent
 }

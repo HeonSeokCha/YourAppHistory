@@ -46,7 +46,7 @@ fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
     sortOption: UsedAppEvent = UsedAppEvent.GetUsageEvent.AppUsageEvent,
-    clickAble: (String) -> Unit
+    clickAble: (AppInfo) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
     val value = usedAppInfo?.second
@@ -66,9 +66,7 @@ fun ItemAppInfoSmall(
                     horizontal = 12.dp
                 )
                 .clickable {
-                    if (appInfo != null) {
-                        clickAble(appInfo.packageName)
-                    }
+                    if (appInfo != null) { clickAble(appInfo) }
                 },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
