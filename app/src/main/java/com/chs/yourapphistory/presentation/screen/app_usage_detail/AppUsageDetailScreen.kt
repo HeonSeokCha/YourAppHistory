@@ -1,7 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,7 +15,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Card
 import androidx.compose.material3.Text
-import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -28,11 +26,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
@@ -45,10 +43,29 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
+fun AppUsageDetailScreenRoot(
+    viewModel: AppUsageDetailViewModel,
+    onBack: () -> Unit
+) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
+    AppUsageDetailScreen(
+        state = state,
+        onEvent = { event ->
+            when (event) {
+                AppUsageDetailEvent.OnBackClick -> {
+                    onBack()
+                }
+                else -> Unit
+            }
+            viewModel.changeEvent(event)
+        }
+    )
+}
+
+@Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
-    onRefresh: () -> Unit,
-    onBack: () -> Unit
+    onEvent: (AppUsageDetailEvent) -> Unit
 ) {
     var currentDate by remember { mutableStateOf(state.targetDate) }
     var isRefreshing by remember { mutableStateOf(false) }
@@ -72,14 +89,13 @@ fun AppUsageDetailScreen(
         }
     }
 
-    BackHandler { onBack() }
+    BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
 
     ItemPullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
             isRefreshing = true
             coroutineScope.launch {
-                onRefresh()
                 delay(500L)
                 isRefreshing = false
             }

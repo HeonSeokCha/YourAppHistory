@@ -12,6 +12,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.chs.yourapphistory.presentation.Screen
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreen
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreenRoot
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListViewModel
@@ -67,15 +68,13 @@ fun MainNavHost(
                 navController.getBackStackEntry(arg)
             }
             val viewModel: AppUsageDetailViewModel = hiltViewModel(parentEntry)
-            AppUsageDetailScreen(
-                state = viewModel.state,
-                onRefresh = {
-                    viewModel.refreshUsageInfo()
+            AppUsageDetailScreenRoot(
+                viewModel = viewModel,
+                onBack = {
+                    selectPackage(null)
+                    navController.navigateUp()
                 }
-            ) {
-                selectPackage(null)
-                navController.navigateUp()
-            }
+            )
         }
     }
 }
