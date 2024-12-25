@@ -67,7 +67,6 @@ fun AppUsageDetailScreen(
     state: AppUsageDetailState,
     onEvent: (AppUsageDetailEvent) -> Unit
 ) {
-    var currentDate by remember { mutableStateOf(state.targetDate) }
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
     val pagingData = state.pagingDetailInfo?.collectAsLazyPagingItems()
@@ -77,7 +76,7 @@ fun AppUsageDetailScreen(
                 pagingData.itemCount
             }, initialPage = pagingData.itemSnapshotList.items.map {
                 it.first
-            }.indexOf(state.targetDate)
+            }.indexOf(state.displayDate)
         )
     } else {
         rememberPagerState(pageCount = { 0 })
@@ -85,7 +84,11 @@ fun AppUsageDetailScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         if (pagingData != null && pagingData.itemCount != 0) {
-            currentDate = pagingData[pagerState.currentPage]?.first ?: LocalDate.now()
+            onEvent(
+                AppUsageDetailEvent.OnChangeTargetDate(
+                    pagingData[pagerState.currentPage]?.first ?: LocalDate.now()
+                )
+            )
         }
     }
 
@@ -120,17 +123,16 @@ fun AppUsageDetailScreen(
                     text = if (pagingData == null || pagingData.itemCount == 0) {
                         Constants.TEXT_TITLE_PREVIEW
                     } else {
-                        if (currentDate == LocalDate.now()) {
+                        if (state.displayDate == LocalDate.now()) {
                             "오늘"
                         } else {
-                            currentDate.format(Constants.DATE_FORMAT)
+                            state.displayDate!!.format(Constants.DATE_FORMAT)
                         }
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
             }
-
 
             HorizontalPager(
                 state = pagerState,

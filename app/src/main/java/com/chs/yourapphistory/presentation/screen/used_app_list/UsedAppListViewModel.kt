@@ -53,23 +53,30 @@ class UsedAppListViewModel @Inject constructor(
                 async { _state.update { it.copy(appIconList = getAppIconMapUseCase()) } }
             )
         }
+
+        getEventList(_state.value.sortOption)
     }
 
     fun changeEvent(option: UsedAppEvent) {
         when (option) {
             UsedAppEvent.RefreshAppUsageInfo -> {
-                _state.update {
-                    viewModelScope.launch {
-                        getApplicationsInfo()
-                    }
-                    it.copy(
-                        appInfoList = null,
-                        appIconList = hashMapOf()
-                    )
+                viewModelScope.launch {
+                    getApplicationsInfo()
                 }
             }
 
+            is UsedAppEvent.GetUsageEvent -> {
+                getEventList(option)
+            }
+
+            else -> Unit
+        }
+    }
+
+    private fun getEventList(option: UsedAppEvent.GetUsageEvent) {
+        when (option) {
             is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
+                option
                 _state.update {
                     it.copy(
                         appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
@@ -104,8 +111,6 @@ class UsedAppListViewModel @Inject constructor(
                     )
                 }
             }
-
-            else -> Unit
         }
     }
 }

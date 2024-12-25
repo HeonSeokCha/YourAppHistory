@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -56,6 +57,7 @@ fun UsedAppListScreenScreenRoot(
                 is UsedAppEvent.ClickApplication -> {
                     onClickApp(event.appInfo, event.targetDate)
                 }
+
                 else -> Unit
             }
 
@@ -90,61 +92,56 @@ fun UsedAppListScreenScreen(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .padding(vertical = 8.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row {
-                Text(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterVertically)
-                        .placeholder(
-                            visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ),
-                    text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
-                        Constants.TEXT_TITLE_PREVIEW
-                    } else {
-                        pagingData[pagerState.currentPage]?.first.run {
-                            if (this == LocalDate.now()) {
-                                "오늘"
-                            } else this.toString()
-                        }
-                    },
-                    textAlign = TextAlign.Center,
-                    fontSize = 24.sp
-                )
-            }
+            Text(
+                modifier = Modifier
+                    .padding(bottom = 4.dp)
+                    .placeholder(
+                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
+                text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
+                    Constants.TEXT_TITLE_PREVIEW
+                } else {
+                    pagingData[pagerState.currentPage]?.first.run {
+                        if (this == LocalDate.now()) {
+                            "오늘"
+                        } else this.toString()
+                    }
+                },
+                textAlign = TextAlign.Center,
+                fontSize = 24.sp
+            )
 
-            Row {
-                Text(
-                    modifier = Modifier
-                        .weight(1f)
-                        .align(Alignment.CenterVertically)
-                        .clickable {
-                            filterDialogShow = true
-                        }
-                        .placeholder(
-                            visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ),
-                    text = state.sortOption.name,
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            }
+            Text(
+                modifier = Modifier
+                    .clickable {
+                        filterDialogShow = true
+                    }
+                    .placeholder(
+                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                        highlight = PlaceholderHighlight.shimmer()
+                    ),
+                text = state.sortOption.name,
+                textAlign = TextAlign.Center,
+                fontSize = 18.sp
+            )
 
 
-            HorizontalPager(
-                modifier = Modifier.fillMaxSize(),
-                state = pagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-                key = pagingData?.itemKey { it.first }
-            ) { page ->
-                LazyColumn(
+            if (pagingData != null) {
+                HorizontalPager(
                     modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    if (pagingData != null && pagingData.itemCount != 0) {
+                    state = pagerState,
+                    reverseLayout = true,
+                    userScrollEnabled = true,
+                    key = pagingData.itemKey { it.first }
+                ) { page ->
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        horizontalAlignment = Alignment.CenterHorizontally
+                    ) {
                         val packageList = pagingData[page]!!.second
                         items(
                             count = packageList.size,
@@ -174,11 +171,20 @@ fun UsedAppListScreenScreen(
 
                             is LoadState.Error -> {
                                 item {
-                                    Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                                    Text(
+                                        text = (pagingData.loadState.refresh as LoadState.Error)
+                                            .error.message.toString()
+                                    )
                                 }
                             }
 
-                            else -> Unit
+                            else -> {
+                                if (pagingData.itemCount == 0) {
+                                    item {
+                                        Text(text = "No Result.")
+                                    }
+                                }
+                            }
                         }
 
 
@@ -191,15 +197,14 @@ fun UsedAppListScreenScreen(
 
                             is LoadState.Error -> {
                                 item {
-                                    Text((pagingData.loadState.append as LoadState.Error).error.message.toString())
+                                    Text(
+                                        text = (pagingData.loadState.append as LoadState.Error)
+                                            .error.message.toString()
+                                    )
                                 }
                             }
 
                             else -> Unit
-                        }
-                    } else {
-                        items(10) {
-                            ItemAppInfoSmall(null, null) { }
                         }
                     }
                 }

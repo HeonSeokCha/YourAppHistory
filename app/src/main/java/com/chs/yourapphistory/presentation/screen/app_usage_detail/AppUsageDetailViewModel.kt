@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetPagingAppDetailUseCase
 import com.chs.yourapphistory.presentation.Screen
@@ -29,6 +30,7 @@ class AppUsageDetailViewModel @Inject constructor(
     val state = _state
         .onStart {
             getPackageUsageInfo(targetDate)
+            changeDate(targetDate)
         }
         .stateIn(
             viewModelScope,
@@ -44,10 +46,16 @@ class AppUsageDetailViewModel @Inject constructor(
     fun changeEvent(event: AppUsageDetailEvent) {
         when (event) {
             is AppUsageDetailEvent.OnChangeTargetDate -> {
-                getPackageUsageInfo(event.date)
+                changeDate(event.date)
             }
 
             else -> Unit
+        }
+    }
+
+    private fun changeDate(date: LocalDate) {
+        _state.update {
+            it.copy(displayDate = date)
         }
     }
 
@@ -57,8 +65,7 @@ class AppUsageDetailViewModel @Inject constructor(
                 pagingDetailInfo = getPagingAppDetailUseCase(
                     packageName = targetPackageName,
                     targetDate = date
-                ).cachedIn(viewModelScope),
-                targetDate = date
+                ).cachedIn(viewModelScope)
             )
         }
     }
