@@ -31,6 +31,7 @@ import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
@@ -55,6 +56,7 @@ fun AppUsageDetailScreenRoot(
                 AppUsageDetailEvent.OnBackClick -> {
                     onBack()
                 }
+
                 else -> Unit
             }
             viewModel.changeEvent(event)
@@ -117,7 +119,7 @@ fun AppUsageDetailScreen(
                 Text(
                     modifier = Modifier
                         .placeholder(
-                            visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                            visible = pagingData == null,
                             highlight = PlaceholderHighlight.shimmer()
                         ),
                     text = if (pagingData == null || pagingData.itemCount == 0) {
@@ -134,18 +136,20 @@ fun AppUsageDetailScreen(
                 )
             }
 
-            HorizontalPager(
-                state = pagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-                key = pagingData?.itemKey { it.first }
-            ) { page ->
-                Column(
+            if (pagingData != null) {
+                HorizontalPager(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
-                ) {
-                    if (pagingData != null && pagingData.itemCount != 0) {
+                        .fillMaxSize(),
+                    state = pagerState,
+                    reverseLayout = true,
+                    userScrollEnabled = true,
+                    key = pagingData.itemKey { it.first }
+                ) { page ->
+                    Column(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .verticalScroll(rememberScrollState())
+                    ) {
                         val item = pagingData[page]?.second
 
                         if (item != null) {
@@ -183,21 +187,21 @@ fun AppUsageDetailScreen(
 
                             Spacer(modifier = Modifier.height(32.dp))
                         }
-                    } else {
-                        repeat(4) {
-                            Card(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(250.dp)
-                                    .padding(horizontal = 8.dp)
-                                    .placeholder(
-                                        visible = true,
-                                        highlight = PlaceholderHighlight.shimmer()
-                                    )
-                            ) {}
-                            Spacer(modifier = Modifier.height(32.dp))
-                        }
                     }
+                }
+            } else {
+                repeat(4) {
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(250.dp)
+                            .padding(horizontal = 8.dp)
+                            .placeholder(
+                                visible = true,
+                                highlight = PlaceholderHighlight.shimmer()
+                            )
+                    ) {}
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }

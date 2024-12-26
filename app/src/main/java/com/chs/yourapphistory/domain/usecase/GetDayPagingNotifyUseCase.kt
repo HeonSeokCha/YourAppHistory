@@ -12,7 +12,7 @@ import javax.inject.Inject
 class GetDayPagingNotifyUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    suspend operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return repository.getDayNotifyAppList()
     }
 }

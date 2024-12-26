@@ -74,41 +74,42 @@ class UsedAppListViewModel @Inject constructor(
     }
 
     private fun getEventList(option: UsedAppEvent.GetUsageEvent) {
-        when (option) {
-            is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
-                option
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
-                        sortOption = option
-                    )
+        viewModelScope.launch {
+            when (option) {
+                is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
+                    _state.update {
+                        it.copy(
+                            appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
+                    }
                 }
-            }
 
-            is UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope),
-                        sortOption = option
-                    )
+                is UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
+                    _state.update {
+                        it.copy(
+                            appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
+                    }
                 }
-            }
 
-            is UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope),
-                        sortOption = option
-                    )
+                is UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
+                    _state.update {
+                        it.copy(
+                            appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
+                    }
                 }
-            }
 
-            is UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
-                _state.update {
-                    it.copy(
-                        appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
-                        sortOption = option
-                    )
+                is UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
+                    _state.update {
+                        it.copy(
+                            appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
+                    }
                 }
             }
         }

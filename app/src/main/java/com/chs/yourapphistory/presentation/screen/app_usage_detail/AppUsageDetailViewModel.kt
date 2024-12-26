@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
@@ -60,13 +61,15 @@ class AppUsageDetailViewModel @Inject constructor(
     }
 
     private fun getPackageUsageInfo(date: LocalDate) {
-        _state.update {
-            it.copy(
-                pagingDetailInfo = getPagingAppDetailUseCase(
-                    packageName = targetPackageName,
-                    targetDate = date
-                ).cachedIn(viewModelScope)
-            )
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    pagingDetailInfo = getPagingAppDetailUseCase(
+                        packageName = targetPackageName,
+                        targetDate = date
+                    ).cachedIn(viewModelScope)
+                )
+            }
         }
     }
 

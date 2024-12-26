@@ -10,7 +10,7 @@ import javax.inject.Inject
 class GetPagingAppDetailUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    operator fun invoke(
+    suspend operator fun invoke(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, AppDetailInfo>>> {

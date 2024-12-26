@@ -15,6 +15,8 @@ import com.chs.yourapphistory.domain.model.AppDetailInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import kotlin.time.Duration.Companion.hours
@@ -23,6 +25,7 @@ class GetPagingAppDetailList(
     private val appUsageDao: AppUsageDao,
     private val appForegroundUsageDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
+    private val minDate: LocalDate,
     private val targetDate: LocalDate,
     private val targetPackageName: String
 ) : PagingSource<LocalDate, Pair<LocalDate, AppDetailInfo>>() {
@@ -35,14 +38,6 @@ class GetPagingAppDetailList(
     }
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, AppDetailInfo>> {
-        val minDate: LocalDate = withContext(Dispatchers.Default) {
-            awaitAll(
-                async(Dispatchers.IO) { appUsageDao.getFirstCollectTime() },
-                async(Dispatchers.IO) { appForegroundUsageDao.getFirstCollectTime() },
-                async(Dispatchers.IO) { appNotifyInfoDao.getFirstCollectTime() }
-            ).min().toLocalDate()
-        }
-
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -109,6 +104,9 @@ class GetPagingAppDetailList(
                     )
                 }
             }
+
+        chsLog("PARAMS : " + pageDate.toString())
+        chsLog("BUFFER : " + buffetDate.toString())
 
         return LoadResult.Page(
             data = data,

@@ -15,7 +15,8 @@ import kotlinx.coroutines.withContext
 import java.time.LocalDate
 
 class GetDayPagingNotifyList(
-    private val appNotifyInfoDao: AppNotifyInfoDao
+    private val appNotifyInfoDao: AppNotifyInfoDao,
+    private val minDate: LocalDate
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -26,7 +27,6 @@ class GetDayPagingNotifyList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
-        val minDate: LocalDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
 
         val data = pageDate.run {
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate

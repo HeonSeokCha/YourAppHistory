@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -30,6 +31,7 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
+import kotlin.math.min
 
 class AppRepositoryImpl @Inject constructor(
     private val applicationInfoSource: ApplicationInfoSource,
@@ -132,42 +134,66 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    override suspend fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        val minDate: LocalDate = appUsageDao.getFirstCollectTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingUsedList(appUsageDao = appUsageDao)
+            GetDayPagingUsedList(
+                appUsageDao = appUsageDao,
+                minDate = minDate
+            )
         }.flow
     }
 
-    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+
+    override suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        val minDate: LocalDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingForegroundUsedList(appForegroundUsageDao = appForegroundUsageDao)
+            GetDayPagingForegroundUsedList(
+                appForegroundUsageDao = appForegroundUsageDao,
+                minDate = minDate
+            )
         }.flow
     }
 
-    override fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    override suspend fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        val minDate: LocalDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingNotifyList(appNotifyInfoDao = appNotifyInfoDao)
+            GetDayPagingNotifyList(
+                appNotifyInfoDao = appNotifyInfoDao,
+                minDate = minDate
+            )
         }.flow
     }
 
-    override fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    override suspend fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        val minDate: LocalDate = appUsageDao.getFirstCollectTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingLaunchList(appUsageDao = appUsageDao)
+            GetDayPagingLaunchList(
+                appUsageDao = appUsageDao,
+                minDate = minDate
+            )
         }.flow
     }
 
-    override fun getPagingAppDetailInfo(
+    override suspend fun getPagingAppDetailInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, AppDetailInfo>>> {
+        val minDate: LocalDate = withContext(Dispatchers.Default) {
+            awaitAll(
+                async(Dispatchers.IO) { appUsageDao.getFirstCollectTime() },
+                async(Dispatchers.IO) { appForegroundUsageDao.getFirstCollectTime() },
+                async(Dispatchers.IO) { appNotifyInfoDao.getFirstCollectTime() }
+            ).min().toLocalDate()
+        }
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -175,6 +201,7 @@ class AppRepositoryImpl @Inject constructor(
                 appUsageDao = appUsageDao,
                 appForegroundUsageDao = appForegroundUsageDao,
                 appNotifyInfoDao = appNotifyInfoDao,
+                minDate = minDate,
                 targetDate = targetDate,
                 targetPackageName = packageName
             )
