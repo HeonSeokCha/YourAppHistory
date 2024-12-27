@@ -46,15 +46,11 @@ class GetPagingAppDetailList(
             }
         }
 
-        val buffetDate = if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
-            LocalDate.now()
-        } else pageDate.plusDays(Constants.PAGING_DAY)
-
         val data = pageDate.run {
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
             else this.minusDays(Constants.PAGING_DAY)
         }
-            .reverseDateUntil(buffetDate.plusDays(1L))
+            .reverseDateUntil(pageDate.plusDays(1L))
             .map {
                 it to withContext(Dispatchers.Default) {
                     val usageInfo = calcHourUsageList(
@@ -105,17 +101,14 @@ class GetPagingAppDetailList(
                 }
             }
 
-        chsLog("PARAMS : " + pageDate.toString())
-        chsLog("BUFFER : " + buffetDate.toString())
-
         return LoadResult.Page(
             data = data,
-            prevKey = if (buffetDate == LocalDate.now()) {
+            prevKey = if (pageDate == LocalDate.now()) {
                 null
             } else {
-                if (buffetDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
                     LocalDate.now()
-                } else buffetDate.plusDays(Constants.PAGING_DAY + 1)
+                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
             },
             nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
                 null
