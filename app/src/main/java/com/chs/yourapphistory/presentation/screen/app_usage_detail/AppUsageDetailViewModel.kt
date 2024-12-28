@@ -35,7 +35,7 @@ class AppUsageDetailViewModel @Inject constructor(
         }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Lazily,
             _state.value
         )
 

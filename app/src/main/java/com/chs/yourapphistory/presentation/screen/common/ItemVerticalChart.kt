@@ -200,10 +200,7 @@ fun UsageChart(
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
-    Card(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-    ) {
+    Card {
         Text(
             modifier = Modifier
                 .padding(
