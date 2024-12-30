@@ -8,5 +8,8 @@ import java.time.LocalDate
 data class AppUsageDetailState(
     val displayDate: LocalDate? = null,
     val selectIdx: Int = 0,
-    val pagingDetailInfo: Flow<PagingData<Pair<LocalDate, AppDetailInfo>>>? = null,
+    val pagingUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
+    val pagingForegroundUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
+    val pagingNotifyInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
+    val pagingLaunchInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null
 )

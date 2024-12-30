@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import androidx.compose.ui.util.packInts
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,7 +8,10 @@ import androidx.navigation.toRoute
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.domain.usecase.GetPagingAppDetailUseCase
+import com.chs.yourapphistory.data.paging.GetPagingAppForegroundInfo
+import com.chs.yourapphistory.domain.usecase.GetPagingAppLaunchUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingAppNotifyUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingAppUsedInfoUseCase
 import com.chs.yourapphistory.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,7 +26,10 @@ import javax.inject.Inject
 @HiltViewModel
 class AppUsageDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
-    private val getPagingAppDetailUseCase: GetPagingAppDetailUseCase,
+    private val getPagingAppUsedInfoUseCase: GetPagingAppUsedInfoUseCase,
+    private val getPagingAppForegroundInfo: GetPagingAppForegroundInfo,
+    private val getPagingAppNotifyUseCase: GetPagingAppNotifyUseCase,
+    private val getPagingAppLaunchUseCase: GetPagingAppLaunchUseCase
 //    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
 //    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
@@ -64,10 +71,22 @@ class AppUsageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    pagingDetailInfo = getPagingAppDetailUseCase(
-                        packageName = targetPackageName,
-                        targetDate = date
-                    ).cachedIn(viewModelScope)
+                    pagingUsedInfo = getPagingAppUsedInfoUseCase(
+                        targetDate = date,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingForegroundUsedInfo = getPagingAppUsedInfoUseCase(
+                        targetDate = date,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingNotifyInfo = getPagingAppNotifyUseCase(
+                        targetDate = date,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingLaunchInfo = getPagingAppLaunchUseCase(
+                        targetDate = date,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
                 )
             }
         }

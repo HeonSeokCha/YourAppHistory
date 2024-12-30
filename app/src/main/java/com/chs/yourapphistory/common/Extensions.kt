@@ -11,6 +11,7 @@ import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
 import java.util.stream.Collectors
+import kotlin.time.Duration.Companion.hours
 
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
     val localTime: LocalTime = LocalTime.MIDNIGHT
@@ -145,6 +146,101 @@ fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
         .reversed()
 }
 
+internal fun calcHourUsageList(
+    targetDate: LocalDate,
+    list: Map<Long, Long>
+): List<Pair<Int, Int>> {
+    val usageMap = object : HashMap<Int, Long>() {
+        init {
+            for (i in 0..23) {
+                put(i, 0L)
+            }
+        }
+    }
+
+    list.forEach {
+        val (begin, end) = it.key.toLocalDateTime() to it.value.toLocalDateTime()
+
+        if (targetDate.dayOfMonth < end.dayOfMonth) {
+            val targetDateZeroHour = targetDate.atStartOfDay()
+            for (i in begin.hour..23) {
+                usageMap.computeIfPresent(i) { key, value ->
+                    val calc = if (i == begin.hour) {
+                        targetDateZeroHour.plusHours(i + 1L).toMillis() - begin.toMillis()
+                    } else {
+                        1.hours.inWholeMilliseconds
+                    }
+
+                    value + calc
+                }
+                targetDateZeroHour.minusHours(i.toLong())
+            }
+            return@forEach
+        }
+
+        if (begin.dayOfMonth < targetDate.dayOfMonth) {
+            val targetDateZeroHour = targetDate.atStartOfDay()
+            for (i in 0..end.hour) {
+                usageMap.computeIfPresent(i) { key, value ->
+                    val calc = if (i == end.hour) {
+                        end.toMillis() - targetDateZeroHour.plusHours(i.toLong()).toMillis()
+                    } else {
+                        1.hours.inWholeMilliseconds
+                    }
+                    value + calc
+                }
+                targetDateZeroHour.minusHours(i.toLong())
+            }
+
+            return@forEach
+        }
+
+        usageMap.computeIfPresent(begin.hour) { key, value ->
+            if (begin.hour < end.hour) {
+                val targetDateZeroHour = targetDate.atStartOfDay()
+                for (i in (begin.hour + 1)..end.hour) {
+                    val targetHour = targetDateZeroHour.plusHours(i.toLong())
+                    usageMap.computeIfPresent(i) { _, value1 ->
+                        if (i == end.hour) {
+                            value1 + (end.toMillis() - targetHour.toMillis())
+                        } else {
+                            1.hours.inWholeMilliseconds
+                        }
+                    }
+                    targetDateZeroHour.minusHours(i.toLong())
+                }
+                val nextHour = targetDate.atStartOfDay().plusHours((begin.hour + 1).toLong())
+                value + (nextHour.toMillis() - begin.toMillis())
+            } else {
+                value + (end.toMillis() - begin.toMillis())
+            }
+        }
+    }
+
+    return usageMap.toList().map { it.first to it.second.toInt() }
+}
+
+internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
+    val usageMap = object : HashMap<Int, Long>() {
+        init {
+            for (i in 0..23) {
+                put(i, 0L)
+            }
+        }
+    }
+
+    list.forEach {
+        val begin = it.toLocalDateTime()
+
+        usageMap.computeIfPresent(begin.hour) { key, value ->
+            value + 1
+        }
+    }
+
+    return usageMap.toList().map { it.first to it.second.toInt() }
+}
 fun chsLog(value: String) {
     Log.e("CHS_LOG", value)
 }
+
+
