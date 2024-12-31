@@ -1,14 +1,12 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
-import androidx.compose.ui.util.packInts
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.cachedIn
-import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.data.paging.GetPagingAppForegroundInfo
+import com.chs.yourapphistory.domain.usecase.GetPagingAppForegroundUsedUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppUsedInfoUseCase
@@ -27,7 +25,7 @@ import javax.inject.Inject
 class AppUsageDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPagingAppUsedInfoUseCase: GetPagingAppUsedInfoUseCase,
-    private val getPagingAppForegroundInfo: GetPagingAppForegroundInfo,
+    private val getPagingAppForegroundUsedUseCase: GetPagingAppForegroundUsedUseCase,
     private val getPagingAppNotifyUseCase: GetPagingAppNotifyUseCase,
     private val getPagingAppLaunchUseCase: GetPagingAppLaunchUseCase
 //    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
@@ -75,7 +73,7 @@ class AppUsageDetailViewModel @Inject constructor(
                         targetDate = date,
                         packageName = targetPackageName
                     ).cachedIn(viewModelScope),
-                    pagingForegroundUsedInfo = getPagingAppUsedInfoUseCase(
+                    pagingForegroundUsedInfo = getPagingAppForegroundUsedUseCase(
                         targetDate = date,
                         packageName = targetPackageName
                     ).cachedIn(viewModelScope),

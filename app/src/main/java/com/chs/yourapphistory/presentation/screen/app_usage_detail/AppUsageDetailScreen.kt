@@ -72,12 +72,50 @@ fun AppUsageDetailScreen(
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
-    val pagingData = state.pagingDetailInfo?.collectAsLazyPagingItems()
-    val pagerState = if (pagingData != null && pagingData.itemCount != 0) {
+
+
+    val appUsedPagingData = state.pagingUsedInfo?.collectAsLazyPagingItems()
+    val appUsedPagerState = if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
         rememberPagerState(
             pageCount = {
-                pagingData.itemCount
-            }, initialPage = pagingData.itemSnapshotList.items.map {
+                appUsedPagingData.itemCount
+            }, initialPage = appUsedPagingData.itemSnapshotList.items.map {
+                it.first
+            }.indexOf(state.displayDate)
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
+    val appForegroundUsedPagingData = state.pagingForegroundUsedInfo?.collectAsLazyPagingItems()
+    val appForegroundPagerState = if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
+        rememberPagerState(
+            pageCount = {
+                appForegroundUsedPagingData.itemCount
+            }, initialPage = appForegroundUsedPagingData.itemSnapshotList.items.map {
+                it.first
+            }.indexOf(state.displayDate)
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
+    val appNotifyPagingData = state.pagingNotifyInfo?.collectAsLazyPagingItems()
+    val appNotifyPagerState = if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
+        rememberPagerState(
+            pageCount = {
+                appNotifyPagingData.itemCount
+            }, initialPage = appNotifyPagingData.itemSnapshotList.items.map {
+                it.first
+            }.indexOf(state.displayDate)
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
+    val appLaunchPagingData = state.pagingLaunchInfo?.collectAsLazyPagingItems()
+    val appLaunchPagerState = if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
+        rememberPagerState(
+            pageCount = {
+                appLaunchPagingData.itemCount
+            }, initialPage = appLaunchPagingData.itemSnapshotList.items.map {
                 it.first
             }.indexOf(state.displayDate)
         )
@@ -85,15 +123,6 @@ fun AppUsageDetailScreen(
         rememberPagerState(pageCount = { 0 })
     }
 
-    LaunchedEffect(pagerState.currentPage) {
-        if (pagingData != null && pagingData.itemCount != 0) {
-            onEvent(
-                AppUsageDetailEvent.OnChangeTargetDate(
-                    pagingData[pagerState.currentPage]?.first ?: LocalDate.now()
-                )
-            )
-        }
-    }
 
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
 
@@ -119,97 +148,111 @@ fun AppUsageDetailScreen(
                 horizontalArrangement = Arrangement.Start
             ) {
                 Text(
-                    modifier = Modifier
-                        .placeholder(
-                            visible = pagingData == null,
-                            highlight = PlaceholderHighlight.shimmer()
-                        ),
-                    text = if (pagingData == null || pagingData.itemCount == 0) {
-                        Constants.TEXT_TITLE_PREVIEW
+                    text = if (state.displayDate == LocalDate.now()) {
+                        "오늘"
                     } else {
-                        if (state.displayDate == LocalDate.now()) {
-                            "오늘"
-                        } else {
-                            state.displayDate!!.format(Constants.DATE_FORMAT)
-                        }
+                        state.displayDate!!.format(Constants.DATE_FORMAT)
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
             }
 
-           ScrollableTabRow(
-               selectedTabIndex = state.selectIdx,
 
-           ) { }
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .verticalScroll(rememberScrollState())
+            ) {
 
-            if (pagingData != null) {
-                HorizontalPager(
-                    modifier = Modifier
-                        .fillMaxSize(),
-                    state = pagerState,
-                    reverseLayout = true,
-                    userScrollEnabled = true,
-                    key = pagingData.itemKey { it.first }
-                ) { page ->
-                    Column(
+                if (appUsedPagingData != null) {
+                    HorizontalPager(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        val item = pagingData[page]?.second
-
+                            .fillMaxSize(),
+                        state = appUsedPagerState,
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        key = appUsedPagingData.itemKey { it.first }
+                    ) { page ->
+                        val item = appUsedPagingData[page]?.second
                         if (item != null) {
                             UsageChart(
-                                title = item.usageInfo.sumOf { it.second }.convertToRealUsageTime(),
-                                list = item.usageInfo,
+                                title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                list = item,
                                 convertText = { it.convertToRealUsageMinutes() }
                             )
-
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            UsageChart(
-                                title = "포그라운드 실행 시간 " +
-                                        item.foregroundUsageInfo.sumOf { it.second }
-                                            .convertToRealUsageTime(),
-                                list = item.foregroundUsageInfo,
-                                convertText = { it.convertToRealUsageMinutes() }
-                            )
-
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            UsageChart(
-                                title = "알림 ${item.notifyInfo.sumOf { it.second }}개",
-                                list = item.notifyInfo,
-                                convertText = { "${it}개" }
-                            )
-
-                            Spacer(modifier = Modifier.height(32.dp))
-
-                            UsageChart(
-                                title = "총 실행 횟수 ${item.launchCountInfo.sumOf { it.second }}회",
-                                list = item.launchCountInfo,
-                                convertText = { "${it}회" }
-                            )
-
-                            Spacer(modifier = Modifier.height(32.dp))
                         }
                     }
                 }
-            } else {
-                repeat(4) {
-                    Card(
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (appForegroundUsedPagingData != null) {
+                    HorizontalPager(
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .height(250.dp)
-                            .padding(horizontal = 8.dp)
-                            .placeholder(
-                                visible = true,
-                                highlight = PlaceholderHighlight.shimmer()
+                            .fillMaxSize(),
+                        state = appForegroundPagerState,
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        key = appUsedPagingData?.itemKey { it.first }
+                    ) { page ->
+                        val item = appForegroundUsedPagingData[page]?.second
+                        if (item != null) {
+                            UsageChart(
+                                title = "포그라운드 실행 시간 " +
+                                        item.sumOf { it.second }
+                                            .convertToRealUsageTime(),
+                                list = item,
+                                convertText = { it.convertToRealUsageMinutes() }
                             )
-                    ) {}
-                    Spacer(modifier = Modifier.height(32.dp))
+                        }
+                    }
                 }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (appNotifyPagingData != null) {
+                    HorizontalPager(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = appNotifyPagerState,
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        key = appNotifyPagingData.itemKey { it.first }
+                    ) { page ->
+                        val item = appNotifyPagingData[page]?.second
+                        if (item != null) {
+                            UsageChart(
+                                title = "알림 ${item.sumOf { it.second }}개",
+                                list = item,
+                                convertText = { "${it}개" }
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (appLaunchPagingData != null) {
+                    HorizontalPager(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = appLaunchPagerState,
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        key = appLaunchPagingData.itemKey { it.first }
+                    ) { page ->
+                        val item = appLaunchPagingData[page]?.second
+                        if (item != null) {
+                            UsageChart(
+                                title = "총 실행 횟수 ${item.sumOf { it.second }}회",
+                                list = item,
+                                convertText = { "${it}회" }
+                            )
+                        }
+                    }
+                }
+                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }
