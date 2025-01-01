@@ -40,6 +40,8 @@ import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import com.chs.yourapphistory.presentation.screen.common.shimmer
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -87,42 +89,144 @@ fun AppUsageDetailScreen(
         rememberPagerState(pageCount = { 0 })
     }
     val appForegroundUsedPagingData = state.pagingForegroundUsedInfo?.collectAsLazyPagingItems()
-    val appForegroundPagerState = if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
-        rememberPagerState(
-            pageCount = {
-                appForegroundUsedPagingData.itemCount
-            }, initialPage = appForegroundUsedPagingData.itemSnapshotList.items.map {
-                it.first
-            }.indexOf(state.displayDate)
-        )
-    } else {
-        rememberPagerState(pageCount = { 0 })
-    }
+    val appForegroundPagerState =
+        if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appForegroundUsedPagingData.itemCount
+                }, initialPage = appForegroundUsedPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayDate)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
     val appNotifyPagingData = state.pagingNotifyInfo?.collectAsLazyPagingItems()
-    val appNotifyPagerState = if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
-        rememberPagerState(
-            pageCount = {
-                appNotifyPagingData.itemCount
-            }, initialPage = appNotifyPagingData.itemSnapshotList.items.map {
-                it.first
-            }.indexOf(state.displayDate)
-        )
-    } else {
-        rememberPagerState(pageCount = { 0 })
-    }
+    val appNotifyPagerState =
+        if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appNotifyPagingData.itemCount
+                }, initialPage = appNotifyPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayDate)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
     val appLaunchPagingData = state.pagingLaunchInfo?.collectAsLazyPagingItems()
-    val appLaunchPagerState = if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
-        rememberPagerState(
-            pageCount = {
-                appLaunchPagingData.itemCount
-            }, initialPage = appLaunchPagingData.itemSnapshotList.items.map {
-                it.first
-            }.indexOf(state.displayDate)
+    val appLaunchPagerState =
+        if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appLaunchPagingData.itemCount
+                }, initialPage = appLaunchPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayDate)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
+
+    LaunchedEffect(appUsedPagerState.currentPage) {
+        if (appUsedPagingData == null) return@LaunchedEffect
+
+        if (appUsedPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
+            )
         )
-    } else {
-        rememberPagerState(pageCount = { 0 })
+
+        launch {
+            val a = async {
+                delay(200L)
+                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val b = async {
+                delay(200L)
+                appNotifyPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val c = async {
+                delay(200L)
+                appLaunchPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+            awaitAll(a, b, c)
+        }
     }
 
+//    LaunchedEffect(appForegroundPagerState.currentPage) {
+//        if (appForegroundUsedPagingData == null) return@LaunchedEffect
+//
+//        if (appForegroundUsedPagingData.itemCount == 0) return@LaunchedEffect
+//
+//        onEvent(
+//            AppUsageDetailEvent.OnChangeTargetDate(
+//                appForegroundUsedPagingData[appForegroundPagerState.currentPage]?.first
+//                    ?: LocalDate.now()
+//            )
+//        )
+//    }
+
+    LaunchedEffect(appNotifyPagerState.currentPage) {
+        if (appNotifyPagingData == null) return@LaunchedEffect
+
+        if (appNotifyPagingData.itemCount == 0) return@LaunchedEffect
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
+            )
+        )
+
+        launch {
+            val a = async {
+                delay(200L)
+                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val b = async {
+                delay(200L)
+                appUsedPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val c = async {
+                delay(200L)
+                appLaunchPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+            awaitAll(a, b, c)
+        }
+    }
+
+    LaunchedEffect(appLaunchPagerState.currentPage) {
+        if (appLaunchPagingData == null) return@LaunchedEffect
+        if (appLaunchPagingData.itemCount == 0) return@LaunchedEffect
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appLaunchPagingData[appLaunchPagerState.currentPage]?.first ?: LocalDate.now()
+            )
+        )
+
+        launch {
+            val a = async {
+                delay(200L)
+                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val b = async {
+                delay(200L)
+                appNotifyPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+
+            val c = async {
+                delay(200L)
+                appUsedPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
+            }
+            awaitAll(a, b, c)
+        }
+    }
 
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
 
@@ -151,7 +255,7 @@ fun AppUsageDetailScreen(
                     text = if (state.displayDate == LocalDate.now()) {
                         "오늘"
                     } else {
-                        state.displayDate!!.format(Constants.DATE_FORMAT)
+                        state.displayDate.format(Constants.DATE_FORMAT)
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
@@ -165,10 +269,11 @@ fun AppUsageDetailScreen(
                     .verticalScroll(rememberScrollState())
             ) {
 
-                if (appUsedPagingData != null) {
+                if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),
+                        pageSpacing = 8.dp,
                         state = appUsedPagerState,
                         reverseLayout = true,
                         userScrollEnabled = true,
@@ -185,33 +290,33 @@ fun AppUsageDetailScreen(
                     }
                 }
 
+//                Spacer(modifier = Modifier.height(32.dp))
+//
+//                if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
+//                    HorizontalPager(
+//                        modifier = Modifier
+//                            .fillMaxSize(),
+//                        state = appForegroundPagerState,
+//                        reverseLayout = true,
+//                        userScrollEnabled = true,
+//                        key = appUsedPagingData?.itemKey { it.first }
+//                    ) { page ->
+//                        val item = appForegroundUsedPagingData[page]?.second
+//                        if (item != null) {
+//                            UsageChart(
+//                                title = "포그라운드 실행 시간 " +
+//                                        item.sumOf { it.second }
+//                                            .convertToRealUsageTime(),
+//                                list = item,
+//                                convertText = { it.convertToRealUsageMinutes() }
+//                            )
+//                        }
+//                    }
+//                }
+
                 Spacer(modifier = Modifier.height(32.dp))
 
-                if (appForegroundUsedPagingData != null) {
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        state = appForegroundPagerState,
-                        reverseLayout = true,
-                        userScrollEnabled = true,
-                        key = appUsedPagingData?.itemKey { it.first }
-                    ) { page ->
-                        val item = appForegroundUsedPagingData[page]?.second
-                        if (item != null) {
-                            UsageChart(
-                                title = "포그라운드 실행 시간 " +
-                                        item.sumOf { it.second }
-                                            .convertToRealUsageTime(),
-                                list = item,
-                                convertText = { it.convertToRealUsageMinutes() }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (appNotifyPagingData != null) {
+                if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),
@@ -233,7 +338,7 @@ fun AppUsageDetailScreen(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                if (appLaunchPagingData != null) {
+                if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),

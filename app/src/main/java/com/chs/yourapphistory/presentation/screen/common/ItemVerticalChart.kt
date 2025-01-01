@@ -106,7 +106,7 @@ fun ItemVerticalChart(
     Canvas(
         modifier = Modifier
             .fillMaxSize()
-            .height(250.dp)
+            .height(150.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
                 onStart = { },
@@ -145,26 +145,26 @@ fun ItemVerticalChart(
             )
 
             if (info.idx % 6 == 0 || info.idx == 23) {
-                val time = if (info.idx == 23) 24 else info.idx
+                val time = if (info.idx == 23) "(시)" else info.idx.toString()
 
                 val textResult = textMeasurer.measure(
-                    text = time.convert24HourString(true),
+                    text = time,
                     style = style1
                 )
 
                 val textRectPadding = when (time) {
-                    0 -> 0f
-                    24 -> {
+                    "0" -> 1f
+                    "(시)" -> {
                         size.width - textResult.size.width
                     }
                     else -> {
-                        size.width.div(4).times(time / 6) - textResult.size.width.div(2)
+                        size.width.div(4).times(time.toInt() / 6) - textResult.size.width.div(2)
                     }
                 }
 
                 drawText(
                     textMeasurer = textMeasurer,
-                    text = time.convert24HourString(true),
+                    text = time,
                     topLeft = Offset(
                         x = textRectPadding,
                         y = chartAreaBottom

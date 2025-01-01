@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 data class AppUsageDetailState(
-    val displayDate: LocalDate? = null,
+    val displayDate: LocalDate = LocalDate.now(),
     val selectIdx: Int = 0,
     val pagingUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
     val pagingForegroundUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
