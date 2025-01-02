@@ -290,29 +290,29 @@ fun AppUsageDetailScreen(
                     }
                 }
 
-//                Spacer(modifier = Modifier.height(32.dp))
-//
-//                if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
-//                    HorizontalPager(
-//                        modifier = Modifier
-//                            .fillMaxSize(),
-//                        state = appForegroundPagerState,
-//                        reverseLayout = true,
-//                        userScrollEnabled = true,
-//                        key = appUsedPagingData?.itemKey { it.first }
-//                    ) { page ->
-//                        val item = appForegroundUsedPagingData[page]?.second
-//                        if (item != null) {
-//                            UsageChart(
-//                                title = "포그라운드 실행 시간 " +
-//                                        item.sumOf { it.second }
-//                                            .convertToRealUsageTime(),
-//                                list = item,
-//                                convertText = { it.convertToRealUsageMinutes() }
-//                            )
-//                        }
-//                    }
-//                }
+                Spacer(modifier = Modifier.height(32.dp))
+
+                if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
+                    HorizontalPager(
+                        modifier = Modifier
+                            .fillMaxSize(),
+                        state = appForegroundPagerState,
+                        reverseLayout = true,
+                        userScrollEnabled = true,
+                        key = appForegroundUsedPagingData.itemKey { it.first }
+                    ) { page ->
+                        val item = appForegroundUsedPagingData[page]?.second
+                        if (item != null) {
+                            UsageChart(
+                                title = "포그라운드 실행 시간 " +
+                                        item.sumOf { it.second }
+                                            .convertToRealUsageTime(),
+                                list = item,
+                                convertText = { it.convertToRealUsageMinutes() }
+                            )
+                        }
+                    }
+                }
 
                 Spacer(modifier = Modifier.height(32.dp))
 

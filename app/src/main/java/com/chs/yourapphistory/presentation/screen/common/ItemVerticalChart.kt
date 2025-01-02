@@ -34,6 +34,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
@@ -303,4 +304,23 @@ fun Modifier.tapOrPress(
             }
         }
     }
+}
+
+@Preview
+@Composable
+private fun PreViewUsageChart() {
+    val usageMap = object : HashMap<Int, Int>() {
+        init {
+            for (i in 0..23) {
+                put(i, i)
+            }
+        }
+    }.toList()
+
+
+    UsageChart(
+        title = "TEST",
+        list = usageMap,
+        convertText = { a -> "$a 개" }
+    )
 }
