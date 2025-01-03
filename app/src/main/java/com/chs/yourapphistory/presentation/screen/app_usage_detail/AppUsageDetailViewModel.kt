@@ -28,8 +28,6 @@ class AppUsageDetailViewModel @Inject constructor(
     private val getPagingAppForegroundUsedUseCase: GetPagingAppForegroundUsedUseCase,
     private val getPagingAppNotifyUseCase: GetPagingAppNotifyUseCase,
     private val getPagingAppLaunchUseCase: GetPagingAppLaunchUseCase
-//    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
-//    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppUsageDetailState())
@@ -89,13 +87,4 @@ class AppUsageDetailViewModel @Inject constructor(
             }
         }
     }
-
-//    private suspend fun getApplicationsInfo() {
-//        withContext(Dispatchers.IO) {
-//            awaitAll(
-//                async { getInstallAppInfoUseCase() },
-//                async { insertAppUsageInfoUseCase() },
-//            )
-//        }
-//    }
 }

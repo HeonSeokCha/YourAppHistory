@@ -56,6 +56,7 @@ fun ItemVerticalChart(
     val textSize = with(density) { 10.sp.toPx() }
     val smallPadding = with(density) { 4.dp.toPx() }
     val labelSectionHeight = smallPadding.times(2) + textSize
+    val topBasePadding = with(density) { 14.sp.toPx() + 21f }
     val barWidth = with(density) { 6.dp.toPx() }
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
@@ -112,23 +113,20 @@ fun ItemVerticalChart(
             .tapOrPress(
                 onStart = { },
                 onCancel = { },
-                onCompleted = {
-                    scope.launch {
-                        selectedPos = it
-                    }
-                }
+                onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
-
-        repeat(3) {
-            drawLine(
-                color = Color.Gray,
-                start = Offset(basePadding.div(2), ((100.dp.toPx() * (it) + 10))),
-                end = Offset(size.width - basePadding.div(2), ((100.dp.toPx() * (it) + 10)))
-            )
+        if (size.height != 0f) {
+            repeat(3) {
+                drawLine(
+                    color = Color.Gray,
+                    start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
+                    end = Offset(size.width - basePadding.div(2), ((size.height / 3) * it) + topBasePadding)
+                )
+            }
         }
         val scale = calculateScale(
-            (size.height - smallPadding).roundToInt(),
+            (size.height - smallPadding - topBasePadding).roundToInt(),
             hourUsageList.map { it.second }
         )
         val chartAreaBottom = size.height - labelSectionHeight
@@ -154,9 +152,9 @@ fun ItemVerticalChart(
                 )
 
                 val textRectPadding = when (time) {
-                    "0" -> 1f
+                    "0" -> 42f
                     "(시)" -> {
-                        size.width - textResult.size.width
+                        size.width - (textResult.size.width + 42f)
                     }
                     else -> {
                         size.width.div(4).times(time.toInt() / 6) - textResult.size.width.div(2)
@@ -213,7 +211,7 @@ fun UsageChart(
             fontWeight = FontWeight.Bold
         )
 
-        Spacer(modifier = Modifier.height(32.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         ItemVerticalChart(hourUsageList = list) { textMeasurer, selectedBar ->
             val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()

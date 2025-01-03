@@ -11,10 +11,10 @@ activity = "1.9.3"
 compose-ui = "1.7.6"
 lifecycle = "2.8.7"
 room = "2.6.1"
-hilt = "2.52"
+hilt = "2.54"
 kotlin = "2.0.21"
 ksp = "2.0.20-1.0.24"
-kotlin-coroutine = "1.9.0"
+kotlin-coroutine = "1.10.1"
 desugar_jdk_libs = "2.1.4"
 
 [libraries]
@@ -35,7 +35,7 @@ androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidX-paging-paging-compose = "androidx.paging:paging-compose:3.3.5"
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-lottie = "com.airbnb.android:lottie-compose:6.5.1"
+lottie = "com.airbnb.android:lottie-compose:6.6.2"
 
 ## Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -48,7 +48,7 @@ workmanager = "androidx.work:work-runtime-ktx:2.10.0"
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.2"
+kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
 
 
 
