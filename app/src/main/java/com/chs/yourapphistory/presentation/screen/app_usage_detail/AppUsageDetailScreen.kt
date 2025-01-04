@@ -18,11 +18,13 @@ import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -44,6 +46,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Composable
@@ -128,6 +131,33 @@ fun AppUsageDetailScreen(
             rememberPagerState(pageCount = { 0 })
         }
 
+    LaunchedEffect(appUsedPagerState.isScrollInProgress) {
+        if (appUsedPagerState.currentPage == appForegroundPagerState.currentPage) return@LaunchedEffect
+
+        chsLog("${appUsedPagerState.currentPage}, ${appUsedPagerState.currentPageOffsetFraction}")
+        val a = async {
+            appForegroundPagerState.animateScrollToPage(
+                appUsedPagerState.currentPage,
+                appUsedPagerState.currentPageOffsetFraction,
+            )
+        }
+
+        val b = async {
+            appNotifyPagerState.animateScrollToPage(
+                appUsedPagerState.currentPage,
+                appUsedPagerState.currentPageOffsetFraction,
+            )
+        }
+
+        val c = async {
+            appLaunchPagerState.animateScrollToPage(
+                appUsedPagerState.currentPage,
+                appUsedPagerState.currentPageOffsetFraction,
+            )
+        }
+        awaitAll(a, b, c)
+    }
+
     LaunchedEffect(appUsedPagerState.currentPage) {
         if (appUsedPagingData == null) return@LaunchedEffect
 
@@ -138,94 +168,6 @@ fun AppUsageDetailScreen(
                 appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
             )
         )
-
-        launch {
-            val a = async {
-                delay(200L)
-                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val b = async {
-                delay(200L)
-                appNotifyPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val c = async {
-                delay(200L)
-                appLaunchPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-            awaitAll(a, b, c)
-        }
-    }
-
-//    LaunchedEffect(appForegroundPagerState.currentPage) {
-//        if (appForegroundUsedPagingData == null) return@LaunchedEffect
-//
-//        if (appForegroundUsedPagingData.itemCount == 0) return@LaunchedEffect
-//
-//        onEvent(
-//            AppUsageDetailEvent.OnChangeTargetDate(
-//                appForegroundUsedPagingData[appForegroundPagerState.currentPage]?.first
-//                    ?: LocalDate.now()
-//            )
-//        )
-//    }
-
-    LaunchedEffect(appNotifyPagerState.currentPage) {
-        if (appNotifyPagingData == null) return@LaunchedEffect
-
-        if (appNotifyPagingData.itemCount == 0) return@LaunchedEffect
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
-                appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
-            )
-        )
-
-        launch {
-            val a = async {
-                delay(200L)
-                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val b = async {
-                delay(200L)
-                appUsedPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val c = async {
-                delay(200L)
-                appLaunchPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-            awaitAll(a, b, c)
-        }
-    }
-
-    LaunchedEffect(appLaunchPagerState.currentPage) {
-        if (appLaunchPagingData == null) return@LaunchedEffect
-        if (appLaunchPagingData.itemCount == 0) return@LaunchedEffect
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
-                appLaunchPagingData[appLaunchPagerState.currentPage]?.first ?: LocalDate.now()
-            )
-        )
-
-        launch {
-            val a = async {
-                delay(200L)
-                appForegroundPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val b = async {
-                delay(200L)
-                appNotifyPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-
-            val c = async {
-                delay(200L)
-                appUsedPagerState.animateScrollToPage(page = appUsedPagerState.currentPage)
-            }
-            awaitAll(a, b, c)
-        }
     }
 
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
@@ -296,6 +238,7 @@ fun AppUsageDetailScreen(
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),
+                        pageSpacing = 8.dp,
                         state = appForegroundPagerState,
                         reverseLayout = true,
                         userScrollEnabled = true,
@@ -320,6 +263,7 @@ fun AppUsageDetailScreen(
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),
+                        pageSpacing = 8.dp,
                         state = appNotifyPagerState,
                         reverseLayout = true,
                         userScrollEnabled = true,
@@ -342,6 +286,7 @@ fun AppUsageDetailScreen(
                     HorizontalPager(
                         modifier = Modifier
                             .fillMaxSize(),
+                        pageSpacing = 8.dp,
                         state = appLaunchPagerState,
                         reverseLayout = true,
                         userScrollEnabled = true,

@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Card
@@ -107,7 +108,7 @@ fun ItemVerticalChart(
 
     Canvas(
         modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .height(150.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
@@ -199,7 +200,10 @@ fun UsageChart(
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
-    Card {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
         Text(
             modifier = Modifier
                 .padding(
