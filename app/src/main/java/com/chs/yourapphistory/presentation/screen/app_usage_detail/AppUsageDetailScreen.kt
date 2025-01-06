@@ -37,6 +37,7 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
+import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
@@ -132,33 +133,7 @@ fun AppUsageDetailScreen(
         }
 
     LaunchedEffect(appUsedPagerState.isScrollInProgress) {
-        if (appUsedPagerState.currentPage == appForegroundPagerState.currentPage) return@LaunchedEffect
 
-        chsLog("${appUsedPagerState.currentPage}, ${appUsedPagerState.currentPageOffsetFraction}")
-        val a = async {
-            appForegroundPagerState.animateScrollToPage(
-                appUsedPagerState.currentPage,
-                appUsedPagerState.currentPageOffsetFraction,
-            )
-        }
-
-        val b = async {
-            appNotifyPagerState.animateScrollToPage(
-                appUsedPagerState.currentPage,
-                appUsedPagerState.currentPageOffsetFraction,
-            )
-        }
-
-        val c = async {
-            appLaunchPagerState.animateScrollToPage(
-                appUsedPagerState.currentPage,
-                appUsedPagerState.currentPageOffsetFraction,
-            )
-        }
-        awaitAll(a, b, c)
-    }
-
-    LaunchedEffect(appUsedPagerState.currentPage) {
         if (appUsedPagingData == null) return@LaunchedEffect
 
         if (appUsedPagingData.itemCount == 0) return@LaunchedEffect
@@ -167,6 +142,91 @@ fun AppUsageDetailScreen(
             AppUsageDetailEvent.OnChangeTargetDate(
                 appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
             )
+        )
+
+        awaitAll(
+            async {
+                appForegroundPagerState.scrollToPage(appUsedPagerState.currentPage)
+            },
+            async {
+                appNotifyPagerState.scrollToPage(appUsedPagerState.currentPage)
+            },
+            async {
+                appLaunchPagerState.scrollToPage(appUsedPagerState.currentPage)
+            }
+        )
+    }
+
+    LaunchedEffect(appForegroundPagerState.isScrollInProgress) {
+
+        if (appForegroundUsedPagingData == null) return@LaunchedEffect
+
+        if (appForegroundUsedPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appForegroundUsedPagingData[appForegroundPagerState.currentPage]?.first
+                    ?: LocalDate.now()
+            )
+        )
+        awaitAll(
+            async {
+                appUsedPagerState.scrollToPage(appForegroundPagerState.currentPage)
+            },
+            async {
+                appNotifyPagerState.scrollToPage(appForegroundPagerState.currentPage)
+            },
+            async {
+                appLaunchPagerState.scrollToPage(appForegroundPagerState.currentPage)
+            }
+        )
+    }
+
+    LaunchedEffect(appNotifyPagerState.isScrollInProgress) {
+
+        if (appNotifyPagingData == null) return@LaunchedEffect
+
+        if (appNotifyPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
+            )
+        )
+        awaitAll(
+            async {
+                appForegroundPagerState.scrollToPage(appNotifyPagerState.currentPage)
+            },
+            async {
+                appForegroundPagerState.scrollToPage(appNotifyPagerState.currentPage)
+            },
+            async {
+                appLaunchPagerState.scrollToPage(appNotifyPagerState.currentPage)
+            }
+        )
+    }
+
+    LaunchedEffect(appLaunchPagerState.isScrollInProgress) {
+
+        if (appLaunchPagingData == null) return@LaunchedEffect
+
+        if (appLaunchPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appLaunchPagingData[appLaunchPagerState.currentPage]?.first ?: LocalDate.now()
+            )
+        )
+        awaitAll(
+            async {
+                appForegroundPagerState.scrollToPage(appLaunchPagerState.currentPage)
+            },
+            async {
+                appNotifyPagerState.scrollToPage(appLaunchPagerState.currentPage)
+            },
+            async {
+                appNotifyPagerState.scrollToPage(appLaunchPagerState.currentPage)
+            }
         )
     }
 
@@ -197,7 +257,7 @@ fun AppUsageDetailScreen(
                     text = if (state.displayDate == LocalDate.now()) {
                         "오늘"
                     } else {
-                        state.displayDate.format(Constants.DATE_FORMAT)
+                        state.displayDate.toConvertDisplayYearDate()
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp

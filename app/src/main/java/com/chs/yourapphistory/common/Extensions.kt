@@ -239,8 +239,20 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
 
     return usageMap.toList().map { it.first to it.second.toInt() }
 }
+
 fun chsLog(value: String) {
     Log.e("CHS_LOG", value)
+}
+
+fun LocalDate.toConvertDisplayYearDate(): String {
+    return if (this == LocalDate.now()) {
+        "오늘"
+    } else {
+        if (this.year == LocalDate.now().year) {
+            return this.format(Constants.DATE_FORMAT)
+        }
+        this.format(Constants.YEAR_DATE_FORMAT)
+    }
 }
 
 
