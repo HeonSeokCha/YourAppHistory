@@ -9,6 +9,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
@@ -26,6 +29,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -79,7 +83,6 @@ fun AppUsageDetailScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-
     val appUsedPagingData = state.pagingUsedInfo?.collectAsLazyPagingItems()
     val appUsedPagerState = if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
         rememberPagerState(
@@ -131,6 +134,11 @@ fun AppUsageDetailScreen(
         } else {
             rememberPagerState(pageCount = { 0 })
         }
+
+    val datePagerState = rememberPagerState(
+        pageCount = { state.dateList.count() },
+        initialPage = 0
+    )
 
     LaunchedEffect(appUsedPagerState.isScrollInProgress) {
 
@@ -264,6 +272,27 @@ fun AppUsageDetailScreen(
                 )
             }
 
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 8.dp),
+                pageSpacing = 8.dp,
+                state = datePagerState,
+                reverseLayout = true,
+                userScrollEnabled = true,
+                key = { state.dateList[it] }
+            ) {
+                val item = state.dateList[it]
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
+                    item.reversed().forEach {
+                        Text(text = "${it.monthValue} / ${it.dayOfMonth}")
+                    }
+                }
+            }
 
             Column(
                 modifier = Modifier

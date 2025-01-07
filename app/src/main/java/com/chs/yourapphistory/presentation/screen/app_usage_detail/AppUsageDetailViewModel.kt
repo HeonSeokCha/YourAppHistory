@@ -5,7 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toLocalDate
+import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppForegroundUsedUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppNotifyUseCase
@@ -27,12 +29,14 @@ class AppUsageDetailViewModel @Inject constructor(
     private val getPagingAppUsedInfoUseCase: GetPagingAppUsedInfoUseCase,
     private val getPagingAppForegroundUsedUseCase: GetPagingAppForegroundUsedUseCase,
     private val getPagingAppNotifyUseCase: GetPagingAppNotifyUseCase,
-    private val getPagingAppLaunchUseCase: GetPagingAppLaunchUseCase
+    private val getPagingAppLaunchUseCase: GetPagingAppLaunchUseCase,
+    private val getMinimumTimeUseCase: GetMinimumTimeUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppUsageDetailState())
     val state = _state
         .onStart {
+            getDateRangeList()
             getPackageUsageInfo(targetDate)
             changeDate(targetDate)
         }
@@ -54,6 +58,18 @@ class AppUsageDetailViewModel @Inject constructor(
             }
 
             else -> Unit
+        }
+    }
+
+    private fun getDateRangeList() {
+        viewModelScope.launch {
+            _state.update {
+                it.copy(
+                    dateList = getMinimumTimeUseCase()
+                        .reverseDateUntil(LocalDate.now().plusDays(1L))
+                        .chunked(7)
+                )
+            }
         }
     }
 

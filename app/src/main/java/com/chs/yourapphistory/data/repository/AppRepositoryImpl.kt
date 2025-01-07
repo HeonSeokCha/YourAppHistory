@@ -7,7 +7,6 @@ import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -18,12 +17,10 @@ import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
 import com.chs.yourapphistory.data.paging.GetDayPagingLaunchList
 import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
 import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
-import com.chs.yourapphistory.data.paging.GetPagingAppDetailList
 import com.chs.yourapphistory.data.paging.GetPagingAppForegroundInfo
 import com.chs.yourapphistory.data.paging.GetPagingAppLaunchInfo
 import com.chs.yourapphistory.data.paging.GetPagingAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingAppUsedInfo
-import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +32,6 @@ import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.math.min
 
 class AppRepositoryImpl @Inject constructor(
     private val applicationInfoSource: ApplicationInfoSource,
@@ -259,5 +255,17 @@ class AppRepositoryImpl @Inject constructor(
         return applicationInfoSource.getApplicationIconMap(
             applicationInfoSource.getInstalledLauncherPackageNameList()
         )
+    }
+
+    override suspend fun getMinDate(): LocalDate {
+        return withContext(Dispatchers.IO) {
+            awaitAll(
+                async { appUsageDao.getFirstCollectTime() },
+                async { appForegroundUsageDao.getFirstCollectTime() },
+                async { appNotifyInfoDao.getFirstCollectTime() },
+            )
+                .min()
+                .toLocalDate()
+        }
     }
 }

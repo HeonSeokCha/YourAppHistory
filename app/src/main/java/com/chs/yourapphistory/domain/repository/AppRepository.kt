@@ -2,7 +2,6 @@ package com.chs.yourapphistory.domain.repository
 
 import android.graphics.Bitmap
 import androidx.paging.PagingData
-import com.chs.yourapphistory.domain.model.AppDetailInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
@@ -44,4 +43,6 @@ interface AppRepository {
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
+
+    suspend fun getMinDate(): LocalDate
 }

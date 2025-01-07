@@ -7,7 +7,7 @@ import java.time.LocalDate
 
 data class AppUsageDetailState(
     val displayDate: LocalDate = LocalDate.now(),
-    val selectIdx: Int = 0,
+    val dateList: List<List<LocalDate>> = listOf(),
     val pagingUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
     val pagingForegroundUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
     val pagingNotifyInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
