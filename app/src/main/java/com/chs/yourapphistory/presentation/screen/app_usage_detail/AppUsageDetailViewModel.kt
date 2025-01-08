@@ -65,9 +65,19 @@ class AppUsageDetailViewModel @Inject constructor(
         viewModelScope.launch {
             _state.update {
                 it.copy(
-                    dateList = getMinimumTimeUseCase()
-                        .reverseDateUntil(LocalDate.now().plusDays(1L))
-                        .chunked(7)
+                    minDate = getMinimumTimeUseCase(),
+                    dateList = getMinimumTimeUseCase().run {
+                        if (this.dayOfWeek.value == 7) return@run this
+                        this.minusDays(this.dayOfWeek.value.toLong())
+                    }.reverseDateUntil(
+                        LocalDate.now().run {
+                            if (this.dayOfMonth == 7) {
+                                this.plusDays(6)
+                            } else {
+                                this.plusDays((6 - this.dayOfWeek.value).toLong())
+                            }
+                        }.plusDays(1L)
+                    ).chunked(7)
                 )
             }
         }

@@ -13,12 +13,16 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -274,9 +278,7 @@ fun AppUsageDetailScreen(
 
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 8.dp),
-                pageSpacing = 8.dp,
+                    .fillMaxWidth(),
                 state = datePagerState,
                 reverseLayout = true,
                 userScrollEnabled = true,
@@ -286,10 +288,25 @@ fun AppUsageDetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     item.reversed().forEach {
-                        Text(text = "${it.monthValue} / ${it.dayOfMonth}")
+                        TextButton(
+                            shape = CircleShape.copy(),
+                            enabled = (it > state.minDate && it < LocalDate.now()),
+                            onClick = {
+
+                            },
+                        ) {
+                            if (it.dayOfMonth == 1) {
+                                Text(
+                                    text = "${it.monthValue} / ${it.dayOfMonth}",
+                                )
+                            } else {
+                                Text(
+                                    text = it.dayOfMonth.toString()
+                                )
+                            }
+                        }
                     }
                 }
             }

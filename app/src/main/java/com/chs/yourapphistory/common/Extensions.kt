@@ -5,11 +5,13 @@ import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
 import android.os.Process
 import android.util.Log
+import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.temporal.WeekFields
 import java.util.stream.Collectors
 import kotlin.time.Duration.Companion.hours
 
@@ -255,4 +257,5 @@ fun LocalDate.toConvertDisplayYearDate(): String {
     }
 }
 
-
+fun getWeekBufferDateList(localDate: LocalDate) {
+}
