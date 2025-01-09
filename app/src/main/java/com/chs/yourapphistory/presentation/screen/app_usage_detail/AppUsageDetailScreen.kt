@@ -1,6 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -9,53 +10,42 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PageSize
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.ButtonColors
-import androidx.compose.material3.Card
-import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
-import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.UsageChart
-import com.chs.yourapphistory.presentation.screen.common.placeholder
-import com.chs.yourapphistory.presentation.screen.common.shimmer
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import java.math.BigDecimal
 import java.time.LocalDate
 
 @Composable
@@ -141,7 +131,11 @@ fun AppUsageDetailScreen(
 
     val datePagerState = rememberPagerState(
         pageCount = { state.dateList.count() },
-        initialPage = 0
+        initialPage = if (state.dateList.isEmpty()) {
+            0
+        } else {
+            state.dateList.flatten().indexOf(state.displayDate) / 7
+        }
     )
 
     LaunchedEffect(appUsedPagerState.isScrollInProgress) {
@@ -154,18 +148,6 @@ fun AppUsageDetailScreen(
             AppUsageDetailEvent.OnChangeTargetDate(
                 appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
             )
-        )
-
-        awaitAll(
-            async {
-                appForegroundPagerState.scrollToPage(appUsedPagerState.currentPage)
-            },
-            async {
-                appNotifyPagerState.scrollToPage(appUsedPagerState.currentPage)
-            },
-            async {
-                appLaunchPagerState.scrollToPage(appUsedPagerState.currentPage)
-            }
         )
     }
 
@@ -181,17 +163,6 @@ fun AppUsageDetailScreen(
                     ?: LocalDate.now()
             )
         )
-        awaitAll(
-            async {
-                appUsedPagerState.scrollToPage(appForegroundPagerState.currentPage)
-            },
-            async {
-                appNotifyPagerState.scrollToPage(appForegroundPagerState.currentPage)
-            },
-            async {
-                appLaunchPagerState.scrollToPage(appForegroundPagerState.currentPage)
-            }
-        )
     }
 
     LaunchedEffect(appNotifyPagerState.isScrollInProgress) {
@@ -204,17 +175,6 @@ fun AppUsageDetailScreen(
             AppUsageDetailEvent.OnChangeTargetDate(
                 appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
             )
-        )
-        awaitAll(
-            async {
-                appForegroundPagerState.scrollToPage(appNotifyPagerState.currentPage)
-            },
-            async {
-                appForegroundPagerState.scrollToPage(appNotifyPagerState.currentPage)
-            },
-            async {
-                appLaunchPagerState.scrollToPage(appNotifyPagerState.currentPage)
-            }
         )
     }
 
@@ -229,15 +189,58 @@ fun AppUsageDetailScreen(
                 appLaunchPagingData[appLaunchPagerState.currentPage]?.first ?: LocalDate.now()
             )
         )
+    }
+
+    LaunchedEffect(state.displayDate) {
+        if (state.dateList.isEmpty()) return@LaunchedEffect
+
+        if (state.dateList[datePagerState.currentPage].min() > state.displayDate) {
+            datePagerState.scrollToPage(datePagerState.currentPage - 1)
+        }
+
+        if (state.dateList[datePagerState.currentPage].max() < state.displayDate) {
+            datePagerState.scrollToPage(datePagerState.currentPage + 1)
+        }
+
+
         awaitAll(
             async {
-                appForegroundPagerState.scrollToPage(appLaunchPagerState.currentPage)
+                if (appUsedPagingData == null || appUsedPagingData.itemCount == 0) return@async
+                if (appUsedPagingData[appUsedPagerState.currentPage]!!.first == state.displayDate)
+                    return@async
+                appUsedPagerState.scrollToPage(
+                    appUsedPagingData.itemSnapshotList.map { it!!.first }.indexOf(state.displayDate)
+                )
             },
             async {
-                appNotifyPagerState.scrollToPage(appLaunchPagerState.currentPage)
+
+                if (appForegroundUsedPagingData == null || appForegroundUsedPagingData.itemCount == 0) return@async
+                if (appForegroundUsedPagingData[appForegroundPagerState.currentPage]!!.first == state.displayDate)
+                    return@async
+                appForegroundPagerState.scrollToPage(
+                    appForegroundUsedPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayDate)
+                )
             },
             async {
-                appNotifyPagerState.scrollToPage(appLaunchPagerState.currentPage)
+
+                if (appNotifyPagingData == null || appNotifyPagingData.itemCount == 0) return@async
+                if (appNotifyPagingData[appNotifyPagerState.currentPage]!!.first == state.displayDate)
+                    return@async
+                appNotifyPagerState.scrollToPage(
+                    appNotifyPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayDate)
+                )
+            },
+            async {
+
+                if (appLaunchPagingData == null || appLaunchPagingData.itemCount == 0) return@async
+                if (appLaunchPagingData[appLaunchPagerState.currentPage]!!.first == state.displayDate)
+                    return@async
+                appLaunchPagerState.scrollToPage(
+                    appLaunchPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayDate)
+                )
             }
         )
     }
@@ -278,7 +281,8 @@ fun AppUsageDetailScreen(
 
             HorizontalPager(
                 modifier = Modifier
-                    .fillMaxWidth(),
+                    .fillMaxWidth()
+                    .padding(bottom = 8.dp),
                 state = datePagerState,
                 reverseLayout = true,
                 userScrollEnabled = true,
@@ -288,24 +292,44 @@ fun AppUsageDetailScreen(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceAround
                 ) {
                     item.reversed().forEach {
-                        TextButton(
-                            shape = CircleShape.copy(),
-                            enabled = (it > state.minDate && it < LocalDate.now()),
-                            onClick = {
-
-                            },
-                        ) {
-                            if (it.dayOfMonth == 1) {
-                                Text(
-                                    text = "${it.monthValue} / ${it.dayOfMonth}",
-                                )
-                            } else {
-                                Text(
-                                    text = it.dayOfMonth.toString()
-                                )
-                            }
+                        if (it.dayOfMonth == 1) {
+                            Text(
+                                modifier = Modifier
+                                    .clickable {
+                                        onEvent(AppUsageDetailEvent.OnChangeTargetDate(it))
+                                    }
+                                    .drawBehind {
+                                        drawRoundRect(
+                                            color = if (state.displayDate == it) Color.LightGray else Color.Transparent,
+                                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
+                                        )
+                                    }
+                                    .padding(8.dp),
+                                text = "${it.monthValue} / ${it.dayOfMonth}",
+                                color = if (it >= state.minDate && it <= LocalDate.now()) Color.Black else Color.LightGray
+                            )
+                        } else {
+                            Text(
+                                modifier = Modifier
+                                    .clickable {
+                                        onEvent(AppUsageDetailEvent.OnChangeTargetDate(it))
+                                    }
+                                    .drawBehind {
+                                        drawRoundRect(
+                                            color = if (state.displayDate == it) Color.LightGray else Color.Transparent,
+                                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
+                                        )
+                                    }
+                                    .padding(
+                                        horizontal = 12.dp,
+                                        vertical = 8.dp
+                                    ),
+                                text = it.dayOfMonth.toString(),
+                                color = if (it >= state.minDate && it <= LocalDate.now()) Color.Black else Color.LightGray
+                            )
                         }
                     }
                 }

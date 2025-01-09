@@ -64,20 +64,22 @@ class AppUsageDetailViewModel @Inject constructor(
     private fun getDateRangeList() {
         viewModelScope.launch {
             _state.update {
+
+                val a = getMinimumTimeUseCase().run {
+                    if (this.dayOfWeek.value == 7) return@run this
+                    this.minusDays(this.dayOfWeek.value.toLong())
+                }.reverseDateUntil(
+                    LocalDate.now().run {
+                        if (this.dayOfMonth == 7) {
+                            this.plusDays(6)
+                        } else {
+                            this.plusDays((6 - this.dayOfWeek.value).toLong())
+                        }
+                    }.plusDays(1L)
+                )
                 it.copy(
                     minDate = getMinimumTimeUseCase(),
-                    dateList = getMinimumTimeUseCase().run {
-                        if (this.dayOfWeek.value == 7) return@run this
-                        this.minusDays(this.dayOfWeek.value.toLong())
-                    }.reverseDateUntil(
-                        LocalDate.now().run {
-                            if (this.dayOfMonth == 7) {
-                                this.plusDays(6)
-                            } else {
-                                this.plusDays((6 - this.dayOfWeek.value).toLong())
-                            }
-                        }.plusDays(1L)
-                    ).chunked(7)
+                    dateList = a.chunked(7)
                 )
             }
         }
