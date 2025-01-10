@@ -23,6 +23,7 @@ import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
@@ -129,14 +131,16 @@ fun AppUsageDetailScreen(
             rememberPagerState(pageCount = { 0 })
         }
 
-    val datePagerState = rememberPagerState(
-        pageCount = { state.dateList.count() },
-        initialPage = if (state.dateList.isEmpty()) {
-            0
-        } else {
-            state.dateList.flatten().indexOf(state.displayDate) / 7
-        }
-    )
+    val datePagerState = if (state.dateList.isNotEmpty()) {
+        rememberPagerState(
+            pageCount = { state.dateList.count() },
+            initialPage = state.dateList.flatten().indexOf(state.displayDate) / 7
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
+
+    var selectDateIdx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(appUsedPagerState.isScrollInProgress) {
 
@@ -195,13 +199,14 @@ fun AppUsageDetailScreen(
         if (state.dateList.isEmpty()) return@LaunchedEffect
 
         if (state.dateList[datePagerState.currentPage].min() > state.displayDate) {
-            datePagerState.scrollToPage(datePagerState.currentPage - 1)
+            datePagerState.scrollToPage(datePagerState.currentPage + 1)
+            selectDateIdx = 6
         }
 
         if (state.dateList[datePagerState.currentPage].max() < state.displayDate) {
-            datePagerState.scrollToPage(datePagerState.currentPage + 1)
+            datePagerState.scrollToPage(datePagerState.currentPage - 1)
+            selectDateIdx = 0
         }
-
 
         awaitAll(
             async {
@@ -243,6 +248,28 @@ fun AppUsageDetailScreen(
                 )
             }
         )
+    }
+
+    LaunchedEffect(datePagerState.isScrollInProgress) {
+        if (state.dateList.isEmpty()) return@LaunchedEffect
+
+        if (state.displayDate == state.dateList[datePagerState.currentPage][6 - selectDateIdx])
+            return@LaunchedEffect
+
+        if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+
+        if (state.dateList[datePagerState.currentPage][6 - selectDateIdx] > LocalDate.now()) {
+            onEvent(
+                AppUsageDetailEvent.OnChangeTargetDate(LocalDate.now())
+            )
+        } else {
+            chsLog(state.dateList[datePagerState.currentPage][6 - selectDateIdx].toString())
+            onEvent(
+                AppUsageDetailEvent.OnChangeTargetDate(
+                    state.dateList[datePagerState.currentPage][6 - selectDateIdx]
+                )
+            )
+        }
     }
 
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
@@ -294,32 +321,39 @@ fun AppUsageDetailScreen(
                         .fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceAround
                 ) {
-                    item.reversed().forEach {
-                        if (it.dayOfMonth == 1) {
+                    item.reversed().forEachIndexed { idx, date ->
+                        if (state.displayDate == date) {
+                            selectDateIdx = idx
+                        }
+                        if (date.dayOfMonth == 1) {
                             Text(
                                 modifier = Modifier
                                     .clickable {
-                                        onEvent(AppUsageDetailEvent.OnChangeTargetDate(it))
+                                        if (date >= state.minDate && date <= LocalDate.now()) {
+                                            onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                        }
                                     }
                                     .drawBehind {
                                         drawRoundRect(
-                                            color = if (state.displayDate == it) Color.LightGray else Color.Transparent,
+                                            color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
                                             cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
                                         )
                                     }
                                     .padding(8.dp),
-                                text = "${it.monthValue} / ${it.dayOfMonth}",
-                                color = if (it >= state.minDate && it <= LocalDate.now()) Color.Black else Color.LightGray
+                                text = "${date.monthValue} / ${date.dayOfMonth}",
+                                color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
                             )
                         } else {
                             Text(
                                 modifier = Modifier
                                     .clickable {
-                                        onEvent(AppUsageDetailEvent.OnChangeTargetDate(it))
+                                        if (date >= state.minDate && date <= LocalDate.now()) {
+                                            onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                        }
                                     }
                                     .drawBehind {
                                         drawRoundRect(
-                                            color = if (state.displayDate == it) Color.LightGray else Color.Transparent,
+                                            color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
                                             cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
                                         )
                                     }
@@ -327,8 +361,8 @@ fun AppUsageDetailScreen(
                                         horizontal = 12.dp,
                                         vertical = 8.dp
                                     ),
-                                text = it.dayOfMonth.toString(),
-                                color = if (it >= state.minDate && it <= LocalDate.now()) Color.Black else Color.LightGray
+                                text = date.dayOfMonth.toString(),
+                                color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
                             )
                         }
                     }

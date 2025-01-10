@@ -6,7 +6,7 @@ import java.time.format.DateTimeFormatter
 
 object Constants {
     const val FIRST_COLLECT_DAY: Long = 7L
-    const val PAGING_DAY: Long = 3L
+    const val PAGING_DAY: Long = 7L
     val SIMPLE_HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h")
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")
     val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
