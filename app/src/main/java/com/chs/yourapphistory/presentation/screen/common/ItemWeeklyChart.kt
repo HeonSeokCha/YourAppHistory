@@ -45,7 +45,7 @@ import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
-fun ItemDailyChart(
+fun ItemWeeklyChart(
     hourUsageList: List<Pair<Int, Int>>,
     clickText: DrawScope.(
         TextMeasurer,
@@ -72,7 +72,9 @@ fun ItemDailyChart(
 
     val basePadding = textMeasurer
         .measure(
-            text = 0.convert24HourString(true), style = style1 ).size
+            text = 0.convert24HourString(true),
+            style = style1
+        ).size
         .width
         .div(2)
         .toFloat()
@@ -191,7 +193,7 @@ fun ItemDailyChart(
 }
 
 @Composable
-fun DailyUsageChart(
+fun WeeklyUsageChart(
     title: String,
     list: List<Pair<Int, Int>>,
     convertText: (Int) -> String
@@ -214,7 +216,7 @@ fun DailyUsageChart(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ItemDailyChart(hourUsageList = list) { textMeasurer, selectedBar ->
+        ItemWeeklyChart(hourUsageList = list) { textMeasurer, selectedBar ->
             val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
             val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
                 selectTimZoneValue,
@@ -281,45 +283,4 @@ fun DailyUsageChart(
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
-}
-
-fun Modifier.tapOrPress(
-    onStart: (offsetX: Float) -> Unit,
-    onCancel: (offsetX: Float) -> Unit,
-    onCompleted: (offsetX: Float) -> Unit
-): Modifier = composed {
-    val interactionSource = remember { MutableInteractionSource() }
-    this.pointerInput(interactionSource) {
-        awaitEachGesture {
-            val tap = awaitFirstDown()
-                .also { if (it.pressed != it.previousPressed) it.consume() }
-            onStart(tap.position.x)
-            val up = waitForUpOrCancellation()
-            if (up == null) {
-                onCancel(tap.position.x)
-            } else {
-                if (up.pressed != up.previousPressed) up.consume()
-                onCompleted(tap.position.x)
-            }
-        }
-    }
-}
-
-@Preview
-@Composable
-private fun PreViewUsageChart() {
-    val usageMap = object : HashMap<Int, Int>() {
-        init {
-            for (i in 0..23) {
-                put(i, i)
-            }
-        }
-    }.toList()
-
-
-    DailyUsageChart(
-        title = "TEST",
-        list = usageMap,
-        convertText = { a -> "$a 개" }
-    )
 }

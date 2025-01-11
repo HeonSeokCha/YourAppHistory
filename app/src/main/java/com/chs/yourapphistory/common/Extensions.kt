@@ -256,6 +256,3 @@ fun LocalDate.toConvertDisplayYearDate(): String {
         this.format(Constants.YEAR_DATE_FORMAT)
     }
 }
-
-fun getWeekBufferDateList(localDate: LocalDate) {
-}

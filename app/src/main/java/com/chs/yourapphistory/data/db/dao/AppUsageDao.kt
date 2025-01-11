@@ -10,16 +10,10 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class AppUsageDao : BaseDao<AppUsageEntity> {
 
-    @Query(
-        "SELECT IFNULL(MIN(beginUseTime), 0) " +
-          "FROM appUsage"
-    )
+    @Query("SELECT IFNULL(MIN(beginUseTime), 0) FROM appUsage")
     abstract suspend fun getFirstCollectTime(): Long
 
-    @Query(
-        "SELECT IFNULL(MAX(endUseTime), 0)" +
-                "FROM appUsage "
-    )
+    @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appUsage")
     abstract suspend fun getLastEventTime(): Long
 
     @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
@@ -36,13 +30,13 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         targetDate: Long
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
+
     @Query(
         "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
            "AND appInfo.packageName = appUsage.packageName " +
-         "GROUP BY appInfo.packageName " +
-         "ORDER BY cnt DESC, appInfo.label ASC "
+         "GROUP BY appInfo.packageName"
     )
     abstract suspend fun getDayAppLaunchInfo(
         targetDate: Long
@@ -70,6 +64,31 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         targetDate: Long,
         packageName: String
     ): List<Long>
+
+    @Query(
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
+          "FROM appUsage " +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:beginDate / 1000, 'unixepoch', 'localtime') " +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:beginDate / 1000, 'unixepoch', 'localtime')) " +
+           "AND packageName = :packageName"
+    )
+    abstract suspend fun getWeeklyAppUsedInfo(
+        beginDate: Long,
+        endDate: Long,
+        packageName: String
+    ): Map<@MapColumn("beginDate") Long, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+
+    @Query(
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(beginUseTime) as cnt " +
+          "FROM appUsage " +
+         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:beginDate / 1000, 'unixepoch', 'localtime') " +
+           "AND packageName = :packageName"
+    )
+    abstract suspend fun getWeeklyAppLaunchInfo(
+        beginDate: Long,
+        endDate: Long,
+        packageName: String
+    ): Map<@MapColumn("beginDate") Long, @MapColumn("cnt") Int>
 
     @Query("DELETE FROM appUsage")
     abstract suspend fun deleteAllUsageInfo()

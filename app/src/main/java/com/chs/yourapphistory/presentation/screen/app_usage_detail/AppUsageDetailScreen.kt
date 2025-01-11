@@ -42,8 +42,8 @@ import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
+import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
-import com.chs.yourapphistory.presentation.screen.common.UsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -387,7 +387,7 @@ fun AppUsageDetailScreen(
                     ) { page ->
                         val item = appUsedPagingData[page]?.second
                         if (item != null) {
-                            UsageChart(
+                            DailyUsageChart(
                                 title = item.sumOf { it.second }.convertToRealUsageTime(),
                                 list = item,
                                 convertText = { it.convertToRealUsageMinutes() }
@@ -410,7 +410,7 @@ fun AppUsageDetailScreen(
                     ) { page ->
                         val item = appForegroundUsedPagingData[page]?.second
                         if (item != null) {
-                            UsageChart(
+                            DailyUsageChart(
                                 title = "포그라운드 실행 시간 " +
                                         item.sumOf { it.second }
                                             .convertToRealUsageTime(),
@@ -435,7 +435,7 @@ fun AppUsageDetailScreen(
                     ) { page ->
                         val item = appNotifyPagingData[page]?.second
                         if (item != null) {
-                            UsageChart(
+                            DailyUsageChart(
                                 title = "알림 ${item.sumOf { it.second }}개",
                                 list = item,
                                 convertText = { "${it}개" }
@@ -458,7 +458,7 @@ fun AppUsageDetailScreen(
                     ) { page ->
                         val item = appLaunchPagingData[page]?.second
                         if (item != null) {
-                            UsageChart(
+                            DailyUsageChart(
                                 title = "총 실행 횟수 ${item.sumOf { it.second }}회",
                                 list = item,
                                 convertText = { "${it}회" }
