@@ -33,17 +33,17 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
+        "SELECT unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) as beginDate, beginUseTime, endUseTime " +
           "FROM appForegroundUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:beginDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:beginDate / 1000, 'unixepoch', 'localtime')) " +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
+            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getWeeklyForegroundUsedList(
         beginDate: Long,
         endDate: Long,
         packageName: String
-    ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+    ): Map<@MapColumn("beginDate") Long, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
         "SELECT beginUseTime, endUseTime " +

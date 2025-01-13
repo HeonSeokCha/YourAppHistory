@@ -183,7 +183,7 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override suspend fun getPagingAppUsedInfo(
+    override suspend fun getDailyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
@@ -200,7 +200,7 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override suspend fun getPagingAppForegroundInfo(
+    override suspend fun getDailyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
@@ -217,7 +217,7 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override suspend fun getPagingAppLaunchInfo(
+    override suspend fun getDailyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
@@ -234,7 +234,7 @@ class AppRepositoryImpl @Inject constructor(
         }.flow
     }
 
-    override suspend fun getPagingAppNotifyInfo(
+    override suspend fun getDailyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
@@ -249,6 +249,42 @@ class AppRepositoryImpl @Inject constructor(
                 packageName = packageName
             )
         }.flow
+    }
+
+    override suspend fun getWeeklyPagingAppUsedInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWeeklyPagingAppForegroundInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWeeklyPagingAppLaunchInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
+        TODO("Not yet implemented")
+    }
+
+    override suspend fun getWeeklyPagingAppNotifyInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
+        TODO("Not yet implemented")
     }
 
     override suspend fun getAppIconMap(): HashMap<String, Bitmap?> {

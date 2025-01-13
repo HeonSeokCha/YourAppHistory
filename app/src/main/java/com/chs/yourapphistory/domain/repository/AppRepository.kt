@@ -20,24 +20,51 @@ interface AppRepository {
 
     suspend fun getDayLaunchAppList():  Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getPagingAppUsedInfo(
+    suspend fun getDailyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
-    suspend fun getPagingAppForegroundInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
-
-
-    suspend fun getPagingAppLaunchInfo(
+    suspend fun getDailyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
 
-    suspend fun getPagingAppNotifyInfo(
+    suspend fun getDailyPagingAppLaunchInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+
+    suspend fun getDailyPagingAppNotifyInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+
+    suspend fun getWeeklyPagingAppUsedInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+
+    suspend fun getWeeklyPagingAppForegroundInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+
+    suspend fun getWeeklyPagingAppLaunchInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+
+    suspend fun getWeeklyPagingAppNotifyInfo(
+        beginDate: LocalDate,
+        endDate: LocalDate,
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
