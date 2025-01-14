@@ -46,7 +46,7 @@ import kotlin.math.roundToInt
 
 @Composable
 fun ItemWeeklyChart(
-    hourUsageList: List<Pair<Int, Int>>,
+    hourUsageList: List<Pair<String, Int>>,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -195,7 +195,7 @@ fun ItemWeeklyChart(
 @Composable
 fun WeeklyUsageChart(
     title: String,
-    list: List<Pair<Int, Int>>,
+    list: List<Pair<String, Int>>,
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary

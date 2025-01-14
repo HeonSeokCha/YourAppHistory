@@ -20,8 +20,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
           "FROM appInfo " +
           "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
            "AND appInfo.packageName = appNotifyInfo.packageName " +
-         "GROUP BY appInfo.packageName " +
-         "ORDER BY cnt DESC, appInfo.label ASC "
+         "GROUP BY appInfo.packageName "
     )
     abstract suspend fun getDayNotifyList(
         targetDate: Long

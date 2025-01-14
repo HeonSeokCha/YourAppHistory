@@ -13,14 +13,14 @@ import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
-import com.chs.yourapphistory.data.paging.GetDayPagingForegroundUsedList
-import com.chs.yourapphistory.data.paging.GetDayPagingLaunchList
-import com.chs.yourapphistory.data.paging.GetDayPagingNotifyList
-import com.chs.yourapphistory.data.paging.GetDayPagingUsedList
-import com.chs.yourapphistory.data.paging.GetPagingAppForegroundInfo
-import com.chs.yourapphistory.data.paging.GetPagingAppLaunchInfo
-import com.chs.yourapphistory.data.paging.GetPagingAppNotifyInfo
-import com.chs.yourapphistory.data.paging.GetPagingAppUsedInfo
+import com.chs.yourapphistory.data.paging.GetPagingForegroundList
+import com.chs.yourapphistory.data.paging.GetPagingLaunchList
+import com.chs.yourapphistory.data.paging.GetPagingNotifyList
+import com.chs.yourapphistory.data.paging.GetPagingUsedList
+import com.chs.yourapphistory.data.paging.GetPagingDailyAppForegroundInfo
+import com.chs.yourapphistory.data.paging.GetPagingDailyAppLaunchInfo
+import com.chs.yourapphistory.data.paging.GetPagingDailyAppNotifyInfo
+import com.chs.yourapphistory.data.paging.GetPagingDailyAppUsedInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
@@ -139,7 +139,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingUsedList(
+            GetPagingUsedList(
                 appUsageDao = appUsageDao,
                 minDate = minDate
             )
@@ -152,7 +152,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingForegroundUsedList(
+            GetPagingForegroundList(
                 appForegroundUsageDao = appForegroundUsageDao,
                 minDate = minDate
             )
@@ -164,7 +164,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingNotifyList(
+            GetPagingNotifyList(
                 appNotifyInfoDao = appNotifyInfoDao,
                 minDate = minDate
             )
@@ -176,7 +176,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetDayPagingLaunchList(
+            GetPagingLaunchList(
                 appUsageDao = appUsageDao,
                 minDate = minDate
             )
@@ -191,7 +191,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetPagingAppUsedInfo(
+            GetPagingDailyAppUsedInfo(
                 dao = appUsageDao,
                 minDate = minDate,
                 targetDate = targetDate,
@@ -208,7 +208,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetPagingAppForegroundInfo(
+            GetPagingDailyAppForegroundInfo(
                 dao = appForegroundUsageDao,
                 minDate = minDate,
                 targetDate = targetDate,
@@ -225,7 +225,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetPagingAppLaunchInfo(
+            GetPagingDailyAppLaunchInfo(
                 dao = appUsageDao,
                 minDate = minDate,
                 targetDate = targetDate,
@@ -242,7 +242,7 @@ class AppRepositoryImpl @Inject constructor(
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
-            GetPagingAppNotifyInfo(
+            GetPagingDailyAppNotifyInfo(
                 dao = appNotifyInfoDao,
                 minDate = minDate,
                 targetDate = targetDate,

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.reverseDateUntil
+import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingAppForegroundUsedUseCase
@@ -64,22 +65,11 @@ class AppUsageDetailViewModel @Inject constructor(
     private fun getDateRangeList() {
         viewModelScope.launch {
             _state.update {
-
-                val a = getMinimumTimeUseCase().run {
-                    if (this.dayOfWeek.value == 7) return@run this
-                    this.minusDays(this.dayOfWeek.value.toLong())
-                }.reverseDateUntil(
-                    LocalDate.now().run {
-                        if (this.dayOfMonth == 7) {
-                            this.plusDays(6)
-                        } else {
-                            this.plusDays((6 - this.dayOfWeek.value).toLong())
-                        }
-                    }.plusDays(1L)
-                )
                 it.copy(
                     minDate = getMinimumTimeUseCase(),
-                    dateList = a.chunked(7)
+                    dateList = getMinimumTimeUseCase()
+                        .reverseDateUntilWeek(LocalDate.now())
+                        .chunked(7)
                 )
             }
         }

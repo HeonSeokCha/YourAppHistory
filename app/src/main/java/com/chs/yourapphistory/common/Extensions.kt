@@ -143,7 +143,7 @@ fun getUsagePermission(context: Context): Boolean {
 }
 
 fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
-    return this.datesUntil(targetDate)
+    return this.datesUntil(targetDate.plusDays(1L))
         .collect(Collectors.toList())
         .reversed()
 }
@@ -255,4 +255,19 @@ fun LocalDate.toConvertDisplayYearDate(): String {
         }
         this.format(Constants.YEAR_DATE_FORMAT)
     }
+}
+
+fun LocalDate.reverseDateUntilWeek(targetDate: LocalDate): List<LocalDate> {
+    return this.run {
+        if (this.dayOfWeek == DayOfWeek.SUNDAY) return@run this
+        this.minusDays(this.dayOfWeek.value.toLong())
+    }.reverseDateUntil(
+        targetDate.run {
+            if (this.dayOfWeek == DayOfWeek.SUNDAY) {
+                this.plusDays(6)
+            } else {
+                this.plusDays((6 - this.dayOfWeek.value).toLong())
+            }
+        }.plusDays(1L)
+    )
 }

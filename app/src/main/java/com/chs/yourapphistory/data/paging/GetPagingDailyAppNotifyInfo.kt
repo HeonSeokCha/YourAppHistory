@@ -6,16 +6,15 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calcHourUsageList
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toMillis
-import com.chs.yourapphistory.data.db.dao.AppUsageDao
+import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import java.time.LocalDate
 
-class GetPagingAppUsedInfo(
+class GetPagingDailyAppNotifyInfo(
     private val minDate: LocalDate,
+    private val dao: AppNotifyInfoDao,
     private val targetDate: LocalDate,
-    private val packageName: String,
-    private val dao: AppUsageDao
+    private val packageName: String
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<Int, Int>>>>() {
-
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<Int, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
@@ -36,14 +35,13 @@ class GetPagingAppUsedInfo(
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
             else this.minusDays(Constants.PAGING_DAY)
         }
-            .reverseDateUntil(pageDate.plusDays(1L))
+            .reverseDateUntil(pageDate)
             .map {
                 it to calcHourUsageList(
-                    list = dao.getDayPackageUsageInfo(
+                    list = dao.getDayNotifyCount(
                         targetDate = it.toMillis(),
                         packageName = packageName
-                    ),
-                    targetDate = it
+                    )
                 )
             }
 

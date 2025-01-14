@@ -3,23 +3,16 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toConvertDayUsedTime
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toMillis
-import com.chs.yourapphistory.data.db.dao.AppInfoDao
-import com.chs.yourapphistory.data.db.dao.AppUsageDao
+import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import java.time.LocalDate
-import kotlin.math.min
-import kotlin.streams.toList
 
-class GetDayPagingUsedList(
-    private val appUsageDao: AppUsageDao,
+class GetPagingForegroundList(
+    private val appForegroundUsageDao: AppForegroundUsageDao,
     private val minDate: LocalDate
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
@@ -36,9 +29,9 @@ class GetDayPagingUsedList(
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
             else this.minusDays(Constants.PAGING_DAY)
         }
-            .reverseDateUntil(pageDate.plusDays(1L))
+            .reverseDateUntil(pageDate)
             .map { date ->
-                date to appUsageDao.getDayAppUsedInfo(date.toMillis()).map {
+                date to appForegroundUsageDao.getDayForegroundUsedList(date.toMillis()).map {
                     it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(

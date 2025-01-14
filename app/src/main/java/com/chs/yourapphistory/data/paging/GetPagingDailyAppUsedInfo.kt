@@ -9,11 +9,11 @@ import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import java.time.LocalDate
 
-class GetPagingAppLaunchInfo(
-    private val dao: AppUsageDao,
+class GetPagingDailyAppUsedInfo(
     private val minDate: LocalDate,
     private val targetDate: LocalDate,
-    private val packageName: String
+    private val packageName: String,
+    private val dao: AppUsageDao
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<Int, Int>>>>() {
 
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<Int, Int>>>>): LocalDate? {
@@ -36,13 +36,14 @@ class GetPagingAppLaunchInfo(
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
             else this.minusDays(Constants.PAGING_DAY)
         }
-            .reverseDateUntil(pageDate.plusDays(1L))
+            .reverseDateUntil(pageDate)
             .map {
                 it to calcHourUsageList(
-                    list = dao.getDayPackageLaunchInfo(
+                    list = dao.getDayPackageUsageInfo(
                         targetDate = it.toMillis(),
                         packageName = packageName
-                    )
+                    ),
+                    targetDate = it
                 )
             }
 

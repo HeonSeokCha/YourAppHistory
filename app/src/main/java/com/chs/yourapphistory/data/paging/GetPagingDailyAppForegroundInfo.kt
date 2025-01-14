@@ -9,7 +9,7 @@ import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import java.time.LocalDate
 
-class GetPagingAppForegroundInfo(
+class GetPagingDailyAppForegroundInfo(
     private val dao: AppForegroundUsageDao,
     private val minDate: LocalDate,
     private val targetDate: LocalDate,
@@ -36,7 +36,7 @@ class GetPagingAppForegroundInfo(
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
             else this.minusDays(Constants.PAGING_DAY)
         }
-            .reverseDateUntil(pageDate.plusDays(1L))
+            .reverseDateUntil(pageDate)
             .map {
                 it to calcHourUsageList(
                     list = dao.getForegroundUsageInfo(
