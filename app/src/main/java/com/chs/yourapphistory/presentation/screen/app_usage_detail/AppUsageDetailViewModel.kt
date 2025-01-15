@@ -58,6 +58,10 @@ class AppUsageDetailViewModel @Inject constructor(
                 changeDate(event.date)
             }
 
+            is AppUsageDetailEvent.OnChangeViewType -> {
+                _state.update { it.copy(isDailyMode = !_state.value.isDailyMode) }
+            }
+
             else -> Unit
         }
     }

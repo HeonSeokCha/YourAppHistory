@@ -5,4 +5,5 @@ import java.time.LocalDate
 sealed interface AppUsageDetailEvent {
     data object OnBackClick : AppUsageDetailEvent
     data class OnChangeTargetDate(val date: LocalDate) : AppUsageDetailEvent
+    data object OnChangeViewType : AppUsageDetailEvent
 }

@@ -14,7 +14,7 @@ class GetPagingAppLaunchUseCase @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        return repository.getPagingAppLaunchInfo(
+        return repository.getDailyPagingAppLaunchInfo(
             targetDate = targetDate,
             packageName = packageName
         )

@@ -1,4 +1,8 @@
 package com.chs.yourapphistory.data.paging
 
-class GetPagingWeekAppNotifyInfo {
+import java.time.LocalDate
+
+class GetPagingWeekAppNotifyInfo(
+
+){
 }

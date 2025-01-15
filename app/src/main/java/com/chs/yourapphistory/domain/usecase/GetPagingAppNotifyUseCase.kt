@@ -14,7 +14,7 @@ class GetPagingAppNotifyUseCase @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        return repository.getPagingAppNotifyInfo(
+        return repository.getDailyPagingAppNotifyInfo(
             targetDate = targetDate,
             packageName = packageName
         )

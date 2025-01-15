@@ -293,13 +293,25 @@ fun AppUsageDetailScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(vertical = 16.dp),
-                horizontalArrangement = Arrangement.Start
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
                     text = if (state.displayDate == LocalDate.now()) {
                         "오늘"
                     } else {
                         state.displayDate.toConvertDisplayYearDate()
+                    },
+                    textAlign = TextAlign.Center,
+                    fontSize = 18.sp
+                )
+
+                Text(
+                    modifier = Modifier
+                        .clickable { onEvent(AppUsageDetailEvent.OnChangeViewType) },
+                    text = if (state.isDailyMode) {
+                        "주별 보기"
+                    } else {
+                        "일별 보기"
                     },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp

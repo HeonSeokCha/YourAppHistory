@@ -13,7 +13,7 @@ class GetPagingAppForegroundUsedUseCase @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        return repository.getPagingAppForegroundInfo(
+        return repository.getDailyPagingAppForegroundInfo(
             targetDate = targetDate,
             packageName = packageName
         )

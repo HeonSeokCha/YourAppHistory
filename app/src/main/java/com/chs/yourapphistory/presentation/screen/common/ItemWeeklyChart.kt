@@ -42,11 +42,13 @@ import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
 import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.launch
+import java.time.DayOfWeek
+import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
 fun ItemWeeklyChart(
-    hourUsageList: List<Pair<String, Int>>,
+    weekUsageList: List<Pair<String, Int>>,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -57,9 +59,9 @@ fun ItemWeeklyChart(
     val smallPadding = with(density) { 4.dp.toPx() }
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
-    val barWidth = with(density) { 6.dp.toPx() }
+    val barWidth = with(density) { 12.dp.toPx() }
     val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
+        (LocalConfiguration.current.screenWidthDp - 25).div(7).dp.toPx()
     }
     val barColor = MaterialTheme.colorScheme.primary
 
@@ -72,14 +74,17 @@ fun ItemWeeklyChart(
 
     val basePadding = textMeasurer
         .measure(
-            text = 0.convert24HourString(true),
+            text = DayOfWeek.SUNDAY.getDisplayName(
+                java.time.format.TextStyle.SHORT,
+                Locale.KOREAN
+            ),
             style = style1
         ).size
         .width
-        .div(2)
+
         .toFloat()
 
-    val barAreas = hourUsageList.mapIndexed { idx, pair ->
+    val barAreas = weekUsageList.mapIndexed { idx, pair ->
         BarArea(
             idx = idx,
             value = pair.second,
@@ -121,13 +126,16 @@ fun ItemWeeklyChart(
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
-                    end = Offset(size.width - basePadding.div(2), ((size.height / 3) * it) + topBasePadding)
+                    end = Offset(
+                        size.width - basePadding.div(2),
+                        ((size.height / 3) * it) + topBasePadding
+                    )
                 )
             }
         }
         val scale = calculateScale(
             (size.height - smallPadding - topBasePadding).roundToInt(),
-            hourUsageList.map { it.second }
+            weekUsageList.map { it.second }
         )
         val chartAreaBottom = size.height - labelSectionHeight
 
@@ -136,41 +144,27 @@ fun ItemWeeklyChart(
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = basePadding + smallPadding + (distance).times(idx) - barWidth,
+                    x = (size.width.div(7) * info.idx) + barWidth + smallPadding,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
                 cornerRadius = CornerRadius(4.dp.toPx())
             )
 
-            if (info.idx % 6 == 0 || info.idx == 23) {
-                val time = if (info.idx == 23) "(시)" else info.idx.toString()
-
-                val textResult = textMeasurer.measure(
-                    text = time,
-                    style = style1
-                )
-
-                val textRectPadding = when (time) {
-                    "0" -> 42f
-                    "(시)" -> {
-                        size.width - (textResult.size.width + 42f)
-                    }
-                    else -> {
-                        size.width.div(4).times(time.toInt() / 6) - textResult.size.width.div(2)
-                    }
-                }
-
-                drawText(
-                    textMeasurer = textMeasurer,
-                    text = time,
-                    topLeft = Offset(
-                        x = textRectPadding,
-                        y = chartAreaBottom
-                    ),
-                    style = style1
-                )
-            }
+            val textResult = textMeasurer.measure(
+                text = weekUsageList[info.idx].first,
+                style = style1
+            )
+            val textRectPadding = (size.width.div(7) * info.idx) + (textResult.size.width) + basePadding
+            drawText(
+                textMeasurer = textMeasurer,
+                text = weekUsageList[info.idx].first,
+                topLeft = Offset(
+                    x = textRectPadding,
+                    y = chartAreaBottom
+                ),
+                style = style1
+            )
         }
 
         if (selectedBar != null) {
@@ -216,7 +210,7 @@ fun WeeklyUsageChart(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ItemWeeklyChart(hourUsageList = list) { textMeasurer, selectedBar ->
+        ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
             val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
             val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
                 selectTimZoneValue,
@@ -283,4 +277,30 @@ fun WeeklyUsageChart(
         }
         Spacer(modifier = Modifier.height(16.dp))
     }
+}
+
+@Preview
+@Composable
+private fun PreViewUsageChart2() {
+    val usageMap = object : HashMap<String, Int>() {
+        init {
+            for (i in 0..6) {
+                put(
+                    DayOfWeek.values().sortedBy { it.value }[i].getDisplayName(
+                        java.time.format.TextStyle.SHORT,
+                        Locale.KOREAN
+                    ),
+                    i * 2 + 1
+                )
+
+            }
+        }
+    }.toList()
+
+
+    WeeklyUsageChart(
+        title = "TEST",
+        list = usageMap,
+        convertText = { a -> "$a 개" }
+    )
 }
