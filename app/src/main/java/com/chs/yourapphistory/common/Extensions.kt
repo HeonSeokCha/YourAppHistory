@@ -268,6 +268,6 @@ fun LocalDate.reverseDateUntilWeek(targetDate: LocalDate): List<LocalDate> {
             } else {
                 this.plusDays((6 - this.dayOfWeek.value).toLong())
             }
-        }.plusDays(1L)
+        }
     )
 }

@@ -10,16 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -44,11 +39,13 @@ import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
+import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.temporal.WeekFields
 
 @Composable
 fun AppUsageDetailScreenRoot(
@@ -79,7 +76,7 @@ fun AppUsageDetailScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
 
-    val appUsedPagingData = state.pagingUsedInfo?.collectAsLazyPagingItems()
+    val appUsedPagingData = state.pagingDailyUsedInfo?.collectAsLazyPagingItems()
     val appUsedPagerState = if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
         rememberPagerState(
             pageCount = {
@@ -91,7 +88,8 @@ fun AppUsageDetailScreen(
     } else {
         rememberPagerState(pageCount = { 0 })
     }
-    val appForegroundUsedPagingData = state.pagingForegroundUsedInfo?.collectAsLazyPagingItems()
+    val appForegroundUsedPagingData =
+        state.pagingDailyForegroundUsedInfo?.collectAsLazyPagingItems()
     val appForegroundPagerState =
         if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
             rememberPagerState(
@@ -104,7 +102,7 @@ fun AppUsageDetailScreen(
         } else {
             rememberPagerState(pageCount = { 0 })
         }
-    val appNotifyPagingData = state.pagingNotifyInfo?.collectAsLazyPagingItems()
+    val appNotifyPagingData = state.pagingDailyNotifyInfo?.collectAsLazyPagingItems()
     val appNotifyPagerState =
         if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
             rememberPagerState(
@@ -117,7 +115,7 @@ fun AppUsageDetailScreen(
         } else {
             rememberPagerState(pageCount = { 0 })
         }
-    val appLaunchPagingData = state.pagingLaunchInfo?.collectAsLazyPagingItems()
+    val appLaunchPagingData = state.pagingDailyLaunchInfo?.collectAsLazyPagingItems()
     val appLaunchPagerState =
         if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
             rememberPagerState(
@@ -135,6 +133,29 @@ fun AppUsageDetailScreen(
         rememberPagerState(
             pageCount = { state.dateList.count() },
             initialPage = state.dateList.flatten().indexOf(state.displayDate) / 7
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
+
+    val appUsedWeekPAgingData = state.pagingWeeklyUsedInfo?.collectAsLazyPagingItems()
+    val appUsedWeekPagerState =
+        if (appUsedWeekPAgingData != null && appUsedWeekPAgingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appUsedWeekPAgingData.itemCount
+                }, initialPage = appUsedWeekPAgingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayWeek)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
+
+    val wekPagerState = if (state.weekList.isNotEmpty()) {
+        rememberPagerState(
+            pageCount = { state.weekList.count() },
+            initialPage = state.weekList.indexOf(state.displayWeek) / 5
         )
     } else {
         rememberPagerState(pageCount = { 0 })
@@ -295,15 +316,27 @@ fun AppUsageDetailScreen(
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(
-                    text = if (state.displayDate == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        state.displayDate.toConvertDisplayYearDate()
-                    },
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
+                if (state.isDailyMode) {
+                    Text(
+                        text = if (state.displayDate == LocalDate.now()) {
+                            "오늘"
+                        } else {
+                            state.displayDate.toConvertDisplayYearDate()
+                        },
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp
+                    )
+                } else {
+                    Text(
+                        text = if (state.displayDate == LocalDate.now()) {
+                            "오늘"
+                        } else {
+                            state.displayDate.toConvertDisplayYearDate()
+                        },
+                        textAlign = TextAlign.Center,
+                        fontSize = 18.sp
+                    )
+                }
 
                 Text(
                     modifier = Modifier
@@ -318,54 +351,199 @@ fun AppUsageDetailScreen(
                 )
             }
 
-            HorizontalPager(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 8.dp),
-                state = datePagerState,
-                reverseLayout = true,
-                userScrollEnabled = true,
-                key = { state.dateList[it] }
-            ) {
-                val item = state.dateList[it]
-                Row(
+            if (state.isDailyMode) {
+                HorizontalPager(
                     modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceAround
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    state = datePagerState,
+                    reverseLayout = true,
+                    userScrollEnabled = true,
+                    key = { state.dateList[it] }
                 ) {
-                    item.reversed().forEachIndexed { idx, date ->
-                        if (state.displayDate == date) {
-                            selectDateIdx = idx
+                    val item = state.dateList[it]
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        item.reversed().forEachIndexed { idx, date ->
+                            if (state.displayDate == date) {
+                                selectDateIdx = idx
+                            }
+                            if (date.dayOfMonth == 1) {
+                                Text(
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (date >= state.minDate && date <= LocalDate.now()) {
+                                                onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                            }
+                                        }
+                                        .drawBehind {
+                                            drawRoundRect(
+                                                color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
+                                                cornerRadius = CornerRadius(
+                                                    15.dp.toPx(),
+                                                    15.dp.toPx()
+                                                )
+                                            )
+                                        }
+                                        .padding(8.dp),
+                                    text = "${date.monthValue} / ${date.dayOfMonth}",
+                                    color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
+                                )
+                            } else {
+                                Text(
+                                    modifier = Modifier
+                                        .clickable {
+                                            if (date >= state.minDate && date <= LocalDate.now()) {
+                                                onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                            }
+                                        }
+                                        .drawBehind {
+                                            drawRoundRect(
+                                                color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
+                                                cornerRadius = CornerRadius(
+                                                    15.dp.toPx(),
+                                                    15.dp.toPx()
+                                                )
+                                            )
+                                        }
+                                        .padding(
+                                            horizontal = 12.dp,
+                                            vertical = 8.dp
+                                        ),
+                                    text = date.dayOfMonth.toString(),
+                                    color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
+                                )
+                            }
                         }
-                        if (date.dayOfMonth == 1) {
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+
+                    if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appUsedPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appUsedPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appUsedPagingData[page]?.second
+                            if (item != null) {
+                                DailyUsageChart(
+                                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                    list = item,
+                                    convertText = { it.convertToRealUsageMinutes() }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appForegroundPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appForegroundUsedPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appForegroundUsedPagingData[page]?.second
+                            if (item != null) {
+                                DailyUsageChart(
+                                    title = "포그라운드 실행 시간 " +
+                                            item.sumOf { it.second }
+                                                .convertToRealUsageTime(),
+                                    list = item,
+                                    convertText = { it.convertToRealUsageMinutes() }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appNotifyPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appNotifyPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appNotifyPagingData[page]?.second
+                            if (item != null) {
+                                DailyUsageChart(
+                                    title = "알림 ${item.sumOf { it.second }}개",
+                                    list = item,
+                                    convertText = { "${it}개" }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appLaunchPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appLaunchPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appLaunchPagingData[page]?.second
+                            if (item != null) {
+                                DailyUsageChart(
+                                    title = "총 실행 횟수 ${item.sumOf { it.second }}회",
+                                    list = item,
+                                    convertText = { "${it}회" }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
+            } else {
+                HorizontalPager(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    state = wekPagerState,
+                    reverseLayout = true,
+                    userScrollEnabled = true,
+                    key = { state.weekList[it] }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceAround
+                    ) {
+                        val item = state.weekList[it]
+                        item.reversed().forEach {
+                            chsLog(it.toString())
                             Text(
                                 modifier = Modifier
-                                    .clickable {
-                                        if (date >= state.minDate && date <= LocalDate.now()) {
-                                            onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
-                                        }
-                                    }
+                                    .clickable { }
                                     .drawBehind {
                                         drawRoundRect(
-                                            color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
-                                            cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
-                                        )
-                                    }
-                                    .padding(8.dp),
-                                text = "${date.monthValue} / ${date.dayOfMonth}",
-                                color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
-                            )
-                        } else {
-                            Text(
-                                modifier = Modifier
-                                    .clickable {
-                                        if (date >= state.minDate && date <= LocalDate.now()) {
-                                            onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
-                                        }
-                                    }
-                                    .drawBehind {
-                                        drawRoundRect(
-                                            color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
+                                            color = Color.Transparent,
                                             cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
                                         )
                                     }
@@ -373,112 +551,38 @@ fun AppUsageDetailScreen(
                                         horizontal = 12.dp,
                                         vertical = 8.dp
                                     ),
-                                text = date.dayOfMonth.toString(),
-                                color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
-                            )
-                        }
-                    }
-                }
-            }
-
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .verticalScroll(rememberScrollState())
-            ) {
-
-                if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        pageSpacing = 8.dp,
-                        state = appUsedPagerState,
-                        reverseLayout = true,
-                        userScrollEnabled = true,
-                        key = appUsedPagingData.itemKey { it.first }
-                    ) { page ->
-                        val item = appUsedPagingData[page]?.second
-                        if (item != null) {
-                            DailyUsageChart(
-                                title = item.sumOf { it.second }.convertToRealUsageTime(),
-                                list = item,
-                                convertText = { it.convertToRealUsageMinutes() }
+                                text = "${it.get(WeekFields.ISO.weekOfYear())}주"
                             )
                         }
                     }
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (appForegroundUsedPagingData != null && appForegroundUsedPagingData.itemCount != 0) {
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        pageSpacing = 8.dp,
-                        state = appForegroundPagerState,
-                        reverseLayout = true,
-                        userScrollEnabled = true,
-                        key = appForegroundUsedPagingData.itemKey { it.first }
-                    ) { page ->
-                        val item = appForegroundUsedPagingData[page]?.second
-                        if (item != null) {
-                            DailyUsageChart(
-                                title = "포그라운드 실행 시간 " +
-                                        item.sumOf { it.second }
-                                            .convertToRealUsageTime(),
-                                list = item,
-                                convertText = { it.convertToRealUsageMinutes() }
-                            )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                ) {
+                    if (appUsedWeekPAgingData != null && appUsedWeekPAgingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appUsedWeekPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appUsedWeekPAgingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appUsedWeekPAgingData[page]?.second
+                            if (item != null) {
+                                WeeklyUsageChart(
+                                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                    list = item,
+                                    convertText = { it.convertToRealUsageMinutes() }
+                                )
+                            }
                         }
                     }
                 }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (appNotifyPagingData != null && appNotifyPagingData.itemCount != 0) {
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        pageSpacing = 8.dp,
-                        state = appNotifyPagerState,
-                        reverseLayout = true,
-                        userScrollEnabled = true,
-                        key = appNotifyPagingData.itemKey { it.first }
-                    ) { page ->
-                        val item = appNotifyPagingData[page]?.second
-                        if (item != null) {
-                            DailyUsageChart(
-                                title = "알림 ${item.sumOf { it.second }}개",
-                                list = item,
-                                convertText = { "${it}개" }
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(32.dp))
-
-                if (appLaunchPagingData != null && appLaunchPagingData.itemCount != 0) {
-                    HorizontalPager(
-                        modifier = Modifier
-                            .fillMaxSize(),
-                        pageSpacing = 8.dp,
-                        state = appLaunchPagerState,
-                        reverseLayout = true,
-                        userScrollEnabled = true,
-                        key = appLaunchPagingData.itemKey { it.first }
-                    ) { page ->
-                        val item = appLaunchPagingData[page]?.second
-                        if (item != null) {
-                            DailyUsageChart(
-                                title = "총 실행 횟수 ${item.sumOf { it.second }}회",
-                                list = item,
-                                convertText = { "${it}회" }
-                            )
-                        }
-                    }
-                }
-                Spacer(modifier = Modifier.height(32.dp))
             }
         }
     }

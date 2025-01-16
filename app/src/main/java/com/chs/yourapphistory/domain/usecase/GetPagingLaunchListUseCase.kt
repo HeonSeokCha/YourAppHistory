@@ -1,18 +1,14 @@
-package com.chs.yourapphistory.domain.usecase
-
-import androidx.paging.PagingData
-import androidx.paging.map
+package com.chs.yourapphistory.domain.usecase import androidx.paging.PagingData
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import javax.inject.Inject
 
-class GetDayPagingNotifyUseCase @Inject constructor(
+class GetPagingLaunchListUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
     suspend operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        return repository.getDayNotifyAppList()
+        return repository.getDayLaunchAppList()
     }
 }

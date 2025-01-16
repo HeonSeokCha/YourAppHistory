@@ -6,10 +6,9 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
 
-class GetPagingAppLaunchUseCase @Inject constructor(
+class GetPagingDailyLaunchUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-
     suspend operator fun invoke(
         targetDate: LocalDate,
         packageName: String

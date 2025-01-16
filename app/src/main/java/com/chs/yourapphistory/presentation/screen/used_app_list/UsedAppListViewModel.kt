@@ -4,10 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
-import com.chs.yourapphistory.domain.usecase.GetDayPagingForegroundUsedUseCase
-import com.chs.yourapphistory.domain.usecase.GetDayPagingLaunchUseCase
-import com.chs.yourapphistory.domain.usecase.GetDayPagingNotifyUseCase
-import com.chs.yourapphistory.domain.usecase.GetDayPagingUsedUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingForegroundListUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingLaunchListUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingNotifyListUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingUsedListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -25,10 +25,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UsedAppListViewModel @Inject constructor(
-    private val getDayPagingUsedUseCase: GetDayPagingUsedUseCase,
-    private val getDayPagingForegroundUsedUseCase: GetDayPagingForegroundUsedUseCase,
-    private val getDayPagingNotifyUseCase: GetDayPagingNotifyUseCase,
-    private val getDayPagingLaunchUseCase: GetDayPagingLaunchUseCase,
+    private val getPagingUsedListUseCase: GetPagingUsedListUseCase,
+    private val getPagingForegroundListUseCase: GetPagingForegroundListUseCase,
+    private val getPagingNotifyListUseCase: GetPagingNotifyListUseCase,
+    private val getPagingLaunchListUseCase: GetPagingLaunchListUseCase,
     private val getAppIconMapUseCase: GetAppIconMapUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
@@ -79,7 +79,7 @@ class UsedAppListViewModel @Inject constructor(
                 is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
                     _state.update {
                         it.copy(
-                            appInfoList = getDayPagingForegroundUsedUseCase().cachedIn(viewModelScope),
+                            appInfoList = getPagingForegroundListUseCase().cachedIn(viewModelScope),
                             sortOption = option
                         )
                     }
@@ -88,7 +88,7 @@ class UsedAppListViewModel @Inject constructor(
                 is UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
                     _state.update {
                         it.copy(
-                            appInfoList = getDayPagingLaunchUseCase().cachedIn(viewModelScope),
+                            appInfoList = getPagingLaunchListUseCase().cachedIn(viewModelScope),
                             sortOption = option
                         )
                     }
@@ -97,7 +97,7 @@ class UsedAppListViewModel @Inject constructor(
                 is UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
                     _state.update {
                         it.copy(
-                            appInfoList = getDayPagingNotifyUseCase().cachedIn(viewModelScope),
+                            appInfoList = getPagingNotifyListUseCase().cachedIn(viewModelScope),
                             sortOption = option
                         )
                     }
@@ -106,7 +106,7 @@ class UsedAppListViewModel @Inject constructor(
                 is UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
                     _state.update {
                         it.copy(
-                            appInfoList = getDayPagingUsedUseCase().cachedIn(viewModelScope),
+                            appInfoList = getPagingUsedListUseCase().cachedIn(viewModelScope),
                             sortOption = option
                         )
                     }

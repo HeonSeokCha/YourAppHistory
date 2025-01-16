@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 import javax.inject.Inject
 
-class GetDayPagingForegroundUsedUseCase @Inject constructor(
+class GetPagingForegroundListUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
     suspend operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {

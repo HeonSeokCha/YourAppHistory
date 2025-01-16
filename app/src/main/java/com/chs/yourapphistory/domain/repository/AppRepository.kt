@@ -42,32 +42,24 @@ interface AppRepository {
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
     suspend fun getWeeklyPagingAppUsedInfo(
-        beginDate: LocalDate,
-        endDate: LocalDate,
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
 
     suspend fun getWeeklyPagingAppForegroundInfo(
-        beginDate: LocalDate,
-        endDate: LocalDate,
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<List<Pair<Int, Int>>>>
 
     suspend fun getWeeklyPagingAppLaunchInfo(
-        beginDate: LocalDate,
-        endDate: LocalDate,
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<List<Pair<Int, Int>>>>
 
     suspend fun getWeeklyPagingAppNotifyInfo(
-        beginDate: LocalDate,
-        endDate: LocalDate,
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<List<Pair<Int, Int>>>>
 
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 
