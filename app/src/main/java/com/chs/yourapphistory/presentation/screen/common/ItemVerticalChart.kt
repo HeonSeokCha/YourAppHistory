@@ -81,7 +81,7 @@ fun ItemDailyChart(
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = basePadding + smallPadding + (distance).times(idx) - barWidth,
+            xStart = basePadding + smallPadding + distance.times(idx) - barWidth,
             xEnd = basePadding + smallPadding + distance.times(idx) + barWidth
         )
     }

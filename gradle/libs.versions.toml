@@ -7,11 +7,11 @@ targetSdkVersion = "34"
 versionCode = "1"
 versionName = "1.0"
 
-activity = "1.9.3"
+activity = "1.10.0"
 compose-ui = "1.7.6"
 lifecycle = "2.8.7"
 room = "2.6.1"
-hilt = "2.54"
+hilt = "2.55"
 kotlin = "2.0.21"
 ksp = "2.0.20-1.0.24"
 kotlin-coroutine = "1.10.1"
@@ -48,7 +48,7 @@ workmanager = "androidx.work:work-runtime-ktx:2.10.0"
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3"
+kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
 
 
 

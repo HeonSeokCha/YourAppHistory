@@ -38,8 +38,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
+import com.chs.yourapphistory.common.convertDayString
 import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
@@ -81,15 +83,15 @@ fun ItemWeeklyChart(
             style = style1
         ).size
         .width
-
         .toFloat()
 
     val barAreas = weekUsageList.mapIndexed { idx, pair ->
+        chsLog(distance.times(idx).toString())
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = basePadding + smallPadding + (distance).times(idx) - barWidth,
-            xEnd = basePadding + smallPadding + distance.times(idx) + barWidth
+            xStart = distance.times(idx) + barWidth + smallPadding.times(2),
+            xEnd = distance.times(idx) + barWidth + smallPadding.times(2) + barWidth
         )
     }
 
@@ -141,10 +143,12 @@ fun ItemWeeklyChart(
 
         barAreas.forEachIndexed { idx, info ->
             val barHeight = info.value.times(scale).toFloat()
+
+            chsLog(distance.times(idx).toString())
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = (size.width.div(7) * info.idx) + barWidth + smallPadding,
+                    x = distance.times(info.idx) + barWidth + smallPadding.times(2),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -155,7 +159,7 @@ fun ItemWeeklyChart(
                 text = weekUsageList[info.idx].first,
                 style = style1
             )
-            val textRectPadding = (size.width.div(7) * info.idx) + (textResult.size.width) + basePadding
+            val textRectPadding = (distance.times(info.idx)) + (textResult.size.width) + (smallPadding * 3)
             drawText(
                 textMeasurer = textMeasurer,
                 text = weekUsageList[info.idx].first,
@@ -211,9 +215,9 @@ fun WeeklyUsageChart(
         Spacer(modifier = Modifier.height(8.dp))
 
         ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
-            val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
+            val selectDayValue: String = selectedBar.idx.convertDayString()
             val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
-                selectTimZoneValue,
+                selectDayValue,
                 TextStyle(
                     fontSize = 12.sp,
                     color = Color.Black
@@ -233,7 +237,7 @@ fun WeeklyUsageChart(
             val totalWidth: Float =
                 (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
 
-            val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
+            val textRectPadding = selectedBar.xStart - ((totalWidth.div(7)) * selectedBar.idx)
 
             drawRoundRect(
                 color = barColor,
@@ -250,7 +254,7 @@ fun WeeklyUsageChart(
 
             drawText(
                 textMeasurer = textMeasurer,
-                text = selectTimZoneValue,
+                text = selectDayValue,
                 style = TextStyle(
                     fontSize = 12.sp,
                     color = Color.Black
@@ -286,7 +290,7 @@ private fun PreViewUsageChart2() {
         init {
             for (i in 0..6) {
                 put(
-                    DayOfWeek.values().sortedBy { it.value }[i].getDisplayName(
+                    DayOfWeek.entries.sortedBy { it.value }[i].getDisplayName(
                         java.time.format.TextStyle.SHORT,
                         Locale.KOREAN
                     ),

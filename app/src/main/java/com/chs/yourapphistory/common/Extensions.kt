@@ -11,7 +11,9 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.TextStyle
 import java.time.temporal.WeekFields
+import java.util.Locale
 import java.util.stream.Collectors
 import kotlin.time.Duration.Companion.hours
 
@@ -31,6 +33,12 @@ fun Int.convertBetweenHourString(): String {
     return this.convert24HourString(true) +
             " ~ " +
             (this + 1).convert24HourString(false) + " "
+}
+
+fun Int.convertDayString(): String {
+    return DayOfWeek.entries.first() { it.value == this }.getDisplayName(
+        TextStyle.SHORT, Locale.KOREAN
+    )
 }
 
 fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
@@ -146,6 +154,18 @@ fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
     return this.datesUntil(targetDate.plusDays(1L))
         .collect(Collectors.toList())
         .reversed()
+}
+
+internal fun calcDailyUsageList(
+
+) {
+    val usageMap = object : HashMap<Int, Long>() {
+        init {
+            for (i in 0 .. 6) {
+                put(i, 0L)
+            }
+        }
+    }
 }
 
 internal fun calcHourUsageList(
