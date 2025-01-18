@@ -13,6 +13,9 @@ import com.chs.yourapphistory.domain.usecase.GetPagingDailyForegroundUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingDailyLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingDailyNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingDailyUsedUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyForegroundUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyLaunchUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyUsedUseCase
 import com.chs.yourapphistory.presentation.Screen
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,12 +36,14 @@ class AppUsageDetailViewModel @Inject constructor(
     private val getPagingDailyNotifyUseCase: GetPagingDailyNotifyUseCase,
     private val getPagingDailyLaunchUseCase: GetPagingDailyLaunchUseCase,
     private val getPagingWeeklyUsedUseCase: GetPagingWeeklyUsedUseCase,
+    private val getPagingWeeklyForegroundUseCase: GetPagingWeeklyForegroundUseCase,
+    private val getPagingWeeklyNotifyUseCase: GetPagingWeeklyNotifyUseCase,
+    private val getPagingWeeklyLaunchUseCase: GetPagingWeeklyLaunchUseCase,
     private val getMinimumTimeUseCase: GetMinimumTimeUseCase
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppUsageDetailState())
-    val state = _state
-        .onStart {
+    val state = _state .onStart {
             getDateRangeList()
             getPackageUsageInfo(targetDate)
             changeDate(targetDate)
@@ -116,6 +121,18 @@ class AppUsageDetailViewModel @Inject constructor(
                         packageName = targetPackageName
                     ).cachedIn(viewModelScope),
                     pagingWeeklyUsedInfo = getPagingWeeklyUsedUseCase(
+                        targetDate = targetDate,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingWeeklyForegroundInfo = getPagingWeeklyForegroundUseCase(
+                        targetDate = targetDate,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingWeeklyNotifyInfo = getPagingWeeklyNotifyUseCase(
+                        targetDate = targetDate,
+                        packageName = targetPackageName
+                    ).cachedIn(viewModelScope),
+                    pagingWeeklyLaunchInfo = getPagingWeeklyLaunchUseCase(
                         targetDate = targetDate,
                         packageName = targetPackageName
                     ).cachedIn(viewModelScope)

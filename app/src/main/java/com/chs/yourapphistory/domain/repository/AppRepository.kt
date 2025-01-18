@@ -49,17 +49,17 @@ interface AppRepository {
     suspend fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
 
     suspend fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
 
     suspend fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
 
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 

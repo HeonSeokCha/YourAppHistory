@@ -21,6 +21,9 @@ import com.chs.yourapphistory.data.paging.GetPagingDailyAppForegroundInfo
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppLaunchInfo
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppUsedInfo
+import com.chs.yourapphistory.data.paging.GetPagingWeekAppForegroundInfo
+import com.chs.yourapphistory.data.paging.GetPagingWeekAppLaunchInfo
+import com.chs.yourapphistory.data.paging.GetPagingWeekAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
@@ -272,22 +275,52 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>> {
-        TODO("Not yet implemented")
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
+        val minDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetPagingWeekAppForegroundInfo(
+                dao = appForegroundUsageDao,
+                minDate = minDate,
+                targetDate = targetDate,
+                packageName = packageName
+            )
+        }.flow
     }
 
     override suspend fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>> {
-        TODO("Not yet implemented")
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
+        val minDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetPagingWeekAppLaunchInfo(
+                dao = appUsageDao,
+                minDate = minDate,
+                targetDate = targetDate,
+                packageName = packageName
+            )
+        }.flow
     }
 
     override suspend fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<List<Pair<Int, Int>>>> {
-        TODO("Not yet implemented")
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
+        val minDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
+        return Pager(
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+        ) {
+            GetPagingWeekAppNotifyInfo(
+                dao = appNotifyInfoDao,
+                minDate = minDate,
+                targetDate = targetDate,
+                packageName = packageName
+            )
+        }.flow
     }
 
     override suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
