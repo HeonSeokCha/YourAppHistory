@@ -10,8 +10,10 @@ object Constants {
     const val PAGING_WEEK: Long = 4L
     val SIMPLE_HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h")
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")
-    val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
-    val YEAR_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 (E)")
+    val DATE_NAME_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일 (E)")
+    val DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("MM월 dd일")
+    val YEAR_DATE_FORMAT_NAME: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일 (E)")
+    val YEAR_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 MM월 dd일")
 
     const val TEXT_TITLE_PREVIEW: String = "Title Preview"
     const val NUMBER_LOADING_COUNT: Int = 6

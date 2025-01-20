@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -37,6 +38,7 @@ import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
+import com.chs.yourapphistory.common.toDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
 import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
@@ -138,13 +140,55 @@ fun AppUsageDetailScreen(
         rememberPagerState(pageCount = { 0 })
     }
 
-    val appUsedWeekPAgingData = state.pagingWeeklyUsedInfo?.collectAsLazyPagingItems()
+    val appUsedWeekPagingData = state.pagingWeeklyUsedInfo?.collectAsLazyPagingItems()
     val appUsedWeekPagerState =
-        if (appUsedWeekPAgingData != null && appUsedWeekPAgingData.itemCount != 0) {
+        if (appUsedWeekPagingData != null && appUsedWeekPagingData.itemCount != 0) {
             rememberPagerState(
                 pageCount = {
-                    appUsedWeekPAgingData.itemCount
-                }, initialPage = appUsedWeekPAgingData.itemSnapshotList.items.map {
+                    appUsedWeekPagingData.itemCount
+                }, initialPage = appUsedWeekPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayWeek)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
+
+    val appForegroundWeekPagingData = state.pagingWeeklyForegroundInfo?.collectAsLazyPagingItems()
+    val appForegroundWeekPagerState =
+        if (appForegroundWeekPagingData != null && appForegroundWeekPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appForegroundWeekPagingData.itemCount
+                }, initialPage = appForegroundWeekPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayWeek)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
+
+    val appNotifyWeekPagingData = state.pagingWeeklyNotifyInfo?.collectAsLazyPagingItems()
+    val appNotifyWeekPagerState =
+        if (appNotifyWeekPagingData != null && appNotifyWeekPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appNotifyWeekPagingData.itemCount
+                }, initialPage = appNotifyWeekPagingData.itemSnapshotList.items.map {
+                    it.first
+                }.indexOf(state.displayWeek)
+            )
+        } else {
+            rememberPagerState(pageCount = { 0 })
+        }
+
+    val appLaunchWeekPagingData = state.pagingWeeklyLaunchInfo?.collectAsLazyPagingItems()
+    val appLaunchWeekPagerState =
+        if (appLaunchWeekPagingData != null && appLaunchWeekPagingData.itemCount != 0) {
+            rememberPagerState(
+                pageCount = {
+                    appLaunchWeekPagingData.itemCount
+                }, initialPage = appLaunchWeekPagingData.itemSnapshotList.items.map {
                     it.first
                 }.indexOf(state.displayWeek)
             )
@@ -162,6 +206,7 @@ fun AppUsageDetailScreen(
     }
 
     var selectDateIdx by remember { mutableIntStateOf(0) }
+    var selectWeekIdx by remember { mutableIntStateOf(0) }
 
     LaunchedEffect(appUsedPagerState.isScrollInProgress) {
 
@@ -293,6 +338,115 @@ fun AppUsageDetailScreen(
         }
     }
 
+    LaunchedEffect(appUsedWeekPagerState.isScrollInProgress) {
+
+        if (appUsedWeekPagingData == null) return@LaunchedEffect
+
+        if (appUsedWeekPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetWeek(
+                appUsedWeekPagingData[appUsedWeekPagerState.currentPage]?.first?.max()
+                    ?: LocalDate.now()
+            )
+        )
+    }
+
+    LaunchedEffect(appForegroundWeekPagerState.isScrollInProgress) {
+
+        if (appForegroundWeekPagingData == null) return@LaunchedEffect
+
+        if (appForegroundWeekPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appForegroundWeekPagingData[appForegroundWeekPagerState.currentPage]?.first?.max()
+                    ?: LocalDate.now()
+            )
+        )
+    }
+
+    LaunchedEffect(appNotifyWeekPagerState.isScrollInProgress) {
+
+        if (appNotifyWeekPagingData == null) return@LaunchedEffect
+
+        if (appNotifyWeekPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appNotifyWeekPagingData[appNotifyWeekPagerState.currentPage]?.first?.max()
+                    ?: LocalDate.now()
+            )
+        )
+    }
+
+    LaunchedEffect(appLaunchWeekPagerState.isScrollInProgress) {
+
+        if (appLaunchWeekPagingData == null) return@LaunchedEffect
+
+        if (appLaunchWeekPagingData.itemCount == 0) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                appLaunchWeekPagingData[appLaunchWeekPagerState.currentPage]?.first?.max()
+                    ?: LocalDate.now()
+            )
+        )
+    }
+
+    LaunchedEffect(state.displayWeek) {
+
+        if (state.displayWeek.isEmpty()) return@LaunchedEffect
+
+        if (state.displayWeek[datePagerState.currentPage] > state.displayWeek.max()) {
+            datePagerState.scrollToPage(datePagerState.currentPage + 1)
+            selectDateIdx = 6
+        }
+
+        if (state.displayWeek[datePagerState.currentPage] < state.displayWeek.max()) {
+            datePagerState.scrollToPage(datePagerState.currentPage - 1)
+            selectDateIdx = 0
+        }
+
+        awaitAll(
+            async {
+                if (appUsedWeekPagingData == null || appUsedWeekPagingData.itemCount == 0) return@async
+                if (appUsedWeekPagingData[appUsedWeekPagerState.currentPage]!!.first == state.displayWeek)
+                    return@async
+                appUsedWeekPagerState.scrollToPage(
+                    appUsedWeekPagingData.itemSnapshotList.map { it!!.first }.indexOf(state.displayWeek)
+                )
+            },
+            async {
+                if (appForegroundWeekPagingData == null || appForegroundWeekPagingData.itemCount == 0) return@async
+                if (appForegroundWeekPagingData[appForegroundWeekPagerState.currentPage]!!.first == state.displayWeek)
+                    return@async
+                appForegroundWeekPagerState.scrollToPage(
+                    appForegroundWeekPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayWeek)
+                )
+            },
+            async {
+                if (appNotifyWeekPagingData == null || appNotifyWeekPagingData.itemCount == 0) return@async
+                if (appNotifyWeekPagingData[appNotifyWeekPagerState.currentPage]!!.first == state.displayWeek)
+                    return@async
+                appNotifyWeekPagerState.scrollToPage(
+                    appNotifyWeekPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayWeek)
+                )
+            },
+            async {
+                if (appLaunchWeekPagingData == null || appLaunchWeekPagingData.itemCount == 0) return@async
+                if (appLaunchWeekPagingData[appLaunchWeekPagerState.currentPage]!!.first == state.displayWeek)
+                    return@async
+                appLaunchWeekPagerState.scrollToPage(
+                    appLaunchWeekPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayWeek)
+                )
+            }
+        )
+    }
+
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
 
     ItemPullToRefreshBox(
@@ -316,36 +470,30 @@ fun AppUsageDetailScreen(
                     .padding(vertical = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                if (state.isDailyMode) {
-                    Text(
-                        text = if (state.displayDate == LocalDate.now()) {
-                            "오늘"
-                        } else {
-                            state.displayDate.toConvertDisplayYearDate()
-                        },
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp
-                    )
-                } else {
-                    Text(
-                        text = if (state.displayDate == LocalDate.now()) {
-                            "오늘"
-                        } else {
-                            state.displayDate.toConvertDisplayYearDate()
-                        },
-                        textAlign = TextAlign.Center,
-                        fontSize = 18.sp
-                    )
+                Column {
+                    if (state.isDailyMode) {
+                        Text(
+                            text = if (state.displayDate == LocalDate.now()) {
+                                "오늘"
+                            } else {
+                                state.displayDate.toConvertDisplayYearDate()
+                            },
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp
+                        )
+                    } else {
+                        Text(
+                            text = state.displayWeek.toDisplayYearDate(),
+                            textAlign = TextAlign.Center,
+                            fontSize = 18.sp
+                        )
+                    }
                 }
 
                 Text(
                     modifier = Modifier
                         .clickable { onEvent(AppUsageDetailEvent.OnChangeViewType) },
-                    text = if (state.isDailyMode) {
-                        "주별 보기"
-                    } else {
-                        "일별 보기"
-                    },
+                    text = if (state.isDailyMode) { "주별 보기" } else { "일별 보기" },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
@@ -536,14 +684,16 @@ fun AppUsageDetailScreen(
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         val item = state.weekList[it]
-                        item.reversed().forEach {
+                        item.reversed().forEach { maxDate ->
                             chsLog(it.toString())
                             Text(
                                 modifier = Modifier
                                     .clickable { }
                                     .drawBehind {
                                         drawRoundRect(
-                                            color = Color.Transparent,
+                                            color = if (state.displayWeek.any { it == maxDate }) {
+                                                Color.LightGray
+                                            } else Color.Transparent,
                                             cornerRadius = CornerRadius(15.dp.toPx(), 15.dp.toPx())
                                         )
                                     }
@@ -551,7 +701,7 @@ fun AppUsageDetailScreen(
                                         horizontal = 12.dp,
                                         vertical = 8.dp
                                     ),
-                                text = "${it.get(WeekFields.ISO.weekOfYear())}주"
+                                text = "${maxDate.get(WeekFields.ISO.weekOfYear())}주"
                             )
                         }
                     }
@@ -562,7 +712,7 @@ fun AppUsageDetailScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-                    if (appUsedWeekPAgingData != null && appUsedWeekPAgingData.itemCount != 0) {
+                    if (appUsedWeekPagingData != null && appUsedWeekPagingData.itemCount != 0) {
                         HorizontalPager(
                             modifier = Modifier
                                 .fillMaxSize(),
@@ -570,18 +720,88 @@ fun AppUsageDetailScreen(
                             state = appUsedWeekPagerState,
                             reverseLayout = true,
                             userScrollEnabled = true,
-                            key = appUsedWeekPAgingData.itemKey { it.first }
+                            key = appUsedWeekPagingData.itemKey { it.first }
                         ) { page ->
-                            val item = appUsedWeekPAgingData[page]?.second
+                            val item = appUsedWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
                                     title = item.sumOf { it.second }.convertToRealUsageTime(),
                                     list = item,
-                                    convertText = { it.convertToRealUsageMinutes() }
+                                    convertText = { it.convertToRealUsageTime() }
                                 )
                             }
                         }
                     }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appForegroundWeekPagingData != null && appForegroundWeekPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appForegroundWeekPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appForegroundWeekPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appForegroundWeekPagingData[page]?.second
+                            if (item != null) {
+                                WeeklyUsageChart(
+                                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                    list = item,
+                                    convertText = { it.convertToRealUsageTime() }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appNotifyWeekPagingData != null && appNotifyWeekPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appNotifyWeekPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appNotifyWeekPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appNotifyWeekPagingData[page]?.second
+                            if (item != null) {
+                                WeeklyUsageChart(
+                                    title = "${item.sumOf { it.second }}개",
+                                    list = item,
+                                    convertText = { "${it}개" }
+                                )
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    if (appLaunchWeekPagingData != null && appLaunchWeekPagingData.itemCount != 0) {
+                        HorizontalPager(
+                            modifier = Modifier
+                                .fillMaxSize(),
+                            pageSpacing = 8.dp,
+                            state = appLaunchWeekPagerState,
+                            reverseLayout = true,
+                            userScrollEnabled = true,
+                            key = appLaunchWeekPagingData.itemKey { it.first }
+                        ) { page ->
+                            val item = appLaunchWeekPagingData[page]?.second
+                            if (item != null) {
+                                WeeklyUsageChart(
+                                    title = "${item.sumOf { it.second }}개",
+                                    list = item,
+                                    convertText = { "${it}개" }
+                                )
+                            }
+                        }
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
             }
         }

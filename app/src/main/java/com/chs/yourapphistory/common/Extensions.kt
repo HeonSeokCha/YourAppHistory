@@ -271,9 +271,21 @@ fun LocalDate.toConvertDisplayYearDate(): String {
         "오늘"
     } else {
         if (this.year == LocalDate.now().year) {
-            return this.format(Constants.DATE_FORMAT)
+            return this.format(Constants.DATE_NAME_FORMAT)
         }
-        this.format(Constants.YEAR_DATE_FORMAT)
+        this.format(Constants.YEAR_DATE_FORMAT_NAME)
+    }
+}
+
+fun List<LocalDate>.toDisplayYearDate(): String {
+    return if (this.min().year == this.max().year) {
+        if (this.min().monthValue == this.max().monthValue) {
+            "${this.min().format(Constants.DATE_FORMAT)}~${this.max().dayOfMonth}일"
+        } else {
+            "${this.min().format(Constants.DATE_FORMAT)} ~ ${this.max().format(Constants.DATE_FORMAT)}"
+        }
+    } else {
+        "${this.min().format(Constants.YEAR_DATE_FORMAT)} ~ ${this.max().format(Constants.YEAR_DATE_FORMAT)}"
     }
 }
 
