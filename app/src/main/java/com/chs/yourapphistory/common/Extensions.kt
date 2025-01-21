@@ -36,7 +36,7 @@ fun Int.convertBetweenHourString(): String {
 }
 
 fun Int.convertDayString(): String {
-    return DayOfWeek.entries.first() { it.value == this }.getDisplayName(
+    return DayOfWeek.entries.first { it.value == this }.getDisplayName(
         TextStyle.SHORT, Locale.KOREAN
     )
 }
@@ -302,4 +302,8 @@ fun LocalDate.reverseDateUntilWeek(targetDate: LocalDate): List<LocalDate> {
             }
         }
     )
+}
+
+fun LocalDate.getYearOfWeek(): Int {
+    return this.get(WeekFields.of(Locale.KOREA).weekOfYear())
 }

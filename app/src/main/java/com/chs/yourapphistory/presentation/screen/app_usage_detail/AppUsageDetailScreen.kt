@@ -23,7 +23,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
@@ -34,9 +33,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
+import com.chs.yourapphistory.common.getYearOfWeek
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.common.toDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
@@ -47,7 +46,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.time.LocalDate
-import java.time.temporal.WeekFields
 
 @Composable
 fun AppUsageDetailScreenRoot(
@@ -196,7 +194,7 @@ fun AppUsageDetailScreen(
             rememberPagerState(pageCount = { 0 })
         }
 
-    val wekPagerState = if (state.weekList.isNotEmpty()) {
+    val weekPagerState = if (state.weekList.isNotEmpty()) {
         rememberPagerState(
             pageCount = { state.weekList.count() },
             initialPage = state.weekList.indexOf(state.displayWeek) / 5
@@ -265,13 +263,17 @@ fun AppUsageDetailScreen(
         if (state.dateList.isEmpty()) return@LaunchedEffect
 
         if (state.dateList[datePagerState.currentPage].min() > state.displayDate) {
-            datePagerState.scrollToPage(datePagerState.currentPage + 1)
-            selectDateIdx = 6
+            launch {
+                datePagerState.scrollToPage(datePagerState.currentPage + 1)
+                selectDateIdx = 6
+            }
         }
 
         if (state.dateList[datePagerState.currentPage].max() < state.displayDate) {
-            datePagerState.scrollToPage(datePagerState.currentPage - 1)
-            selectDateIdx = 0
+            launch {
+                datePagerState.scrollToPage(datePagerState.currentPage - 1)
+                selectDateIdx = 0
+            }
         }
 
         awaitAll(
@@ -329,7 +331,6 @@ fun AppUsageDetailScreen(
                 AppUsageDetailEvent.OnChangeTargetDate(LocalDate.now())
             )
         } else {
-            chsLog(state.dateList[datePagerState.currentPage][6 - selectDateIdx].toString())
             onEvent(
                 AppUsageDetailEvent.OnChangeTargetDate(
                     state.dateList[datePagerState.currentPage][6 - selectDateIdx]
@@ -359,7 +360,7 @@ fun AppUsageDetailScreen(
         if (appForegroundWeekPagingData.itemCount == 0) return@LaunchedEffect
 
         onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+            AppUsageDetailEvent.OnChangeTargetWeek(
                 appForegroundWeekPagingData[appForegroundWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -373,7 +374,7 @@ fun AppUsageDetailScreen(
         if (appNotifyWeekPagingData.itemCount == 0) return@LaunchedEffect
 
         onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+            AppUsageDetailEvent.OnChangeTargetWeek(
                 appNotifyWeekPagingData[appNotifyWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -387,7 +388,7 @@ fun AppUsageDetailScreen(
         if (appLaunchWeekPagingData.itemCount == 0) return@LaunchedEffect
 
         onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+            AppUsageDetailEvent.OnChangeTargetWeek(
                 appLaunchWeekPagingData[appLaunchWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -395,17 +396,20 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(state.displayWeek) {
+        if (state.weekList.isEmpty()) return@LaunchedEffect
 
-        if (state.displayWeek.isEmpty()) return@LaunchedEffect
-
-        if (state.displayWeek[datePagerState.currentPage] > state.displayWeek.max()) {
-            datePagerState.scrollToPage(datePagerState.currentPage + 1)
-            selectDateIdx = 6
+        if (state.weekList[weekPagerState.currentPage].min() > state.displayWeek.max()) {
+            launch {
+                weekPagerState.scrollToPage(weekPagerState.currentPage + 1)
+                selectWeekIdx = 5
+            }
         }
 
-        if (state.displayWeek[datePagerState.currentPage] < state.displayWeek.max()) {
-            datePagerState.scrollToPage(datePagerState.currentPage - 1)
-            selectDateIdx = 0
+        if (state.weekList[weekPagerState.currentPage].max() < state.displayWeek.max()) {
+            launch {
+                weekPagerState.scrollToPage(weekPagerState.currentPage - 1)
+                selectWeekIdx = 0
+            }
         }
 
         awaitAll(
@@ -444,6 +448,21 @@ fun AppUsageDetailScreen(
                         .indexOf(state.displayWeek)
                 )
             }
+        )
+    }
+
+    LaunchedEffect(weekPagerState.isScrollInProgress) {
+        if (state.weekList.isEmpty()) return@LaunchedEffect
+
+        if (state.displayWeek.max() == state.dateList[datePagerState.currentPage][4 - selectWeekIdx])
+            return@LaunchedEffect
+
+        if (weekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetWeek(
+                state.weekList[weekPagerState.currentPage][4 - selectWeekIdx]
+            )
         )
     }
 
@@ -574,7 +593,6 @@ fun AppUsageDetailScreen(
                         .fillMaxSize()
                         .verticalScroll(rememberScrollState())
                 ) {
-
                     if (appUsedPagingData != null && appUsedPagingData.itemCount != 0) {
                         HorizontalPager(
                             modifier = Modifier
@@ -673,7 +691,7 @@ fun AppUsageDetailScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp),
-                    state = wekPagerState,
+                    state = weekPagerState,
                     reverseLayout = true,
                     userScrollEnabled = true,
                     key = { state.weekList[it] }
@@ -684,11 +702,15 @@ fun AppUsageDetailScreen(
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         val item = state.weekList[it]
-                        item.reversed().forEach { maxDate ->
-                            chsLog(it.toString())
+                        item.reversed().forEachIndexed { idx, maxDate ->
+                            if (state.displayWeek.any { it == maxDate }) {
+                                selectWeekIdx = idx
+                            }
                             Text(
                                 modifier = Modifier
-                                    .clickable { }
+                                    .clickable {
+                                        onEvent(AppUsageDetailEvent.OnChangeTargetWeek(maxDate))
+                                    }
                                     .drawBehind {
                                         drawRoundRect(
                                             color = if (state.displayWeek.any { it == maxDate }) {
@@ -701,7 +723,7 @@ fun AppUsageDetailScreen(
                                         horizontal = 12.dp,
                                         vertical = 8.dp
                                     ),
-                                text = "${maxDate.get(WeekFields.ISO.weekOfYear())}주"
+                                text = "${maxDate.getYearOfWeek()}주"
                             )
                         }
                     }

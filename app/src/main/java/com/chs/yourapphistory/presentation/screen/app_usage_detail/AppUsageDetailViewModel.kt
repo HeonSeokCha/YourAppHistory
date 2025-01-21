@@ -47,6 +47,7 @@ class AppUsageDetailViewModel @Inject constructor(
             getDateRangeList()
             getPackageUsageInfo(targetDate)
             changeDate(targetDate)
+            changeWeek(targetDate)
         }
         .stateIn(
             viewModelScope,
@@ -66,7 +67,7 @@ class AppUsageDetailViewModel @Inject constructor(
             }
 
             is AppUsageDetailEvent.OnChangeTargetWeek -> {
-                changeDate(event.date)
+                changeWeek(event.date)
             }
 
             is AppUsageDetailEvent.OnChangeViewType -> {
@@ -97,8 +98,13 @@ class AppUsageDetailViewModel @Inject constructor(
 
     private fun changeDate(date: LocalDate) {
         _state.update {
+            it.copy(displayDate = date)
+        }
+    }
+
+    private fun changeWeek(date: LocalDate) {
+        _state.update {
             it.copy(
-                displayDate = date,
                 displayWeek = date.reverseDateUntilWeek(date)
             )
         }
