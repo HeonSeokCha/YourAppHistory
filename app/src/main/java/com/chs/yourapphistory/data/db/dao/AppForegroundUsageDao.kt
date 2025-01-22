@@ -33,7 +33,7 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) as beginDate, beginUseTime, endUseTime " +
+        "SELECT unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, beginUseTime, endUseTime " +
           "FROM appForegroundUsage " +
          "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +

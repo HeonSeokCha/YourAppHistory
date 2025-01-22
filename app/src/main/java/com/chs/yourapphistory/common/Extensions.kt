@@ -36,7 +36,8 @@ fun Int.convertBetweenHourString(): String {
 }
 
 fun Int.convertDayString(): String {
-    return DayOfWeek.entries.first { it.value == this }.getDisplayName(
+    val idx = if (this == 0) 6 else this - 1
+    return DayOfWeek.entries[idx].getDisplayName(
         TextStyle.SHORT, Locale.KOREAN
     )
 }

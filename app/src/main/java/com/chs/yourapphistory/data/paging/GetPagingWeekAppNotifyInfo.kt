@@ -49,7 +49,7 @@ class GetPagingWeekAppNotifyInfo(
                 ).map {
                     it.key.toLocalDate().dayOfWeek
                         .getDisplayName(TextStyle.SHORT, Locale.KOREAN) to
-                            it.value.toInt()
+                            it.value
                 }
             }
 

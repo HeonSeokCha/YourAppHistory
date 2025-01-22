@@ -38,15 +38,16 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     ): List<Long>
 
     @Query(
-        "SELECT unixepoch(date(notifyTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, notifyTime " +
+        "SELECT unixepoch(date(notifyTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, COUNT(notifyTime) as cnt " +
           "FROM appNotifyInfo " +
          "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
-           "AND packageName = :packageName"
+           "AND packageName = :packageName " +
+         "GROUP BY unixepoch(date(notifyTime / 1000, 'unixepoch', 'localtime'))"
     )
     abstract suspend fun getWeeklyNotifyCount(
         beginDate: Long,
         endDate: Long,
         packageName: String,
-    ): Map<@MapColumn("beginDate") Long, @MapColumn("notifyTime") Long>
+    ): Map<@MapColumn("beginDate") Long, @MapColumn("cnt") Int>
 
 }
