@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import android.util.Log
+import androidx.compose.ui.util.fastCbrt
 import androidx.compose.ui.util.packInts
 import androidx.core.graphics.drawable.toBitmap
 import androidx.room.util.copy
@@ -178,10 +179,13 @@ class ApplicationInfoSource @Inject constructor(
         var prevClassName: String? = null
         val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, Int>> = hashMapOf()
         var isScreenOff: Boolean = false
+        var ddadack: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-//            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.className} - ${usageEvent.eventType}")
+            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(1)) {
+                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
+            }
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -216,7 +220,6 @@ class ApplicationInfoSource @Inject constructor(
                         }
                     }
 
-
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
@@ -238,76 +241,67 @@ class ApplicationInfoSource @Inject constructor(
                         )
                     }
 
-                    if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                        || usageEvent.packageName != prevPackageName
-                        || usageEvent.className == prevClassName
-                        || isScreenOff
-                    ) {
+                    if (isScreenOff) {
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                            && usageEvent.packageName == prevPackageName
+                            && usageEvent.className != prevClassName
+                        ) {
+                            continue
+                        }
 
-                        if (isScreenOff) {
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
-                                && usageEvent.packageName == prevPackageName
-                                && usageEvent.className != prevClassName
-                            ) {
-                                continue
-                            }
-
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                                inCompletedUsageList.remove(usageEvent.packageName)
-                                continue
-                            }
-
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                                && usageEvent.packageName == prevPackageName
-                            ) {
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                                inCompletedUsageList.remove(usageEvent.packageName)
-                                continue
-                            }
-
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                                && usageEvent.packageName != prevPackageName
-                            ) {
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                                inCompletedUsageList.remove(usageEvent.packageName)
-                                continue
-                            }
-
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
                             continue
                         }
 
                         if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
                             && usageEvent.packageName == prevPackageName
-                            && usageEvent.className != prevClassName
                         ) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
                             continue
                         }
 
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
-                            && usageEvent.packageName == prevPackageName
-                            && usageEvent.className != prevClassName
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                            && usageEvent.packageName != prevPackageName
                         ) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
                             continue
                         }
-
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
-                            && usageEvent.packageName == prevPackageName
-                            && usageEvent.className == prevClassName
-                        ) {
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second == 1
-                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
-                            ) {
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                                inCompletedUsageList.remove(usageEvent.packageName)
-                            }
-                            continue
-                        }
-
-                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                        inCompletedUsageList.remove(usageEvent.packageName)
+                        continue
                     }
 
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
+                        && usageEvent.packageName == prevPackageName
+                        && usageEvent.className != prevClassName
+                    ) {
+                        continue
+                    }
+
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                        && usageEvent.packageName == prevPackageName
+                        && usageEvent.className != prevClassName
+                    ) {
+                        continue
+                    }
+
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                        && usageEvent.packageName == prevPackageName
+                        && usageEvent.className == prevClassName
+                    ) {
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second == 1
+                            && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
+                        ) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
+                        }
+                        continue
+                    }
+
+                    completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                    inCompletedUsageList.remove(usageEvent.packageName)
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
@@ -320,14 +314,14 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-//        completedUsageList.map {
-//            Log.e(
-//                "CHS_123",
-//                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
-//                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageTime()
-//                }"
-//            )
-//        }
+        completedUsageList.map {
+            Log.e(
+                "CHS_123",
+                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
+                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageTime()
+                }"
+            )
+        }
         return completedUsageList
     }
 }
