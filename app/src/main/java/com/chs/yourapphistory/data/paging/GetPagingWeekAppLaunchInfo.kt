@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.calcDayUsedList
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
@@ -42,15 +43,13 @@ class GetPagingWeekAppLaunchInfo(
             .chunked(7)
             .map {
                 val dateRangeList = it
-                dateRangeList to dao.getWeeklyAppLaunchInfo(
-                    beginDate = dateRangeList.min().atStartOfDayToMillis(),
-                    endDate = dateRangeList.max().atEndOfDayToMillis(),
-                    packageName = packageName
-                ).map {
-                    it.key.toLocalDate().dayOfWeek
-                        .getDisplayName(TextStyle.SHORT, Locale.KOREAN) to
-                            it.value
-                }
+                dateRangeList to calcDayUsedList(
+                    dao.getWeeklyAppLaunchInfo(
+                        beginDate = dateRangeList.min().atStartOfDayToMillis(),
+                        endDate = dateRangeList.max().atEndOfDayToMillis(),
+                        packageName = packageName
+                    )
+                )
             }
 
         return LoadResult.Page(

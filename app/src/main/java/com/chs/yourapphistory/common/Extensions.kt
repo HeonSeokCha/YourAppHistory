@@ -157,18 +157,6 @@ fun LocalDate.reverseDateUntil(targetDate: LocalDate): List<LocalDate> {
         .reversed()
 }
 
-internal fun calcDailyUsageList(
-
-) {
-    val usageMap = object : HashMap<Int, Long>() {
-        init {
-            for (i in 0 .. 6) {
-                put(i, 0L)
-            }
-        }
-    }
-}
-
 internal fun calcHourUsageList(
     targetDate: LocalDate,
     list: Map<Long, Long>
@@ -261,6 +249,49 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
     }
 
     return usageMap.toList().map { it.first to it.second.toInt() }
+}
+
+@JvmName("calcDayUsedFromUsage")
+internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String, Int>> {
+    val usageMap = object : HashMap<Int, Int>() {
+        init {
+            put(6, 0)
+            for (i in 0..5) {
+                put(i, 0)
+            }
+        }
+    }
+
+    list.forEach {
+        usageMap.computeIfPresent(it.key.toLocalDate().dayOfWeek.value) { key, value ->
+            value + it.value.toList().sumOf { it.second - it.first }.toInt()
+        }
+    }
+
+    return usageMap.toList().map {
+        DayOfWeek.entries[it.first].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+    }
+}
+@JvmName("calcDayUsedFromLaunch")
+internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
+    val usageMap = object : HashMap<Int, Int>() {
+        init {
+            put(6, 0)
+            for (i in 0..5) {
+                put(i, 0)
+            }
+        }
+    }
+
+    list.forEach {
+        usageMap.computeIfPresent(it.key.toLocalDate().dayOfWeek.value) { key, value ->
+            value + 1
+        }
+    }
+
+    return usageMap.toList().map {
+        DayOfWeek.entries[it.first].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+    }
 }
 
 fun chsLog(value: String) {

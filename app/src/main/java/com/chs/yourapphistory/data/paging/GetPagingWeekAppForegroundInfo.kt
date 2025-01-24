@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.calcDayUsedList
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -43,15 +44,13 @@ class GetPagingWeekAppForegroundInfo(
             .chunked(7)
             .map {
                 val dateRangeList = it
-                dateRangeList to dao.getWeeklyForegroundUsedList(
-                    beginDate = dateRangeList.min().atStartOfDayToMillis(),
-                    endDate = dateRangeList.max().atEndOfDayToMillis(),
-                    packageName = packageName
-                ).map {
-                    it.key.toLocalDate().dayOfWeek
-                        .getDisplayName(TextStyle.SHORT, Locale.KOREAN) to
-                            it.value.toList().sumOf { it.second - it.first }.toInt()
-                }
+                dateRangeList to calcDayUsedList(
+                    dao.getWeeklyForegroundUsedList(
+                        beginDate = dateRangeList.min().atStartOfDayToMillis(),
+                        endDate = dateRangeList.max().atEndOfDayToMillis(),
+                        packageName = packageName
+                    )
+                )
             }
 
         return LoadResult.Page(
