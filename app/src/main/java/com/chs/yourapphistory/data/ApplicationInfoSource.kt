@@ -179,13 +179,12 @@ class ApplicationInfoSource @Inject constructor(
         var prevClassName: String? = null
         val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, Int>> = hashMapOf()
         var isScreenOff: Boolean = false
-        var ddadack: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(1)) {
-                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
-            }
+//            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(1)) {
+//                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
+//            }
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -314,14 +313,14 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-        completedUsageList.map {
-            Log.e(
-                "CHS_123",
-                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
-                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageTime()
-                }"
-            )
-        }
+//        completedUsageList.map {
+//            Log.e(
+//                "CHS_123",
+//                "${it.packageName} | ${it.beginUseTime.toLocalDateTime()} - ${it.endUseTime.toLocalDateTime()} ${
+//                    (it.endUseTime - it.beginUseTime).toInt().convertToRealUsageTime()
+//                }"
+//            )
+//        }
         return completedUsageList
     }
 }

@@ -161,7 +161,7 @@ internal fun calcHourUsageList(
     targetDate: LocalDate,
     list: Map<Long, Long>
 ): List<Pair<Int, Int>> {
-    val usageMap = object : HashMap<Int, Long>() {
+    val usageMap = object : LinkedHashMap<Int, Long>() {
         init {
             for (i in 0..23) {
                 put(i, 0L)
@@ -253,10 +253,10 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
 
 @JvmName("calcDayUsedFromUsage")
 internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String, Int>> {
-    val usageMap = object : HashMap<Int, Int>() {
+    val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
-            put(6, 0)
-            for (i in 0..5) {
+            put(7, 0)
+            for (i in 1..6) {
                 put(i, 0)
             }
         }
@@ -269,15 +269,15 @@ internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String
     }
 
     return usageMap.toList().map {
-        DayOfWeek.entries[it.first].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+        DayOfWeek.entries[it.first - 1].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
     }
 }
 @JvmName("calcDayUsedFromLaunch")
 internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
-    val usageMap = object : HashMap<Int, Int>() {
+    val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
-            put(6, 0)
-            for (i in 0..5) {
+            put(7, 0)
+            for (i in 1..6) {
                 put(i, 0)
             }
         }
@@ -285,12 +285,12 @@ internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
 
     list.forEach {
         usageMap.computeIfPresent(it.key.toLocalDate().dayOfWeek.value) { key, value ->
-            value + 1
+            value + it.value
         }
     }
 
     return usageMap.toList().map {
-        DayOfWeek.entries[it.first].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+        DayOfWeek.entries[it.first - 1].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
     }
 }
 

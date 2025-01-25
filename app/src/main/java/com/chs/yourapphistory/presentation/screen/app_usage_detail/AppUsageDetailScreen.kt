@@ -330,13 +330,22 @@ fun AppUsageDetailScreen(
             onEvent(
                 AppUsageDetailEvent.OnChangeTargetDate(LocalDate.now())
             )
-        } else {
-            onEvent(
-                AppUsageDetailEvent.OnChangeTargetDate(
-                    state.dateList[datePagerState.currentPage][6 - selectDateIdx]
-                )
-            )
+            return@LaunchedEffect
         }
+
+
+        if (state.dateList[datePagerState.currentPage][6 - selectDateIdx] < state.minDate) {
+            onEvent(
+                AppUsageDetailEvent.OnChangeTargetDate(state.minDate)
+            )
+            return@LaunchedEffect
+        }
+
+        onEvent(
+            AppUsageDetailEvent.OnChangeTargetDate(
+                state.dateList[datePagerState.currentPage][6 - selectDateIdx]
+            )
+        )
     }
 
     LaunchedEffect(appUsedWeekPagerState.isScrollInProgress) {
@@ -418,7 +427,8 @@ fun AppUsageDetailScreen(
                 if (appUsedWeekPagingData[appUsedWeekPagerState.currentPage]!!.first == state.displayWeek)
                     return@async
                 appUsedWeekPagerState.scrollToPage(
-                    appUsedWeekPagingData.itemSnapshotList.map { it!!.first }.indexOf(state.displayWeek)
+                    appUsedWeekPagingData.itemSnapshotList.map { it!!.first }
+                        .indexOf(state.displayWeek)
                 )
             },
             async {
@@ -512,7 +522,11 @@ fun AppUsageDetailScreen(
                 Text(
                     modifier = Modifier
                         .clickable { onEvent(AppUsageDetailEvent.OnChangeViewType) },
-                    text = if (state.isDailyMode) { "주별 보기" } else { "일별 보기" },
+                    text = if (state.isDailyMode) {
+                        "주별 보기"
+                    } else {
+                        "일별 보기"
+                    },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
