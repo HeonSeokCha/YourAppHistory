@@ -761,7 +761,8 @@ fun AppUsageDetailScreen(
                             val item = appUsedWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                    title = "${item.sumOf { it.second }.div(7).convertToRealUsageTime()}/일",
+                                    subTitle = "이번 주 총 ${item.sumOf { it.second }.convertToRealUsageTime()}",
                                     list = item,
                                     convertText = { it.convertToRealUsageTime() }
                                 )
@@ -784,7 +785,8 @@ fun AppUsageDetailScreen(
                             val item = appForegroundWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                                    title = "${item.sumOf { it.second }.div(7).convertToRealUsageTime()}/일",
+                                    subTitle = "이번 주 총 ${item.sumOf { it.second }.convertToRealUsageTime()}",
                                     list = item,
                                     convertText = { it.convertToRealUsageTime() }
                                 )
@@ -807,7 +809,8 @@ fun AppUsageDetailScreen(
                             val item = appNotifyWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "${item.sumOf { it.second }}개",
+                                    title = "알림 ${item.sumOf { it.second }.div(7)}개/일",
+                                    subTitle = "이번 주 총 알림 ${item.sumOf { it.second }}개",
                                     list = item,
                                     convertText = { "${it}개" }
                                 )
@@ -830,9 +833,10 @@ fun AppUsageDetailScreen(
                             val item = appLaunchWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "${item.sumOf { it.second }}개",
+                                    title = "앱 실행 ${item.sumOf { it.second }.div(7)}회/일",
+                                    subTitle = "이번 주 총 앱 실행 ${item.sumOf { it.second }}회",
                                     list = item,
-                                    convertText = { "${it}개" }
+                                    convertText = { "${it}번" }
                                 )
                             }
                         }

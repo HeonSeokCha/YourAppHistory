@@ -12,7 +12,9 @@ import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
+import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
 import com.chs.yourapphistory.data.paging.GetPagingForegroundList
 import com.chs.yourapphistory.data.paging.GetPagingLaunchList
 import com.chs.yourapphistory.data.paging.GetPagingNotifyList
@@ -42,7 +44,8 @@ class AppRepositoryImpl @Inject constructor(
     private val appUsageDao: AppUsageDao,
     private val appInfoDao: AppInfoDao,
     private val appForegroundUsageDao: AppForegroundUsageDao,
-    private val appNotifyInfoDao: AppNotifyInfoDao
+    private val appNotifyInfoDao: AppNotifyInfoDao,
+    private val usageStateEventDao: UsageStateEventDao
 ) : AppRepository {
 
     private val mutex: Mutex by lazy { Mutex() }
@@ -100,7 +103,21 @@ class AppRepositoryImpl @Inject constructor(
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+
             withContext(Dispatchers.IO) {
+                val usageStateEvent = async(Dispatchers.IO) {
+                    usageStateEventDao.upsert(
+                        *rangeList.map {
+                            UsageStateEventEntity(
+                                packageName = it.packageName,
+                                className = it.className,
+                                eventTime = it.eventTime,
+                                eventType = it.eventType
+                            )
+                        }.toTypedArray()
+                    )
+                }
+
                 val appUsageInsert = async(Dispatchers.IO) {
                     appUsageDao.upsert(
                         *applicationInfoSource.getAppUsageInfoList(
@@ -133,7 +150,7 @@ class AppRepositoryImpl @Inject constructor(
                         ).toTypedArray()
                     )
                 }
-                awaitAll(appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
+                awaitAll(usageStateEvent, appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
             }
         }
     }

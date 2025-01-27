@@ -1,10 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.common
 
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -19,13 +15,11 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextLayoutResult
@@ -39,8 +33,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.convert24HourString
-import com.chs.yourapphistory.common.convertBetweenHourString
 import com.chs.yourapphistory.common.convertDayString
 import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.launch
@@ -193,6 +185,7 @@ fun ItemWeeklyChart(
 @Composable
 fun WeeklyUsageChart(
     title: String,
+    subTitle: String,
     list: List<Pair<String, Int>>,
     convertText: (Int) -> String
 ) {
@@ -208,7 +201,20 @@ fun WeeklyUsageChart(
                     start = 8.dp
                 ),
             text = title,
-            fontSize = 16.sp,
+            fontSize = 18.sp,
+            fontWeight = FontWeight.Bold
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Text(
+            modifier = Modifier
+                .padding(
+                    top = 8.dp,
+                    start = 8.dp
+                ),
+            text = subTitle,
+            fontSize = 14.sp,
             fontWeight = FontWeight.Bold
         )
 
@@ -304,6 +310,7 @@ private fun PreViewUsageChart2() {
 
     WeeklyUsageChart(
         title = "TEST",
+        subTitle = "",
         list = usageMap,
         convertText = { a -> "$a 개" }
     )

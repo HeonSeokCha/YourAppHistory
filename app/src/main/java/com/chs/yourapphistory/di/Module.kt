@@ -8,6 +8,7 @@ import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
+import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -49,6 +50,11 @@ object Module {
     @Provides
     fun provideAppNotifyInfoDao(db: YourAppHistoryDatabase): AppNotifyInfoDao {
         return db.appNotifyInfoDao
+    }
+
+    @Provides
+    fun provideUsageStateDao(db: YourAppHistoryDatabase): UsageStateEventDao {
+        return db.usageStateEventDao
     }
 
     @Singleton

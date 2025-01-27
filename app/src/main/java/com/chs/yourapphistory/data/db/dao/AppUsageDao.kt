@@ -83,7 +83,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
           "FROM appUsage " +
          "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
            "AND packageName = :packageName " +
-         "GROUP BY unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) "
+         "GROUP BY date(beginUseTime / 1000, 'unixepoch', 'localtime') "
     )
     abstract suspend fun getWeeklyAppLaunchInfo(
         beginDate: Long,

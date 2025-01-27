@@ -42,7 +42,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
           "FROM appNotifyInfo " +
          "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
            "AND packageName = :packageName " +
-         "GROUP BY unixepoch(date(notifyTime / 1000, 'unixepoch', 'localtime'))"
+         "GROUP BY date(notifyTime / 1000, 'unixepoch', 'localtime')"
     )
     abstract suspend fun getWeeklyNotifyCount(
         beginDate: Long,

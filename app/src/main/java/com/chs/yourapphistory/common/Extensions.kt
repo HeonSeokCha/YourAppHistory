@@ -76,25 +76,25 @@ fun Int.convertToRealUsageTime(): String {
     return when {
         hour != 0 -> {
             if (minutes != 0) {
-                String.format("%02d시간 %02d분", hour, minutes)
+                String.format("%d시간 %d분", hour, minutes)
             } else {
-                String.format("%02d시간", hour, minutes)
+                String.format("%d시간", hour, minutes)
             }
         }
 
         minutes != 0 -> {
             if (second != 0) {
-                String.format("%02d분 %02d초", minutes, second)
+                String.format("%d분 %d초", minutes, second)
             } else {
-                String.format("%02d분", minutes, second)
+                String.format("%d분", minutes, second)
             }
         }
 
         else -> {
             if (second == 0) {
-                String.format("%01d초", second)
+                String.format("%d초", second)
             } else {
-                String.format("%02d초", second)
+                String.format("%d초", second)
             }
         }
     }
