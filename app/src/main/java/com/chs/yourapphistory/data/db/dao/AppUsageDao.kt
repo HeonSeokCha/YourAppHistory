@@ -10,12 +10,6 @@ import kotlinx.coroutines.flow.Flow
 @Dao
 abstract class AppUsageDao : BaseDao<AppUsageEntity> {
 
-    @Query("SELECT IFNULL(MIN(beginUseTime), 0) FROM appUsage")
-    abstract suspend fun getFirstCollectTime(): Long
-
-    @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appUsage")
-    abstract suspend fun getLastEventTime(): Long
-
     @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteUsageInfo(packageNames: List<String>)
 

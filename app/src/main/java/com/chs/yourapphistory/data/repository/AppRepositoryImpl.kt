@@ -52,11 +52,7 @@ class AppRepositoryImpl @Inject constructor(
 
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
-            awaitAll(
-                async { appUsageDao.getLastEventTime() },
-                async { appNotifyInfoDao.getLastEventTime() },
-                async { appForegroundUsageDao.getLastEventTime() }
-            ).min().run {
+            usageStateEventDao.getFirstEventTime().run  {
                 if (this == 0L) {
                     LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).atStartOfDayToMillis()
                 } else this
@@ -94,12 +90,11 @@ class AppRepositoryImpl @Inject constructor(
 
         appInfoDao.delete(*removePackageList.toTypedArray())
         appUsageDao.deleteUsageInfo(removePackageList.map { it.packageName })
-
     }
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-            withContext(Dispatchers.IO) { appUsageDao.deleteAllUsageInfo() }
+//            withContext(Dispatchers.IO) { appUsageDao.deleteAllUsageInfo() }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
@@ -156,7 +151,7 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate: LocalDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -169,7 +164,7 @@ class AppRepositoryImpl @Inject constructor(
 
 
     override suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate: LocalDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -181,7 +176,7 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
+        val minDate: LocalDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -193,7 +188,7 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate: LocalDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -208,7 +203,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -225,7 +220,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -242,7 +237,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -259,7 +254,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -276,7 +271,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
-        val minDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -293,7 +288,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
-        val minDate = appForegroundUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -310,7 +305,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
-        val minDate = appUsageDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -327,7 +322,7 @@ class AppRepositoryImpl @Inject constructor(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
-        val minDate = appNotifyInfoDao.getFirstCollectTime().toLocalDate()
+        val minDate = usageStateEventDao.getFirstEventTime().toLocalDate()
         return Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
@@ -347,14 +342,6 @@ class AppRepositoryImpl @Inject constructor(
     }
 
     override suspend fun getMinDate(): LocalDate {
-        return withContext(Dispatchers.IO) {
-            awaitAll(
-                async { appUsageDao.getFirstCollectTime() },
-                async { appForegroundUsageDao.getFirstCollectTime() },
-                async { appNotifyInfoDao.getFirstCollectTime() },
-            )
-                .min()
-                .toLocalDate()
-        }
+        return usageStateEventDao.getFirstEventTime().toLocalDate()
     }
 }

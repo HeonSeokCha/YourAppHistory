@@ -410,7 +410,7 @@ fun AppUsageDetailScreen(
         if (state.weekList[weekPagerState.currentPage].min() > state.displayWeek.max()) {
             launch {
                 weekPagerState.scrollToPage(weekPagerState.currentPage + 1)
-                selectWeekIdx = 5
+                selectWeekIdx = state.weekList[weekPagerState.currentPage + 1].count() - 1
             }
         }
 
@@ -463,15 +463,16 @@ fun AppUsageDetailScreen(
 
     LaunchedEffect(weekPagerState.isScrollInProgress) {
         if (state.weekList.isEmpty()) return@LaunchedEffect
+        val idx = state.weekList[weekPagerState.currentPage].count() - 1 - selectWeekIdx
 
-        if (state.displayWeek.max() == state.dateList[datePagerState.currentPage][4 - selectWeekIdx])
+        if (state.displayWeek.max() == state.dateList[datePagerState.currentPage][idx])
             return@LaunchedEffect
 
         if (weekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         onEvent(
             AppUsageDetailEvent.OnChangeTargetWeek(
-                state.weekList[weekPagerState.currentPage][4 - selectWeekIdx]
+                state.weekList[weekPagerState.currentPage][idx]
             )
         )
     }
