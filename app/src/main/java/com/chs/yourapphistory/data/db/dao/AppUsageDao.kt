@@ -30,7 +30,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
           "FROM appInfo " +
           "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
            "AND appInfo.packageName = appUsage.packageName " +
-         "GROUP BY appInfo.packageName"
+         "GROUP BY appInfo.packageName " +
+         "ORDER BY cnt DESC, appInfo.label ASC"
     )
     abstract suspend fun getDayAppLaunchInfo(
         targetDate: Long

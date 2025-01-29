@@ -262,9 +262,21 @@ internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String
         }
     }
 
-    list.forEach {
-        usageMap.computeIfPresent(it.key.toLocalDate().dayOfWeek.value) { key, value ->
-            value + it.value.toList().sumOf { it.second - it.first }.toInt()
+    list.forEach { mapInfo ->
+        val targetDate: LocalDate = mapInfo.key.toLocalDate()
+
+        usageMap.computeIfPresent(mapInfo.key.toLocalDate().dayOfWeek.value) { _, value ->
+            value + mapInfo.value.toList().sumOf {
+                val (beginTim, endTime) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
+                if (targetDate.dayOfMonth != beginTim.dayOfMonth) {
+                    return@sumOf targetDate.atStartOfDayToMillis() - it.first
+                }
+
+                if (targetDate.dayOfMonth != endTime.dayOfMonth) {
+                    return@sumOf it.second - targetDate.atStartOfDayToMillis()
+                }
+                it.second - it.first
+            }.toInt()
         }
     }
 
@@ -272,6 +284,7 @@ internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String
         DayOfWeek.entries[it.first - 1].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
     }
 }
+
 @JvmName("calcDayUsedFromLaunch")
 internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
@@ -314,10 +327,14 @@ fun List<LocalDate>.toDisplayYearDate(): String {
         if (this.min().monthValue == this.max().monthValue) {
             "${this.min().format(Constants.DATE_FORMAT)}~${this.max().dayOfMonth}일"
         } else {
-            "${this.min().format(Constants.DATE_FORMAT)} ~ ${this.max().format(Constants.DATE_FORMAT)}"
+            "${this.min().format(Constants.DATE_FORMAT)} ~ ${
+                this.max().format(Constants.DATE_FORMAT)
+            }"
         }
     } else {
-        "${this.min().format(Constants.YEAR_DATE_FORMAT)} ~ ${this.max().format(Constants.YEAR_DATE_FORMAT)}"
+        "${this.min().format(Constants.YEAR_DATE_FORMAT)} ~ ${
+            this.max().format(Constants.YEAR_DATE_FORMAT)
+        }"
     }
 }
 
