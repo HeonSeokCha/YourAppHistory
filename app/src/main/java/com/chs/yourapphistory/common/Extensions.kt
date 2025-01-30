@@ -263,18 +263,18 @@ internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String
     }
 
     list.forEach { mapInfo ->
-        val targetDate: LocalDate = mapInfo.key.toLocalDate()
+//        val targetDate: LocalDate = mapInfo.key.toLocalDate()
 
         usageMap.computeIfPresent(mapInfo.key.toLocalDate().dayOfWeek.value) { _, value ->
             value + mapInfo.value.toList().sumOf {
-                val (beginTim, endTime) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
-                if (targetDate.dayOfMonth != beginTim.dayOfMonth) {
-                    return@sumOf targetDate.atStartOfDayToMillis() - it.first
-                }
-
-                if (targetDate.dayOfMonth != endTime.dayOfMonth) {
-                    return@sumOf it.second - targetDate.atStartOfDayToMillis()
-                }
+//                val (beginTim, endTime) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
+//                if (targetDate.dayOfMonth != beginTim.dayOfMonth) {
+//                    return@sumOf targetDate.atStartOfDayToMillis() - it.first
+//                }
+//
+//                if (targetDate.dayOfMonth != endTime.dayOfMonth) {
+//                    return@sumOf it.second - targetDate.atStartOfDayToMillis()
+//                }
                 it.second - it.first
             }.toInt()
         }
@@ -355,4 +355,11 @@ fun LocalDate.reverseDateUntilWeek(targetDate: LocalDate): List<LocalDate> {
 
 fun LocalDate.getYearOfWeek(): Int {
     return this.get(WeekFields.of(Locale.KOREA).weekOfYear())
+}
+
+fun Int.divideDayOfWeek(): Int {
+    val a = if (LocalDate.now().dayOfWeek == DayOfWeek.SUNDAY) {
+        1
+    } else LocalDate.now().dayOfWeek.value + 1
+    return this.div(a)
 }
