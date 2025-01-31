@@ -44,22 +44,22 @@ interface AppRepository {
     suspend fun getWeeklyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
     suspend fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
     suspend fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
     suspend fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 

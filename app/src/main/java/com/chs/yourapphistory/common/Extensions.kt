@@ -252,7 +252,10 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
 }
 
 @JvmName("calcDayUsedFromUsage")
-internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String, Int>> {
+internal fun calcDayUsedList(
+    dateRangeList: List<LocalDate>,
+    list: Map<Long, Map<Long, Long>>
+): List<Pair<LocalDate, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
             put(7, 0)
@@ -280,13 +283,16 @@ internal fun calcDayUsedList(list: Map<Long, Map<Long, Long>>): List<Pair<String
         }
     }
 
-    return usageMap.toList().map {
-        DayOfWeek.entries[it.first - 1].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+    return dateRangeList.reversed().map {
+        it to usageMap[it.dayOfWeek.value]!!
     }
 }
 
 @JvmName("calcDayUsedFromLaunch")
-internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
+internal fun calcDayUsedList(
+    dateRangeList: List<LocalDate>,
+    list: Map<Long, Int>
+): List<Pair<LocalDate, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
             put(7, 0)
@@ -302,8 +308,8 @@ internal fun calcDayUsedList(list: Map<Long, Int>): List<Pair<String, Int>> {
         }
     }
 
-    return usageMap.toList().map {
-        DayOfWeek.entries[it.first - 1].getDisplayName(TextStyle.SHORT, Locale.KOREA) to it.second
+    return dateRangeList.reversed().map {
+        it to usageMap[it.dayOfWeek.value]!!
     }
 }
 
@@ -362,4 +368,9 @@ fun Int.divideDayOfWeek(): Int {
         1
     } else LocalDate.now().dayOfWeek.value + 1
     return this.div(a)
+}
+
+
+fun LocalDate.toConvertDisplayDay(): String {
+    return this.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREA)
 }

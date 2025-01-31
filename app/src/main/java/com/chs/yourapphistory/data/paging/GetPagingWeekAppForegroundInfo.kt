@@ -18,8 +18,8 @@ class GetPagingWeekAppForegroundInfo(
     private val targetDate: LocalDate,
     private val packageName: String,
     private val dao: AppForegroundUsageDao
-) : PagingSource<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>>): LocalDate? {
+) : PagingSource<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>() {
+    override fun getRefreshKey(state: PagingState<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
             page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
@@ -27,7 +27,7 @@ class GetPagingWeekAppForegroundInfo(
     }
 
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>> {
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>> {
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -45,7 +45,8 @@ class GetPagingWeekAppForegroundInfo(
             .map {
                 val dateRangeList = it
                 dateRangeList to calcDayUsedList(
-                    dao.getWeeklyForegroundUsedList(
+                    dateRangeList = dateRangeList,
+                    list = dao.getWeeklyForegroundUsedList(
                         beginDate = dateRangeList.min().atStartOfDayToMillis(),
                         endDate = dateRangeList.max().atEndOfDayToMillis(),
                         packageName = packageName

@@ -16,8 +16,8 @@ data class AppUsageDetailState(
     val pagingDailyForegroundUsedInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
     val pagingDailyNotifyInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
     val pagingDailyLaunchInfo: Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>? = null,
-    val pagingWeeklyUsedInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>? = null,
-    val pagingWeeklyForegroundInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>? = null,
-    val pagingWeeklyNotifyInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>? = null,
-    val pagingWeeklyLaunchInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>>? = null,
+    val pagingWeeklyUsedInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>? = null,
+    val pagingWeeklyForegroundInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>? = null,
+    val pagingWeeklyNotifyInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>? = null,
+    val pagingWeeklyLaunchInfo: Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>? = null,
 )

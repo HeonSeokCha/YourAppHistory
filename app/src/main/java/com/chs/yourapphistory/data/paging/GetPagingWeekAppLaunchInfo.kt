@@ -7,26 +7,23 @@ import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
 import com.chs.yourapphistory.common.reverseDateUntilWeek
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import java.time.LocalDate
-import java.time.format.TextStyle
-import java.util.Locale
 
 class GetPagingWeekAppLaunchInfo(
     private val minDate: LocalDate,
     private val targetDate: LocalDate,
     private val packageName: String,
     private val dao: AppUsageDao
-) : PagingSource<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>>): LocalDate? {
+) : PagingSource<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>() {
+    override fun getRefreshKey(state: PagingState<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
             page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<List<LocalDate>, List<Pair<String, Int>>>> {
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>> {
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -44,7 +41,8 @@ class GetPagingWeekAppLaunchInfo(
             .map {
                 val dateRangeList = it
                 dateRangeList to calcDayUsedList(
-                    dao.getWeeklyAppLaunchInfo(
+                    dateRangeList = dateRangeList,
+                    list = dao.getWeeklyAppLaunchInfo(
                         beginDate = dateRangeList.min().atStartOfDayToMillis(),
                         endDate = dateRangeList.max().atEndOfDayToMillis(),
                         packageName = packageName

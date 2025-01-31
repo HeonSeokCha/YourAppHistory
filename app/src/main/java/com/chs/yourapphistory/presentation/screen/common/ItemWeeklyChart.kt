@@ -35,14 +35,16 @@ import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertDayString
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.toConvertDisplayDay
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
+import java.time.LocalDate
 import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
 fun ItemWeeklyChart(
-    weekUsageList: List<Pair<String, Int>>,
+    weekUsageList: List<Pair<LocalDate, Int>>,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -148,13 +150,13 @@ fun ItemWeeklyChart(
             )
 
             val textResult = textMeasurer.measure(
-                text = weekUsageList[info.idx].first,
+                text = weekUsageList[info.idx].first.toConvertDisplayDay(),
                 style = style1
             )
             val textRectPadding = (distance.times(info.idx)) + (textResult.size.width) + (smallPadding * 3)
             drawText(
                 textMeasurer = textMeasurer,
-                text = weekUsageList[info.idx].first,
+                text = weekUsageList[info.idx].first.toConvertDisplayDay(),
                 topLeft = Offset(
                     x = textRectPadding,
                     y = chartAreaBottom
@@ -186,7 +188,7 @@ fun ItemWeeklyChart(
 fun WeeklyUsageChart(
     title: String,
     subTitle: String,
-    list: List<Pair<String, Int>>,
+    list: List<Pair<LocalDate, Int>>,
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
@@ -292,17 +294,13 @@ fun WeeklyUsageChart(
 @Preview
 @Composable
 private fun PreViewUsageChart2() {
-    val usageMap = object : HashMap<String, Int>() {
+    val usageMap = object : HashMap<LocalDate, Int>() {
         init {
-            for (i in 0..6) {
+            repeat(6) {
                 put(
-                    DayOfWeek.entries.sortedBy { it.value }[i].getDisplayName(
-                        java.time.format.TextStyle.SHORT,
-                        Locale.KOREAN
-                    ),
-                    i * 2 + 1
+                    LocalDate.now().minusDays(it.toLong()),
+                    it * 2 + 1
                 )
-
             }
         }
     }.toList()

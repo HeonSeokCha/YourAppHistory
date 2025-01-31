@@ -12,7 +12,7 @@ class GetPagingWeeklyForegroundUseCase @Inject constructor(
     suspend operator fun invoke(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<String, Int>>>>> {
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> {
         return repository.getWeeklyPagingAppForegroundInfo(
             packageName = packageName,
             targetDate = targetDate
