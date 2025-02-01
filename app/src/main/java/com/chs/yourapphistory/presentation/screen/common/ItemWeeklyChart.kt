@@ -31,6 +31,7 @@ import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertDayString
@@ -223,7 +224,7 @@ fun WeeklyUsageChart(
         Spacer(modifier = Modifier.height(8.dp))
 
         ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
-            val selectDayValue: String = selectedBar.idx.convertDayString()
+            val selectDayValue: String = list[selectedBar.idx].first.format(Constants.DATE_FORMAT)
             val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
                 selectDayValue,
                 TextStyle(
@@ -231,7 +232,6 @@ fun WeeklyUsageChart(
                     color = Color.Black
                 ),
             )
-
 
             val selectValue = convertText(selectedBar.value)
             val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
