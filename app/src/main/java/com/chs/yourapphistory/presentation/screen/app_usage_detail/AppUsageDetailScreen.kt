@@ -27,7 +27,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -763,9 +767,17 @@ fun AppUsageDetailScreen(
                             val item = appUsedWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "${item.sumOf { it.second }
-                                        .divideDayOfWeek().convertToRealUsageTime()}/일",
-                                    subTitle = "이번 주 총 ${item.sumOf { it.second }.convertToRealUsageTime()}",
+                                    title = "${
+                                        item.sumOf { it.second }
+                                            .divideDayOfWeek().convertToRealUsageTime()
+                                    }/일",
+                                    subTitle = buildAnnotatedString {
+                                        append("이번 주 총 ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(item.sumOf { it.second }
+                                                .convertToRealUsageTime())
+                                        }
+                                    },
                                     list = item,
                                     convertText = { it.convertToRealUsageTime() }
                                 )
@@ -788,9 +800,17 @@ fun AppUsageDetailScreen(
                             val item = appForegroundWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "${item.sumOf { it.second }
-                                        .divideDayOfWeek().convertToRealUsageTime()}/일",
-                                    subTitle = "이번 주 총 ${item.sumOf { it.second }.convertToRealUsageTime()}",
+                                    title = "${
+                                        item.sumOf { it.second }
+                                            .divideDayOfWeek().convertToRealUsageTime()
+                                    }/일",
+                                    subTitle = buildAnnotatedString {
+                                        append("이번 주 총 ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(item.sumOf { it.second }
+                                                .convertToRealUsageTime())
+                                        }
+                                    },
                                     list = item,
                                     convertText = { it.convertToRealUsageTime() }
                                 )
@@ -813,9 +833,17 @@ fun AppUsageDetailScreen(
                             val item = appNotifyWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "알림 ${item.sumOf { it.second }
-                                        .divideDayOfWeek()}개/일",
-                                    subTitle = "이번 주 총 알림 ${item.sumOf { it.second }}개",
+                                    title = "알림 ${
+                                        item.sumOf { it.second }
+                                            .divideDayOfWeek()
+                                    }개/일",
+                                    subTitle = buildAnnotatedString {
+                                        append("이번 주 총 알림 ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(item.sumOf { it.second }.toString())
+                                        }
+                                        append("개")
+                                    },
                                     list = item,
                                     convertText = { "${it}개" }
                                 )
@@ -838,9 +866,17 @@ fun AppUsageDetailScreen(
                             val item = appLaunchWeekPagingData[page]?.second
                             if (item != null) {
                                 WeeklyUsageChart(
-                                    title = "앱 실행 ${item.sumOf { it.second }
-                                        .divideDayOfWeek()}회/일",
-                                    subTitle = "이번 주 총 앱 실행 ${item.sumOf { it.second }}회",
+                                    title = "앱 실행 ${
+                                        item.sumOf { it.second }
+                                            .divideDayOfWeek()
+                                    }회/일",
+                                    subTitle = buildAnnotatedString {
+                                        append("이번 주 총 앱 실행 ")
+                                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                                            append(item.sumOf { it.second }.toString())
+                                        }
+                                        append("회")
+                                    },
                                     list = item,
                                     convertText = { "${it}번" }
                                 )

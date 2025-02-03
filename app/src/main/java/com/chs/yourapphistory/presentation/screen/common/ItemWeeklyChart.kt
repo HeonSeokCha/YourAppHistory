@@ -22,9 +22,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
@@ -188,7 +190,7 @@ fun ItemWeeklyChart(
 @Composable
 fun WeeklyUsageChart(
     title: String,
-    subTitle: String,
+    subTitle: AnnotatedString,
     list: List<Pair<LocalDate, Int>>,
     convertText: (Int) -> String
 ) {
@@ -217,8 +219,7 @@ fun WeeklyUsageChart(
                     start = 8.dp
                 ),
             text = subTitle,
-            fontSize = 14.sp,
-            fontWeight = FontWeight.Bold
+            fontSize = 14.sp
         )
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -251,7 +252,7 @@ fun WeeklyUsageChart(
                 color = barColor,
                 topLeft = Offset(
                     textRectPadding,
-                    0f
+                    -21f
                 ),
                 size = Size(
                     totalWidth + 12.dp.toPx(),
@@ -269,7 +270,7 @@ fun WeeklyUsageChart(
                 ),
                 topLeft = Offset(
                     textRectPadding + 20f,
-                    12f
+                    -9f
                 )
             )
 
@@ -283,7 +284,7 @@ fun WeeklyUsageChart(
                 ),
                 topLeft = Offset(
                     textRectPadding + 20f + selectTimeMeasurer.size.width.toFloat(),
-                    6f
+                    -15f
                 )
             )
         }
@@ -308,7 +309,7 @@ private fun PreViewUsageChart2() {
 
     WeeklyUsageChart(
         title = "TEST",
-        subTitle = "",
+        subTitle = buildAnnotatedString { append("") },
         list = usageMap,
         convertText = { a -> "$a 개" }
     )
