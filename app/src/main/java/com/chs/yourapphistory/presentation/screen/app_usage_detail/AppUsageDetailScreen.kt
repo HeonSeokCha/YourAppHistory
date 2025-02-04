@@ -769,17 +769,17 @@ fun AppUsageDetailScreen(
                                 WeeklyUsageChart(
                                     title = "${
                                         item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageTime()
+                                            .divideDayOfWeek().convertToRealUsageMinutes()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append(item.sumOf { it.second }
-                                                .convertToRealUsageTime())
+                                                .convertToRealUsageMinutes())
                                         }
                                     },
                                     list = item,
-                                    convertText = { it.convertToRealUsageTime() }
+                                    convertText = { it.convertToRealUsageMinutes() }
                                 )
                             }
                         }
@@ -802,17 +802,17 @@ fun AppUsageDetailScreen(
                                 WeeklyUsageChart(
                                     title = "${
                                         item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageTime()
+                                            .divideDayOfWeek().convertToRealUsageMinutes()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append(item.sumOf { it.second }
-                                                .convertToRealUsageTime())
+                                                .convertToRealUsageMinutes())
                                         }
                                     },
                                     list = item,
-                                    convertText = { it.convertToRealUsageTime() }
+                                    convertText = { it.convertToRealUsageMinutes() }
                                 )
                             }
                         }

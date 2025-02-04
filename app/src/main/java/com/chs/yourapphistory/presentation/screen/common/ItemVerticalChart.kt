@@ -28,12 +28,15 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -72,7 +75,9 @@ fun ItemDailyChart(
 
     val basePadding = textMeasurer
         .measure(
-            text = 0.convert24HourString(true), style = style1 ).size
+            text = 0.convert24HourString(true),
+            style = style1
+        ).size
         .width
         .div(2)
         .toFloat()
@@ -119,7 +124,10 @@ fun ItemDailyChart(
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
-                    end = Offset(size.width - basePadding.div(2), ((size.height / 3) * it) + topBasePadding)
+                    end = Offset(
+                        size.width - basePadding.div(2),
+                        ((size.height / 3) * it) + topBasePadding
+                    )
                 )
             }
         }
@@ -154,6 +162,7 @@ fun ItemDailyChart(
                     "(시)" -> {
                         size.width - (textResult.size.width + 42f)
                     }
+
                     else -> {
                         size.width.div(4).times(time.toInt() / 6) - textResult.size.width.div(2)
                     }
@@ -215,38 +224,36 @@ fun DailyUsageChart(
         Spacer(modifier = Modifier.height(8.dp))
 
         ItemDailyChart(hourUsageList = list) { textMeasurer, selectedBar ->
-            val selectTimZoneValue: String = selectedBar.idx.convertBetweenHourString()
-            val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
-                selectTimZoneValue,
-                TextStyle(
-                    fontSize = 12.sp,
-                    color = Color.Black
-                ),
-            )
 
 
-            val selectValue = convertText(selectedBar.value)
-            val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
-                selectValue,
-                TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-            )
-            val totalWidth: Float =
-                (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
+            val selectValue = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontSize = 12.sp)) {
+                    append(selectedBar.idx.convertBetweenHourString() + " ")
+                }
 
-            val textRectPadding = selectedBar.xStart - ((totalWidth.div(24)) * selectedBar.idx)
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(convertText(selectedBar.value))
+                }
+            }
+
+            val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(selectValue)
+
+            val textRectPadding =
+                selectedBar.xStart - ((selectValueMeasurer.size.width.div(24)) * selectedBar.idx)
 
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
                     textRectPadding,
-                    0f
+                    -21f
                 ),
                 size = Size(
-                    totalWidth + 12.dp.toPx(),
+                    selectValueMeasurer.size.width + 12.dp.toPx(),
                     selectValueMeasurer.size.height.toFloat() + 21f
                 ),
                 cornerRadius = CornerRadius(50f)
@@ -254,31 +261,14 @@ fun DailyUsageChart(
 
             drawText(
                 textMeasurer = textMeasurer,
-                text = selectTimZoneValue,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = Color.Black
-                ),
+                text = selectValue,
                 topLeft = Offset(
                     textRectPadding + 20f,
-                    12f
-                )
-            )
-
-            drawText(
-                textMeasurer = textMeasurer,
-                text = selectValue,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-                topLeft = Offset(
-                    textRectPadding + 20f + selectTimeMeasurer.size.width.toFloat(),
-                    6f
+                    -9f
                 )
             )
         }
+
         Spacer(modifier = Modifier.height(16.dp))
     }
 }

@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextLayoutResult
 import androidx.compose.ui.text.TextMeasurer
 import androidx.compose.ui.text.TextStyle
@@ -30,9 +31,11 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.room.util.appendPlaceholders
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.chsLog
@@ -141,11 +144,10 @@ fun ItemWeeklyChart(
         barAreas.forEachIndexed { idx, info ->
             val barHeight = info.value.times(scale).toFloat()
 
-            chsLog(distance.times(idx).toString())
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = distance.times(info.idx) + barWidth + smallPadding.times(2),
+                    x = distance.times(idx) + barWidth + smallPadding.times(2),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -153,13 +155,13 @@ fun ItemWeeklyChart(
             )
 
             val textResult = textMeasurer.measure(
-                text = weekUsageList[info.idx].first.toConvertDisplayDay(),
+                text = weekUsageList[idx].first.toConvertDisplayDay(),
                 style = style1
             )
-            val textRectPadding = (distance.times(info.idx)) + (textResult.size.width) + (smallPadding * 3)
+            val textRectPadding = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 3)
             drawText(
                 textMeasurer = textMeasurer,
-                text = weekUsageList[info.idx].first.toConvertDisplayDay(),
+                text = weekUsageList[idx].first.toConvertDisplayDay(),
                 topLeft = Offset(
                     x = textRectPadding,
                     y = chartAreaBottom
@@ -225,26 +227,25 @@ fun WeeklyUsageChart(
         Spacer(modifier = Modifier.height(8.dp))
 
         ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
-            val selectDayValue: String = list[selectedBar.idx].first.format(Constants.DATE_FORMAT)
-            val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(
-                selectDayValue,
-                TextStyle(
-                    fontSize = 12.sp,
-                    color = Color.Black
-                ),
-            )
+            val selectDateValue = buildAnnotatedString {
+                withStyle(style = SpanStyle(fontSize = 12.sp)) {
+                    append(list[selectedBar.idx].first.format(Constants.DATE_FORMAT) + " ")
+                }
 
-            val selectValue = convertText(selectedBar.value)
-            val selectValueMeasurer: TextLayoutResult = textMeasurer.measure(
-                selectValue,
-                TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-            )
+                withStyle(
+                    style = SpanStyle(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp
+                    )
+                ) {
+                    append(convertText(selectedBar.value))
+                }
+            }
+
+            val selectTimeMeasurer: TextLayoutResult = textMeasurer.measure(selectDateValue)
+
             val totalWidth: Float =
-                (selectTimeMeasurer.size.width + selectValueMeasurer.size.width).toFloat()
+                (selectTimeMeasurer.size.width).toFloat()
 
             val textRectPadding = selectedBar.xStart - ((totalWidth.div(7)) * selectedBar.idx)
 
@@ -255,36 +256,18 @@ fun WeeklyUsageChart(
                     -21f
                 ),
                 size = Size(
-                    totalWidth + 12.dp.toPx(),
-                    selectValueMeasurer.size.height.toFloat() + 21f
+                    selectTimeMeasurer.size.width + 12.dp.toPx(),
+                    selectTimeMeasurer.size.height.toFloat() + 21f
                 ),
                 cornerRadius = CornerRadius(50f)
             )
 
             drawText(
                 textMeasurer = textMeasurer,
-                text = selectDayValue,
-                style = TextStyle(
-                    fontSize = 12.sp,
-                    color = Color.Black
-                ),
+                text = selectDateValue,
                 topLeft = Offset(
                     textRectPadding + 20f,
                     -9f
-                )
-            )
-
-            drawText(
-                textMeasurer = textMeasurer,
-                text = selectValue,
-                style = TextStyle(
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = Color.Black
-                ),
-                topLeft = Offset(
-                    textRectPadding + 20f + selectTimeMeasurer.size.width.toFloat(),
-                    -15f
                 )
             )
         }
