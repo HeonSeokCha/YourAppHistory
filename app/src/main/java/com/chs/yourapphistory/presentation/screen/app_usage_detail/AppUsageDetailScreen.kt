@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.divideDayOfWeek
@@ -769,17 +770,17 @@ fun AppUsageDetailScreen(
                                 WeeklyUsageChart(
                                     title = "${
                                         item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageMinutes()
+                                            .divideDayOfWeek().convertToRealUsageHour()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append(item.sumOf { it.second }
-                                                .convertToRealUsageMinutes())
+                                                .convertToRealUsageHour())
                                         }
                                     },
                                     list = item,
-                                    convertText = { it.convertToRealUsageMinutes() }
+                                    convertText = { it.convertToRealUsageHour() }
                                 )
                             }
                         }
@@ -802,17 +803,17 @@ fun AppUsageDetailScreen(
                                 WeeklyUsageChart(
                                     title = "${
                                         item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageMinutes()
+                                            .divideDayOfWeek().convertToRealUsageHour()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
                                         withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
                                             append(item.sumOf { it.second }
-                                                .convertToRealUsageMinutes())
+                                                .convertToRealUsageHour())
                                         }
                                     },
                                     list = item,
-                                    convertText = { it.convertToRealUsageMinutes() }
+                                    convertText = { it.convertToRealUsageHour() }
                                 )
                             }
                         }

@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.common
 
+import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
@@ -68,6 +69,17 @@ fun Int.convertToRealUsageMinutes(): String {
     return "${(this / 1000) / 60}분"
 }
 
+@SuppressLint("DefaultLocale")
+fun Int.convertToRealUsageHour(): String {
+    val hour: Int = (this / 1000) / 60 / 60 % 24
+    val minutes: Int = (this / 1000) / 60 % 60
+
+    if (hour == 0) return this.convertToRealUsageMinutes()
+
+    return String.format("%d시간 %d분", hour, minutes)
+}
+
+@SuppressLint("DefaultLocale")
 fun Int.convertToRealUsageTime(): String {
     val hour: Int = (this / 1000) / 60 / 60 % 24
     val minutes: Int = (this / 1000) / 60 % 60
@@ -115,10 +127,6 @@ fun Long.toLocalDateTime(): LocalDateTime {
 
 fun Long.toLocalDate(): LocalDate {
     return Instant.ofEpochMilli(this).atZone(ZoneId.systemDefault()).toLocalDate()
-}
-
-fun Long.getDayOfMonth(): Int {
-    return this.toLocalDate().dayOfMonth
 }
 
 fun LocalDate.atStartOfDayToMillis(): Long {
