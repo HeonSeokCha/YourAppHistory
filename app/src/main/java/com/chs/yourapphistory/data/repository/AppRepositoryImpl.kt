@@ -1,6 +1,8 @@
 package com.chs.yourapphistory.data.repository
 
 import android.graphics.Bitmap
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.Preferences
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
@@ -28,6 +30,7 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppForegroundInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppLaunchInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
+import com.chs.yourapphistory.data.workmanager.DataStoreSource
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
@@ -47,7 +50,8 @@ class AppRepositoryImpl @Inject constructor(
     private val appInfoDao: AppInfoDao,
     private val appForegroundUsageDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
-    private val usageStateEventDao: UsageStateEventDao
+    private val usageStateEventDao: UsageStateEventDao,
+    private val dataStoreSource: DataStoreSource
 ) : AppRepository {
 
     private val mutex: Mutex by lazy { Mutex() }
@@ -101,7 +105,6 @@ class AppRepositoryImpl @Inject constructor(
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
 
-            chsLog(LocalDateTime.now().toString())
             withContext(Dispatchers.IO) {
                 val usageStateEvent = async(Dispatchers.IO) {
                     usageStateEventDao.upsert(
@@ -150,7 +153,6 @@ class AppRepositoryImpl @Inject constructor(
                 }
                 awaitAll(usageStateEvent, appUsageInsert, appForegroundUsageInsert, appNotifyInfoUpsert)
             }
-            chsLog(LocalDateTime.now().toString())
         }
     }
 
@@ -165,7 +167,6 @@ class AppRepositoryImpl @Inject constructor(
             )
         }.flow
     }
-
 
     override suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         val minDate: LocalDate = usageStateEventDao.getFirstEventTime().toLocalDate()

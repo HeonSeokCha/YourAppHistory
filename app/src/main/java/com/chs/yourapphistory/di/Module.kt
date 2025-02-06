@@ -1,7 +1,12 @@
 package com.chs.yourapphistory.di
 
 import android.content.Context
+import androidx.datastore.core.DataStore
+import androidx.datastore.preferences.core.PreferenceDataStoreFactory
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.work.WorkManager
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.YourAppHistoryDatabase
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -9,6 +14,7 @@ import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
+import com.chs.yourapphistory.data.workmanager.DataStoreSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,6 +36,20 @@ object Module {
     @Provides
     fun provideDatabase(@ApplicationContext context: Context): YourAppHistoryDatabase {
         return YourAppHistoryDatabase.getInstance(context)
+    }
+
+    @Singleton
+    @Provides
+    fun provideDataStorePref(@ApplicationContext context: Context): DataStore<Preferences> {
+        return PreferenceDataStoreFactory.create {
+            context.preferencesDataStoreFile(Constants.PREF_NAME)
+        }
+    }
+
+    @Singleton
+    @Provides
+    fun provideDataStoreSource(dataStorePref: DataStore<Preferences>): DataStoreSource {
+        return DataStoreSource(dataStorePref)
     }
 
     @Provides

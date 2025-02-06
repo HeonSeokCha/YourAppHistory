@@ -18,6 +18,7 @@ object Constants {
     const val TEXT_TITLE_PREVIEW: String = "Title Preview"
     const val NUMBER_LOADING_COUNT: Int = 6
     const val TAG_WORKER_NAME: String = "app_worker"
+    const val PREF_NAME: String = "YourAppPref"
 
     val APP_USAGE_EVENT_FILTER = listOf(
         UsageEvents.Event.ACTIVITY_RESUMED,

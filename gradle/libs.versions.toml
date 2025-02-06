@@ -29,6 +29,7 @@ androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling
 androidX-navigation-compose = "androidx.navigation:navigation-compose:2.8.6"
 androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
 androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
+androidX-datastore-preferences ="androidx.datastore:datastore-preferences:1.1.2"
 
 androidX-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -49,6 +50,9 @@ workmanager = "androidx.work:work-runtime-ktx:2.10.0"
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
 kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
+
+## DataStore
+
 
 
 

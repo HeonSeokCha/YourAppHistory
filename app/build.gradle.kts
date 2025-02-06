@@ -67,7 +67,9 @@ dependencies {
 
     implementation(libs.lottie)
     implementation(libs.kotlin.serialization)
-    
+
+    implementation(libs.androidX.datastore.preferences)
+
     ksp(libs.hilt.compiler)
     ksp(libs.androidX.room.compiler)
     ksp(libs.hilt.worker.compiler)
