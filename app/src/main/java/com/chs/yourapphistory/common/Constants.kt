@@ -1,6 +1,8 @@
 package com.chs.yourapphistory.common
 
 import android.app.usage.UsageEvents
+import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.longPreferencesKey
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppEvent
 import java.time.format.DateTimeFormatter
 
@@ -19,6 +21,7 @@ object Constants {
     const val NUMBER_LOADING_COUNT: Int = 6
     const val TAG_WORKER_NAME: String = "app_worker"
     const val PREF_NAME: String = "YourAppPref"
+    val PREF_KEY_FIRST_DATE: Preferences.Key<Long> = longPreferencesKey("first_date")
 
     val APP_USAGE_EVENT_FILTER = listOf(
         UsageEvents.Event.ACTIVITY_RESUMED,

@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.data.workmanager
+package com.chs.yourapphistory.data
 
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences

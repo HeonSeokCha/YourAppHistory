@@ -14,7 +14,7 @@ import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
-import com.chs.yourapphistory.data.workmanager.DataStoreSource
+import com.chs.yourapphistory.data.DataStoreSource
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
