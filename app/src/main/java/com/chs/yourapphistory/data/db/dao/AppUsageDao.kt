@@ -53,8 +53,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         "SELECT beginUseTime " +
           "FROM appUsage " +
          "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND packageName = :packageName"
-    )
+           "AND packageName = :packageName" )
     abstract suspend fun getDayPackageLaunchInfo(
         targetDate: Long,
         packageName: String
@@ -88,4 +87,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
 
     @Query("DELETE FROM appUsage")
     abstract suspend fun deleteAllUsageInfo()
+
+    @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appUsage")
+    abstract suspend fun getLastTime(): Long
 }

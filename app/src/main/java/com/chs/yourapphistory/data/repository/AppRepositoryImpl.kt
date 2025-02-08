@@ -56,11 +56,15 @@ class AppRepositoryImpl @Inject constructor(
 
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
-            usageStateEventDao.getLastEventTime().run {
-                if (this == 0L) {
-                    LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).atStartOfDayToMillis()
-                } else this
-            }
+            awaitAll(
+                async { appUsageDao.getLastTime() },
+                async { appForegroundUsageDao.getLastTime() },
+                async { appNotifyInfoDao.getLastTime() }
+            ).min()
+        }.run {
+            if (this == 0L) {
+                LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).atStartOfDayToMillis()
+            } else this
         }
     }
 

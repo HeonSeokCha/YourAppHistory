@@ -44,4 +44,6 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
         packageName: String,
     ): Map<@MapColumn("beginDate") Long, @MapColumn("cnt") Int>
 
+    @Query("SELECT IFNULL(MAX(notifyTime), 0) FROM appNotifyInfo")
+    abstract suspend fun getLastTime(): Long
 }
