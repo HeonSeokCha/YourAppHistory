@@ -16,6 +16,7 @@ import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
 import java.util.stream.Collectors
+import kotlin.time.Duration.Companion.days
 import kotlin.time.Duration.Companion.hours
 
 fun Int.convert24HourString(isShowAMPM: Boolean): String {
@@ -50,6 +51,7 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
         val (begin, end) = it.first to it.second
 
         if (targetDate.dayOfMonth > begin.dayOfMonth) {
+            if (targetDate.dayOfMonth != end.dayOfMonth) return@sumOf 0
             return@sumOf end.toMillis() - targetDate.atStartOfDayToMillis()
         }
 
@@ -182,8 +184,18 @@ internal fun calcHourUsageList(
 
         if (targetDate.dayOfMonth < end.dayOfMonth) {
             val targetDateZeroHour = targetDate.atStartOfDay()
+            if (begin.dayOfMonth < targetDate.dayOfMonth) {
+                usageMap.keys.forEach {
+                    usageMap.computeIfPresent(it) { _, value ->
+                        1.hours.inWholeMilliseconds
+                    }
+                }
+
+                return@forEach
+            }
+
             for (i in begin.hour..23) {
-                usageMap.computeIfPresent(i) { key, value ->
+                usageMap.computeIfPresent(i) { _, value ->
                     val calc = if (i == begin.hour) {
                         targetDateZeroHour.plusHours(i + 1L).toMillis() - begin.toMillis()
                     } else {

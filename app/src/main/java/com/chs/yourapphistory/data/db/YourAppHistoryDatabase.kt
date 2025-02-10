@@ -24,7 +24,7 @@ import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
         UsageStateEventEntity::class
     ],
     version = 1,
-    exportSchema = false,
+    exportSchema = true,
 )
 abstract class YourAppHistoryDatabase : RoomDatabase() {
     abstract val appUsageDao: AppUsageDao

@@ -21,8 +21,8 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query(
         "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
-          "LEFT JOIN appForegroundUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
+          "LEFT JOIN appForegroundUsage ON (date(beginUseTime / 1000, 'unixepoch', 'localtime') <= date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND date(endUseTime / 1000, 'unixepoch', 'localtime') >= date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND appInfo.packageName = appForegroundUsage.packageName "
     )
     abstract suspend fun getDayForegroundUsedList(
@@ -45,8 +45,8 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query(
         "SELECT beginUseTime, endUseTime " +
           "FROM appForegroundUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
+         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') <= date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+           "AND date(endUseTime / 1000, 'unixepoch', 'localtime')>= date(:targetDate / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName "
     )
     abstract suspend fun getForegroundUsageInfo(
