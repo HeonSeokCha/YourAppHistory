@@ -37,13 +37,6 @@ fun Int.convertBetweenHourString(): String {
             (this + 1).convert24HourString(false) + " "
 }
 
-fun Int.convertDayString(): String {
-    val idx = if (this == 0) 6 else this - 1
-    return DayOfWeek.entries[idx].getDisplayName(
-        TextStyle.SHORT, Locale.KOREAN
-    )
-}
-
 fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
     return this.map {
         it.key.toLocalDateTime() to it.value.toLocalDateTime()
@@ -83,7 +76,7 @@ fun Int.convertToRealUsageHour(): String {
 
 @SuppressLint("DefaultLocale")
 fun Int.convertToRealUsageTime(): String {
-    val hour: Int = (this / 1000) / 60 / 60 % 24
+    val hour: Int = (this / 1000) / 60 / 60
     val minutes: Int = (this / 1000) / 60 % 60
     val second: Int = (this / 1000) % 60
 

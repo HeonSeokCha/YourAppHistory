@@ -181,6 +181,9 @@ class ApplicationInfoSource @Inject constructor(
 //            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(1)) {
 //                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
 //            }
+            if (usageEvent.eventTime == 1739161362040) {
+                chsLog("")
+            }
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -225,9 +228,25 @@ class ApplicationInfoSource @Inject constructor(
                 UsageEvents.Event.ACTIVITY_STOPPED -> {
                     if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
+                    if (usageEvent.packageName != prevPackageName) {
+                        inCompletedUsageList.filter {
+                            it.key != usageEvent.packageName
+                                    && it.value.first.endUseTime != 0L
+                                    && it.value.second > 1
+                        }.forEach {
+                            chsLog(it.value.first.toString())
+                            completedUsageList.add(it.value.first)
+                            inCompletedUsageList.remove(it.key)
+                        }
+                    }
+
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
-                            first = if ((usageEvent.packageName != prevPackageName || value.second == 1)
+                            first = if (
+                                (
+                                    (usageEvent.packageName != prevPackageName || usageEvent.className != prevClassName)
+                                        || value.second == 1
+                                )
                                 && value.first.endUseTime.isZero()
                             ) {
                                 value.first.copy(endUseTime = usageEvent.eventTime)

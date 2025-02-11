@@ -35,11 +35,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.room.util.appendPlaceholders
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calculateScale
-import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.convertDayString
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import kotlinx.coroutines.launch
@@ -86,7 +83,6 @@ fun ItemWeeklyChart(
         .toFloat()
 
     val barAreas = weekUsageList.mapIndexed { idx, pair ->
-        chsLog(distance.times(idx).toString())
         BarArea(
             idx = idx,
             value = pair.second,
