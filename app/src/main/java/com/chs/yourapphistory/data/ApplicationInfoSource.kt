@@ -181,7 +181,7 @@ class ApplicationInfoSource @Inject constructor(
 //            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(1)) {
 //                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
 //            }
-            if (usageEvent.eventTime == 1739161362040) {
+            if (usageEvent.eventTime == 1739320073109) {
                 chsLog("")
             }
 
@@ -291,6 +291,8 @@ class ApplicationInfoSource @Inject constructor(
                         && usageEvent.packageName == prevPackageName
                         && usageEvent.className != prevClassName
                     ) {
+                        prevClassName = null
+                        prevPackageName = null
                         continue
                     }
 
@@ -298,6 +300,8 @@ class ApplicationInfoSource @Inject constructor(
                         && usageEvent.packageName == prevPackageName
                         && usageEvent.className != prevClassName
                     ) {
+                        prevClassName = null
+                        prevPackageName = null
                         continue
                     }
 
@@ -305,14 +309,23 @@ class ApplicationInfoSource @Inject constructor(
                         && usageEvent.packageName == prevPackageName
                         && usageEvent.className == prevClassName
                     ) {
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second == 1
+
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 1
                             && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
                         ) {
                             completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                             inCompletedUsageList.remove(usageEvent.packageName)
                         }
+
+                        prevClassName = null
+                        prevPackageName = null
                         continue
                     }
+
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
+                        && prevClassName == null
+                        && prevPackageName == null
+                        ) continue
 
                     completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                     inCompletedUsageList.remove(usageEvent.packageName)
