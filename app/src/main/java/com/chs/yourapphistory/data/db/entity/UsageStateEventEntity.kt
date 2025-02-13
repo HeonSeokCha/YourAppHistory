@@ -5,7 +5,7 @@ import androidx.room.Index
 
 @Entity(
     tableName = "usageStateEvent",
-    primaryKeys = ["packageName", "eventTime"],
+    primaryKeys = ["packageName", "eventTime", "eventType"],
     indices = [
         Index(
             value = ["eventTime"],
