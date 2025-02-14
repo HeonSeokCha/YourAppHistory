@@ -178,7 +178,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739411860783) {
+            if (usageEvent.eventTime == 1739320050330) {
                 chsLog("11")
             }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
@@ -230,7 +230,7 @@ class ApplicationInfoSource @Inject constructor(
                         inCompletedUsageList.filter {
                             it.key != usageEvent.packageName
                                     && it.value.first.endUseTime != 0L
-                                    && it.value.second > 1
+                                    && it.value.second > 2
                         }.forEach {
                             chsLog(it.value.first.toString())
                             completedUsageList.add(it.value.first)
@@ -254,55 +254,41 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     if (isScreenOff) {
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
-                            && usageEvent.packageName == prevPackageName
-                            && usageEvent.className != prevClassName
-                        ) {
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
+                            if (usageEvent.packageName == prevPackageName
+                                && usageEvent.className != prevClassName
+                            ) {
+                                continue
+                            }
+
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
                             continue
                         }
+
+                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
+                            continue
+                        }
+
+                        continue
+                    }
+
+                    if (usageEvent.packageName == prevPackageName) {
+
+                        if (usageEvent.className != prevClassName) continue
 
                         if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
+
+                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 1
+                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
+                            ) {
+                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                                inCompletedUsageList.remove(usageEvent.packageName)
+                            }
                             continue
                         }
-
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                            && usageEvent.packageName == prevPackageName
-                        ) {
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
-                            continue
-                        }
-
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0
-                            && usageEvent.packageName != prevPackageName
-                        ) {
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
-                            continue
-                        }
-                        continue
-                    }
-
-
-                    if (usageEvent.packageName == prevPackageName
-                            && usageEvent.className != prevClassName
-                        ) {
-                        continue
-                    }
-
-                    if (inCompletedUsageList[usageEvent.packageName]!!.second > 0
-                        && usageEvent.packageName == prevPackageName
-                    ) {
-
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 1
-                            && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
-                        ) {
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
-                        }
-                        continue
                     }
 
                     completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
