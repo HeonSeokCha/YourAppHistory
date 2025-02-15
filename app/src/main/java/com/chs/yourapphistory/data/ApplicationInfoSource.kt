@@ -173,12 +173,13 @@ class ApplicationInfoSource @Inject constructor(
     ): List<AppUsageEntity> {
         var prevPackageName: String? = null
         var prevClassName: String? = null
-        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, Int>> = hashMapOf()
+        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, HashSet<String?>>> =
+            hashMapOf()
         var isScreenOff: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739320050330) {
+            if (usageEvent.eventTime == 1739597823459) {
                 chsLog("11")
             }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
@@ -191,13 +192,13 @@ class ApplicationInfoSource @Inject constructor(
                                 AppUsageEntity(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
-                                ) to 1
+                                ) to hashSetOf(usageEvent.className)
 
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
                                     first = value.first.copy(endUseTime = 0L),
-                                    second = value.second + 1
+                                    second = value.second.apply { this.add(usageEvent.className) }
                                 )
                             }
                         }
@@ -207,6 +208,8 @@ class ApplicationInfoSource @Inject constructor(
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
+                    if (inCompletedUsageList[usageEvent.packageName] == null) continue
+
                     if (prevPackageName != null && usageEvent.packageName != prevPackageName) {
                         if (inCompletedUsageList[prevPackageName] != null
                             && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L
@@ -215,8 +218,6 @@ class ApplicationInfoSource @Inject constructor(
                             inCompletedUsageList.remove(prevPackageName)
                         }
                     }
-
-                    if (inCompletedUsageList[usageEvent.packageName] == null) continue
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
@@ -229,8 +230,9 @@ class ApplicationInfoSource @Inject constructor(
                     if (usageEvent.packageName != prevPackageName) {
                         inCompletedUsageList.filter {
                             it.key != usageEvent.packageName
+                                    && it.key != prevPackageName
                                     && it.value.first.endUseTime != 0L
-                                    && it.value.second > 2
+                                    && it.value.second.isEmpty()
                         }.forEach {
                             chsLog(it.value.first.toString())
                             completedUsageList.add(it.value.first)
@@ -239,60 +241,38 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        value.copy(
-                            first = if (
-                                (
-                                        (usageEvent.packageName != prevPackageName || usageEvent.className != prevClassName)
-                                                || value.second == 1
-                                        )
-                                && value.first.endUseTime.isZero()
-                            ) {
-                                value.first.copy(endUseTime = usageEvent.eventTime)
-                            } else value.first,
-                            second = value.second - 1
-                        )
+                        if (value.first.endUseTime.isZero()) {
+                            value.copy(
+                                first = value.first.copy(endUseTime = usageEvent.eventTime),
+                                second = value.second.apply {
+                                    this.remove(usageEvent.className)
+                                }
+                            )
+                        } else {
+                            value.copy(
+                                second = value.second.apply {
+                                    this.remove(usageEvent.className)
+                                }
+                            )
+                        }
                     }
 
                     if (isScreenOff) {
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
-                            if (usageEvent.packageName == prevPackageName
-                                && usageEvent.className != prevClassName
-                            ) {
-                                continue
-                            }
-
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
+                        if (usageEvent.packageName == prevPackageName
+                            && usageEvent.className != prevClassName
+                        ) {
                             continue
                         }
 
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second <= 0) {
-                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                            inCompletedUsageList.remove(usageEvent.packageName)
-                            continue
-                        }
-
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
                         continue
                     }
 
-                    if (usageEvent.packageName == prevPackageName) {
-
-                        if (usageEvent.className != prevClassName) continue
-
-                        if (inCompletedUsageList[usageEvent.packageName]!!.second > 0) {
-
-                            if (inCompletedUsageList[usageEvent.packageName]!!.second <= 1
-                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime != 0L
-                            ) {
-                                completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                                inCompletedUsageList.remove(usageEvent.packageName)
-                            }
-                            continue
-                        }
+                    if (inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()) {
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
                     }
-
-                    completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-                    inCompletedUsageList.remove(usageEvent.packageName)
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
