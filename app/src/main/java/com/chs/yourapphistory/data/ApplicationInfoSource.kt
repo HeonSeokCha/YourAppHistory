@@ -173,13 +173,13 @@ class ApplicationInfoSource @Inject constructor(
     ): List<AppUsageEntity> {
         var prevPackageName: String? = null
         var prevClassName: String? = null
-        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, HashSet<String?>>> =
+        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, ArrayList<String?>>> =
             hashMapOf()
         var isScreenOff: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739597823459) {
+            if (usageEvent.eventTime == 1739277731855) {
                 chsLog("11")
             }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
@@ -192,13 +192,23 @@ class ApplicationInfoSource @Inject constructor(
                                 AppUsageEntity(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
-                                ) to hashSetOf(usageEvent.className)
+                                ) to arrayListOf(usageEvent.className)
 
+//                            inCompletedUsageList.filter {
+//                                it.key != usageEvent.packageName
+//                                        && it.value.first.endUseTime != 0L
+//                                        && it.value.second.isNotEmpty()
+//                            }.forEach {
+//                                completedUsageList.add(it.value.first)
+//                                inCompletedUsageList.remove(it.key)
+//                            }
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
                                     first = value.first.copy(endUseTime = 0L),
-                                    second = value.second.apply { this.add(usageEvent.className) }
+                                    second = value.second.apply {
+                                        this.add(usageEvent.className)
+                                    }
                                 )
                             }
                         }
@@ -272,6 +282,13 @@ class ApplicationInfoSource @Inject constructor(
                     if (inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()) {
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
+                    } else {
+                        if (usageEvent.packageName != prevPackageName
+                            && usageEvent.className != prevClassName
+                        ) {
+                            completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                            inCompletedUsageList.remove(usageEvent.packageName)
+                        }
                     }
                 }
 
