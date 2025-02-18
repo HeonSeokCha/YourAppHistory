@@ -179,7 +179,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739277731855) {
+            if (usageEvent.eventTime == 1739777087556) {
                 chsLog("11")
             }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
@@ -193,21 +193,16 @@ class ApplicationInfoSource @Inject constructor(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
                                 ) to arrayListOf(usageEvent.className)
-
-//                            inCompletedUsageList.filter {
-//                                it.key != usageEvent.packageName
-//                                        && it.value.first.endUseTime != 0L
-//                                        && it.value.second.isNotEmpty()
-//                            }.forEach {
-//                                completedUsageList.add(it.value.first)
-//                                inCompletedUsageList.remove(it.key)
-//                            }
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
                                     first = value.first.copy(endUseTime = 0L),
                                     second = value.second.apply {
-                                        this.add(usageEvent.className)
+                                        if (this.none { it == usageEvent.className }) {
+                                            if (usageEvent.packageName == prevPackageName) {
+                                                this.add(usageEvent.className)
+                                            }
+                                        }
                                     }
                                 )
                             }
@@ -280,6 +275,7 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     if (inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()) {
+                        if (usageEvent.packageName == prevPackageName && usageEvent.className == prevClassName) continue
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     } else {
