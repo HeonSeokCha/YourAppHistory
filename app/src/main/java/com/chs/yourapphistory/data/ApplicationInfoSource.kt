@@ -179,7 +179,7 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739777087556) {
+            if (usageEvent.eventTime == 1739949234866) {
                 chsLog("11")
             }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
@@ -226,6 +226,12 @@ class ApplicationInfoSource @Inject constructor(
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
+                    }
+
+
+                    if (isScreenOff) {
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
                     }
                 }
 

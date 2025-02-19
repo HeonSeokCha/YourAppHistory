@@ -19,9 +19,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.chs.yourapphistory.R
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.getUsagePermission
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -38,10 +40,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val navController: NavHostController = rememberNavController()
-            var selectPackage: String? by remember { mutableStateOf(null) }
+            val selectPackageLabel: String? by viewModel.selectPackageLabel.collectAsStateWithLifecycle()
+
             Scaffold(
                 topBar = {
-                    if (selectPackage == null) {
+                    if (selectPackageLabel == null) {
                         TopAppBar(
                             title = {
                                 Text(text = getString(R.string.app_name))
@@ -53,12 +56,12 @@ class MainActivity : ComponentActivity() {
                         )
                     } else {
                         TopAppBar(
-                            title = { Text(text = selectPackage!!) },
+                            title = { Text(text = selectPackageLabel!!) },
                             navigationIcon = {
                                 IconButton(
                                     onClick = {
                                         navController.navigateUp()
-                                        selectPackage = null
+                                        viewModel.changeSelectPackageName(null)
                                     }
                                 ) {
                                     Icon(
@@ -81,7 +84,7 @@ class MainActivity : ComponentActivity() {
                     paddingValues = it,
                     isGrantPermission = getUsagePermission(this)
                 ) { packageLabel ->
-                    selectPackage = packageLabel
+                    viewModel.changeSelectPackageName(packageLabel)
                 }
             }
         }
