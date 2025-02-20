@@ -245,7 +245,6 @@ class ApplicationInfoSource @Inject constructor(
                                     && it.value.first.endUseTime != 0L
                                     && it.value.second.isEmpty()
                         }.forEach {
-                            chsLog(it.value.first.toString())
                             completedUsageList.add(it.value.first)
                             inCompletedUsageList.remove(it.key)
                         }
@@ -296,6 +295,13 @@ class ApplicationInfoSource @Inject constructor(
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
                     isScreenOff = true
+                    inCompletedUsageList.filter {
+                        it.value.first.endUseTime != 0L
+                                && it.value.second.isEmpty()
+                    }.forEach {
+                        completedUsageList.add(it.value.first)
+                        inCompletedUsageList.remove(it.key)
+                    }
                 }
 
                 UsageEvents.Event.SCREEN_INTERACTIVE -> {

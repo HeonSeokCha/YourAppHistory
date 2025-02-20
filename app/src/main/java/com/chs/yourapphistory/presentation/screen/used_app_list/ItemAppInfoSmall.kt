@@ -52,11 +52,14 @@ fun ItemAppInfoSmall(
     val value = usedAppInfo?.second
 
     Card(
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.primary
-        ),
         modifier = Modifier
             .padding(4.dp)
+            .clickable {
+                if (appInfo != null) { clickAble(appInfo) }
+            },
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primary
+        )
     ) {
         Row(
             modifier = Modifier
@@ -64,14 +67,10 @@ fun ItemAppInfoSmall(
                 .padding(
                     vertical = 8.dp,
                     horizontal = 12.dp
-                )
-                .clickable {
-                    if (appInfo != null) { clickAble(appInfo) }
-                },
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Row(
                 verticalAlignment = Alignment.CenterVertically
             ) {
