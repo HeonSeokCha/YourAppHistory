@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime

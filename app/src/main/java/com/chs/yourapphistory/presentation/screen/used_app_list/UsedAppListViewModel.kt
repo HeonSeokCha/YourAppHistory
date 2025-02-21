@@ -69,6 +69,12 @@ class UsedAppListViewModel @Inject constructor(
                 getEventList(option)
             }
 
+            is UsedAppEvent.ChangeLoadingInfo -> {
+                _state.update {
+                    it.copy(isLoading = false)
+                }
+            }
+
             else -> Unit
         }
     }

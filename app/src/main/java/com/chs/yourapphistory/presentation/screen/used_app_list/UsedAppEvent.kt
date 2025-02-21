@@ -16,4 +16,6 @@ sealed interface UsedAppEvent {
     ) : UsedAppEvent
 
     data object RefreshAppUsageInfo : UsedAppEvent
+
+    data object ChangeLoadingInfo : UsedAppEvent
 }

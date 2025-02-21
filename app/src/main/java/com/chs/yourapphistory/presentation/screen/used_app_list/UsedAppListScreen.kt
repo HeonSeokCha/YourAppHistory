@@ -99,13 +99,13 @@ fun UsedAppListScreenScreen(
                 modifier = Modifier
                     .padding(bottom = 4.dp)
                     .placeholder(
-                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                        visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
-                text = if (pagingData == null || pagingData.loadState.refresh == LoadState.Loading) {
+                text = if (state.isLoading) {
                     Constants.TEXT_TITLE_PREVIEW
                 } else {
-                    pagingData[pagerState.currentPage]?.first.run {
+                    pagingData!![pagerState.currentPage]?.first.run {
                         if (this == LocalDate.now()) {
                             "오늘"
                         } else this.toString()
@@ -121,7 +121,7 @@ fun UsedAppListScreenScreen(
                         filterDialogShow = true
                     }
                     .placeholder(
-                        visible = pagingData == null || pagingData.loadState.refresh == LoadState.Loading,
+                        visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
                 text = state.sortOption.name,
@@ -129,20 +129,20 @@ fun UsedAppListScreenScreen(
                 fontSize = 18.sp
             )
 
-
             if (pagingData != null) {
+
                 HorizontalPager(
                     modifier = Modifier.fillMaxSize(),
                     state = pagerState,
                     reverseLayout = true,
                     userScrollEnabled = true,
-                    key = pagingData.itemKey { it.first }
                 ) { page ->
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        val packageList = pagingData[page]!!.second
+
+                        val packageList = pagingData!![page]!!.second
                         items(
                             count = packageList.size,
                             key = { packageList[it].first.packageName }
@@ -161,51 +161,27 @@ fun UsedAppListScreenScreen(
                                 )
                             }
                         }
+                    }
+                }
 
-                        when (pagingData.loadState.refresh) {
-                            is LoadState.Loading -> {
-                                items(10) {
-                                    ItemAppInfoSmall(null, null) { }
-                                }
-                            }
+                when (pagingData.loadState.refresh) {
+                    is LoadState.Loading -> Unit
 
-                            is LoadState.Error -> {
-                                item {
-                                    Text(
-                                        text = (pagingData.loadState.refresh as LoadState.Error)
-                                            .error.message.toString()
-                                    )
-                                }
-                            }
+                    is LoadState.Error -> {
+                        onEvent(UsedAppEvent.ChangeLoadingInfo)
+                    }
 
-                            else -> {
-                                if (pagingData.itemCount == 0) {
-                                    item {
-                                        Text(text = "No Result.")
-                                    }
-                                }
-                            }
-                        }
-
-
-                        when (pagingData.loadState.append) {
-                            is LoadState.Loading -> {
-                                items(10) {
-                                    ItemAppInfoSmall(null, null) { }
-                                }
-                            }
-
-                            is LoadState.Error -> {
-                                item {
-                                    Text(
-                                        text = (pagingData.loadState.append as LoadState.Error)
-                                            .error.message.toString()
-                                    )
-                                }
-                            }
-
-                            else -> Unit
-                        }
+                    else -> {
+                        onEvent(UsedAppEvent.ChangeLoadingInfo)
+                    }
+                }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(10) {
+                        ItemAppInfoSmall(null, null) { }
                     }
                 }
             }
@@ -220,9 +196,6 @@ fun UsedAppListScreenScreen(
             onDismiss = {
                 filterDialogShow = false
             }, onClick = { selectSortType ->
-                coroutineScope.launch {
-                    pagerState.scrollToPage(0)
-                }
                 onEvent(selectSortType)
             }
         )

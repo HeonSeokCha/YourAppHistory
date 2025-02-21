@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
 data class UsedAppListState(
+    val isLoading: Boolean = true,
     val appInfoList: Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>? = null,
     val appIconList: HashMap<String, Bitmap?> = hashMapOf(),
     val sortList: List<UsedAppEvent.GetUsageEvent> = Constants.USAGE_EVENT_TYPE_LIST,
