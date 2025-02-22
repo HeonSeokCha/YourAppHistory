@@ -1,6 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import com.chs.yourapphistory.domain.model.AppInfo
+import java.time.LocalDate
 
 sealed interface UsedAppEvent {
     sealed class GetUsageEvent(val name: String): UsedAppEvent {
@@ -16,6 +17,8 @@ sealed interface UsedAppEvent {
     ) : UsedAppEvent
 
     data object RefreshAppUsageInfo : UsedAppEvent
+
+    data class ChangeDate(val date: LocalDate) : UsedAppEvent
 
     data object ChangeLoadingInfo : UsedAppEvent
 }

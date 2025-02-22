@@ -14,6 +14,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -78,6 +79,25 @@ fun UsedAppListScreenScreen(
     val coroutineScope = rememberCoroutineScope()
     var isRefreshing by remember { mutableStateOf(false) }
 
+    if (pagingData != null) {
+        when (pagingData.loadState.refresh) {
+            is LoadState.Loading -> Unit
+
+            is LoadState.Error -> { onEvent(UsedAppEvent.ChangeLoadingInfo) }
+
+            else -> { onEvent(UsedAppEvent.ChangeLoadingInfo) }
+        }
+
+        LaunchedEffect(pagerState.currentPage) {
+            if (pagingData.itemCount != 0) {
+                onEvent(
+                    UsedAppEvent.ChangeDate(pagingData[pagerState.currentPage]!!.first)
+                )
+            }
+        }
+    }
+
+
     ItemPullToRefreshBox(
         isRefreshing = isRefreshing,
         onRefresh = {
@@ -105,11 +125,7 @@ fun UsedAppListScreenScreen(
                 text = if (state.isLoading) {
                     Constants.TEXT_TITLE_PREVIEW
                 } else {
-                    pagingData!![pagerState.currentPage]?.first.run {
-                        if (this == LocalDate.now()) {
-                            "오늘"
-                        } else this.toString()
-                    }
+                    state.displayDate
                 },
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp
@@ -129,19 +145,27 @@ fun UsedAppListScreenScreen(
                 fontSize = 18.sp
             )
 
-            if (pagingData != null) {
-
+            if (state.isLoading) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    items(10) {
+                        ItemAppInfoSmall(null, null) { }
+                    }
+                }
+            } else {
                 HorizontalPager(
                     modifier = Modifier.fillMaxSize(),
                     state = pagerState,
                     reverseLayout = true,
                     userScrollEnabled = true,
+                    key = pagingData?.itemKey { it.first }
                 ) { page ->
                     LazyColumn(
                         modifier = Modifier.fillMaxSize(),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-
                         val packageList = pagingData!![page]!!.second
                         items(
                             count = packageList.size,
@@ -164,26 +188,7 @@ fun UsedAppListScreenScreen(
                     }
                 }
 
-                when (pagingData.loadState.refresh) {
-                    is LoadState.Loading -> Unit
 
-                    is LoadState.Error -> {
-                        onEvent(UsedAppEvent.ChangeLoadingInfo)
-                    }
-
-                    else -> {
-                        onEvent(UsedAppEvent.ChangeLoadingInfo)
-                    }
-                }
-            } else {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    items(10) {
-                        ItemAppInfoSmall(null, null) { }
-                    }
-                }
             }
         }
     }

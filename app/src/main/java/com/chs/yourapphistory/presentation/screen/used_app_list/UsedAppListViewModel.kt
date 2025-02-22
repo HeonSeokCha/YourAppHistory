@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
@@ -21,6 +22,7 @@ import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -59,7 +61,8 @@ class UsedAppListViewModel @Inject constructor(
 
     fun changeEvent(option: UsedAppEvent) {
         when (option) {
-            UsedAppEvent.RefreshAppUsageInfo -> {
+            UsedAppEvent.RefreshAppUsageInfo -> { _state.update { UsedAppListState()
+                }
                 viewModelScope.launch {
                     getApplicationsInfo()
                 }
@@ -72,6 +75,15 @@ class UsedAppListViewModel @Inject constructor(
             is UsedAppEvent.ChangeLoadingInfo -> {
                 _state.update {
                     it.copy(isLoading = false)
+                }
+            }
+
+            is UsedAppEvent.ChangeDate -> {
+                _state.update {
+                    it.copy(
+                        displayDate = if (option.date == LocalDate.now()) "오늘"
+                        else option.date.toString()
+                    )
                 }
             }
 
