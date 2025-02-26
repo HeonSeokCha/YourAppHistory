@@ -32,7 +32,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     ): List<Long>
 
     @Query(
-        "SELECT unixepoch(date(notifyTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, COUNT(notifyTime) as cnt " +
+        "SELECT date(notifyTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(notifyTime) as cnt " +
           "FROM appNotifyInfo " +
          "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
            "AND packageName = :packageName " +
@@ -42,7 +42,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
         beginDate: Long,
         endDate: Long,
         packageName: String,
-    ): Map<@MapColumn("beginDate") Long, @MapColumn("cnt") Int>
+    ): Map<@MapColumn("beginDate") String, @MapColumn("cnt") Int>
 
     @Query("SELECT IFNULL(MAX(notifyTime), 0) FROM appNotifyInfo")
     abstract suspend fun getLastTime(): Long

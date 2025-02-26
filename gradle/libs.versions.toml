@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.8.0"
+androidGradlePlugin = "8.8.1"
 
 compileSdkVersion = "35"
 minSdkVersion = "29"
@@ -13,9 +13,9 @@ lifecycle = "2.8.7"
 room = "2.6.1"
 hilt = "2.55"
 kotlin = "2.1.10"
-ksp = "2.1.10-1.0.29"
+ksp = "2.1.10-1.0.30"
 kotlin-coroutine = "1.10.1"
-desugar_jdk_libs = "2.1.4"
+desugar_jdk_libs = "2.1.5"
 
 [libraries]
 # AndroidX

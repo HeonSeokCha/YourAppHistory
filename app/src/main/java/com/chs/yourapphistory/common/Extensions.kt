@@ -12,6 +12,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
@@ -267,7 +268,7 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
 @JvmName("calcDayUsedFromUsage")
 internal fun calcDayUsedList(
     dateRangeList: List<LocalDate>,
-    list: Map<Long, Map<Long, Long>>
+    list: Map<String, Map<Long, Long>>
 ): List<Pair<LocalDate, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
@@ -280,8 +281,9 @@ internal fun calcDayUsedList(
 
     list.forEach { mapInfo ->
 //        val targetDate: LocalDate = mapInfo.key.toLocalDate()
+        val date = LocalDate.parse(mapInfo.key, DateTimeFormatter.ISO_LOCAL_DATE)
 
-        usageMap.computeIfPresent(mapInfo.key.toLocalDate().dayOfWeek.value) { _, value ->
+        usageMap.computeIfPresent(date.dayOfWeek.value) { _, value ->
             value + mapInfo.value.toList().sumOf {
 //                val (beginTim, endTime) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
 //                if (targetDate.dayOfMonth != beginTim.dayOfMonth) {
@@ -304,7 +306,7 @@ internal fun calcDayUsedList(
 @JvmName("calcDayUsedFromLaunch")
 internal fun calcDayUsedList(
     dateRangeList: List<LocalDate>,
-    list: Map<Long, Int>
+    list: Map<String, Int>
 ): List<Pair<LocalDate, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
@@ -316,7 +318,8 @@ internal fun calcDayUsedList(
     }
 
     list.forEach {
-        usageMap.computeIfPresent(it.key.toLocalDate().dayOfWeek.value) { key, value ->
+        val date = LocalDate.parse(it.key, DateTimeFormatter.ISO_LOCAL_DATE)
+        usageMap.computeIfPresent(date.dayOfWeek.value) { key, value ->
             value + it.value
         }
     }

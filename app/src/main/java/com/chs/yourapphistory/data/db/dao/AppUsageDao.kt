@@ -60,7 +60,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     ): List<Long>
 
     @Query(
-        "SELECT unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, beginUseTime, endUseTime " +
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
           "FROM appUsage " +
          "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
             "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +
@@ -70,10 +70,10 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         beginDate: Long,
         endDate: Long,
         packageName: String
-    ): Map<@MapColumn("beginDate") Long, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+    ): Map<@MapColumn("beginDate") String, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT unixepoch(date(beginUseTime / 1000, 'unixepoch', 'localtime')) * 1000 as beginDate, COUNT(beginUseTime) as cnt " +
+        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(beginUseTime) as cnt " +
           "FROM appUsage " +
          "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
            "AND packageName = :packageName " +
@@ -83,7 +83,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         beginDate: Long,
         endDate: Long,
         packageName: String
-    ): Map<@MapColumn("beginDate") Long, @MapColumn("cnt") Int>
+    ): Map<@MapColumn("beginDate") String, @MapColumn("cnt") Int>
 
     @Query("DELETE FROM appUsage")
     abstract suspend fun deleteAllUsageInfo()
