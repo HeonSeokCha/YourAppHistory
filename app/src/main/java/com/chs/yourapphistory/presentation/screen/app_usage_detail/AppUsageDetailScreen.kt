@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -218,6 +219,8 @@ fun AppUsageDetailScreen(
 
         if (appUsedPagingData.itemCount == 0) return@LaunchedEffect
 
+        if (appUsedPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+
         onEvent(
             AppUsageDetailEvent.OnChangeTargetDate(
                 appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
@@ -230,6 +233,8 @@ fun AppUsageDetailScreen(
         if (appForegroundUsedPagingData == null) return@LaunchedEffect
 
         if (appForegroundUsedPagingData.itemCount == 0) return@LaunchedEffect
+
+        if (appForegroundPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         onEvent(
             AppUsageDetailEvent.OnChangeTargetDate(
@@ -245,6 +250,8 @@ fun AppUsageDetailScreen(
 
         if (appNotifyPagingData.itemCount == 0) return@LaunchedEffect
 
+        if (appNotifyPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+
         onEvent(
             AppUsageDetailEvent.OnChangeTargetDate(
                 appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
@@ -257,6 +264,8 @@ fun AppUsageDetailScreen(
         if (appLaunchPagingData == null) return@LaunchedEffect
 
         if (appLaunchPagingData.itemCount == 0) return@LaunchedEffect
+
+        if (appLaunchPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         onEvent(
             AppUsageDetailEvent.OnChangeTargetDate(
@@ -325,6 +334,7 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(datePagerState.isScrollInProgress) {
+
         if (state.dateList.isEmpty()) return@LaunchedEffect
 
         if (state.displayDate == state.dateList[datePagerState.currentPage][6 - selectDateIdx])
@@ -484,6 +494,10 @@ fun AppUsageDetailScreen(
     }
 
     BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
+
+    LaunchedEffect(datePagerState.currentPage) {
+        chsLog(datePagerState.currentPage.toString())
+    }
 
     ItemPullToRefreshBox(
         isRefreshing = isRefreshing,
