@@ -33,8 +33,17 @@ class GetPagingDailyAppForegroundInfo(
         }
 
         val data = pageDate.run {
-            if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
-            else this.minusDays(Constants.PAGING_DAY)
+            if (targetDate == LocalDate.now()) {
+                if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
+                else this.minusDays(Constants.PAGING_DAY)
+            } else {
+                if (this == LocalDate.now()) {
+                    targetDate.plusDays(1L)
+                } else {
+                    if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
+                    else this.minusDays(Constants.PAGING_DAY)
+                }
+            }
         }
             .reverseDateUntil(pageDate)
             .map {
