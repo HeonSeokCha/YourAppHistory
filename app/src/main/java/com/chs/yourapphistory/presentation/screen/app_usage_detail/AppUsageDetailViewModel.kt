@@ -43,7 +43,7 @@ class AppUsageDetailViewModel @Inject constructor(
 ) : ViewModel() {
 
     private val _state = MutableStateFlow(AppUsageDetailState())
-    val state = _state .onStart {
+    val state = _state.onStart {
             getDateRangeList()
             getPackageUsageInfo(targetDate)
             changeDate(targetDate)

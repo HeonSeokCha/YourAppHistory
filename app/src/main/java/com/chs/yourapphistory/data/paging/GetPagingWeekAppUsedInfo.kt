@@ -6,6 +6,7 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import java.time.LocalDate
@@ -32,18 +33,11 @@ class GetPagingWeekAppUsedInfo(
             }
         }
 
+        chsLog("$targetDate, $pageDate")
+
         val data = pageDate.run {
-            if (targetDate == LocalDate.now()) {
-                if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-                else this.minusWeeks(Constants.PAGING_WEEK)
-            } else {
-                if (this == LocalDate.now()) {
-                    targetDate.plusDays(1L)
-                } else {
-                    if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-                    else this.minusWeeks(Constants.PAGING_WEEK)
-                }
-            }
+            if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
+            else this.minusWeeks(Constants.PAGING_WEEK)
         }
             .reverseDateUntilWeek(pageDate)
             .chunked(7)
@@ -58,6 +52,8 @@ class GetPagingWeekAppUsedInfo(
                     )
                 )
             }
+
+        chsLog(data.map { it.first }.toString())
 
         return LoadResult.Page(
             prevKey = if (pageDate == LocalDate.now()) {

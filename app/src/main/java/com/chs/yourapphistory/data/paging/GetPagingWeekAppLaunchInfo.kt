@@ -33,17 +33,8 @@ class GetPagingWeekAppLaunchInfo(
         }
 
         val data = pageDate.run {
-            if (targetDate == LocalDate.now()) {
-                if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-                else this.minusWeeks(Constants.PAGING_WEEK)
-            } else {
-                if (this == LocalDate.now()) {
-                    targetDate.plusDays(1L)
-                } else {
-                    if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-                    else this.minusWeeks(Constants.PAGING_WEEK)
-                }
-            }
+            if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
+            else this.minusWeeks(Constants.PAGING_WEEK)
         }
             .reverseDateUntilWeek(pageDate)
             .chunked(7)
