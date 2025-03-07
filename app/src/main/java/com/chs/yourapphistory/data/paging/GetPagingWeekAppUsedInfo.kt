@@ -1,13 +1,13 @@
 package com.chs.yourapphistory.data.paging
 
+import android.util.Log
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.atEndOfDayToMillis
-import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
-import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.containsWeek
 import com.chs.yourapphistory.common.reverseDateUntilWeek
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import java.time.LocalDate
 
@@ -33,11 +33,18 @@ class GetPagingWeekAppUsedInfo(
             }
         }
 
-        chsLog("$targetDate, $pageDate")
+
+        Log.e("123", "$targetDate, $pageDate")
 
         val data = pageDate.run {
             if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-            else this.minusWeeks(Constants.PAGING_WEEK)
+            else {
+                if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+                    LocalDate.now()
+                } else {
+                    this.minusWeeks(Constants.PAGING_WEEK)
+                }
+            }
         }
             .reverseDateUntilWeek(pageDate)
             .chunked(7)
@@ -46,17 +53,16 @@ class GetPagingWeekAppUsedInfo(
                 dateRangeList to calcDayUsedList(
                     dateRangeList = dateRangeList,
                     list = dao.getWeeklyAppUsedInfo(
-                        beginDate = dateRangeList.min().atStartOfDayToMillis(),
-                        endDate = dateRangeList.max().atEndOfDayToMillis(),
+                        beginDate = dateRangeList.min().toMillis(),
+                        endDate = dateRangeList.max().toMillis(),
                         packageName = packageName
                     )
                 )
             }
-
-        chsLog(data.map { it.first }.toString())
+        Log.e("123", "$pageDate ${data.map { it.first }}")
 
         return LoadResult.Page(
-            prevKey = if (pageDate == LocalDate.now()) {
+            prevKey = if (pageDate.containsWeek(LocalDate.now())) {
                 null
             } else {
                 if (pageDate.plusWeeks(Constants.PAGING_WEEK) >= LocalDate.now()) {

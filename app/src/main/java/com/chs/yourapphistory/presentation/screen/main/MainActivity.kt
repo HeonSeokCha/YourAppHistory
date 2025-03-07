@@ -23,7 +23,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.chs.yourapphistory.R
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.getUsagePermission
 import dagger.hilt.android.AndroidEntryPoint
 

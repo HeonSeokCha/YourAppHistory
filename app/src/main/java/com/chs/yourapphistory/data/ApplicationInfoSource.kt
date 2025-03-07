@@ -7,28 +7,15 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
-import android.util.Log
-import androidx.compose.ui.util.fastCbrt
-import androidx.compose.ui.util.packInts
 import androidx.core.graphics.drawable.toBitmap
-import androidx.room.util.copy
-import com.chs.yourapphistory.common.atEndOfDayToMillis
-import com.chs.yourapphistory.common.atStartOfDayToMillis
-import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.convertToRealUsageMinutes
-import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.isZero
-import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.time.LocalDate
 import javax.inject.Inject
-import kotlin.contracts.contract
 
 class ApplicationInfoSource @Inject constructor(
     private val context: Context
@@ -179,9 +166,6 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime == 1739949234866) {
-                chsLog("11")
-            }
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
 
             when (usageEvent.eventType) {

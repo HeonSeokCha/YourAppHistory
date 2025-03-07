@@ -3,10 +3,10 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
-import com.chs.yourapphistory.common.atEndOfDayToMillis
-import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
+import com.chs.yourapphistory.common.containsWeek
 import com.chs.yourapphistory.common.reverseDateUntilWeek
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import java.time.LocalDate
 
@@ -34,7 +34,13 @@ class GetPagingWeekAppNotifyInfo(
 
         val data = pageDate.run {
             if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-            else this.minusWeeks(Constants.PAGING_WEEK)
+            else {
+                if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+                    LocalDate.now()
+                } else {
+                    this.minusWeeks(Constants.PAGING_WEEK)
+                }
+            }
         }
             .reverseDateUntilWeek(pageDate)
             .chunked(7)
@@ -43,15 +49,15 @@ class GetPagingWeekAppNotifyInfo(
                 dateRangeList to calcDayUsedList(
                     dateRangeList = dateRangeList,
                     list = dao.getWeeklyNotifyCount(
-                        beginDate = dateRangeList.min().atStartOfDayToMillis(),
-                        endDate = dateRangeList.max().atEndOfDayToMillis(),
+                        beginDate = dateRangeList.min().toMillis(),
+                        endDate = dateRangeList.max().toMillis(),
                         packageName = packageName
                     )
                 )
             }
 
         return LoadResult.Page(
-            prevKey = if (pageDate == LocalDate.now()) {
+            prevKey = if (pageDate.containsWeek(LocalDate.now())) {
                 null
             } else {
                 if (pageDate.plusWeeks(Constants.PAGING_WEEK) >= LocalDate.now()) {

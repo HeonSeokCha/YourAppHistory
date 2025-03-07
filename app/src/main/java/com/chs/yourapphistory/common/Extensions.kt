@@ -360,6 +360,10 @@ fun List<LocalDate>.toDisplayYearDate(): String {
     }
 }
 
+fun LocalDate.containsWeek(targetDate: LocalDate): Boolean {
+    return this.reverseDateUntilWeek(targetDate).count() == 7
+}
+
 fun LocalDate.reverseDateUntilWeek(targetDate: LocalDate): List<LocalDate> {
     return this.run {
         if (this.dayOfWeek == DayOfWeek.SUNDAY) return@run this
