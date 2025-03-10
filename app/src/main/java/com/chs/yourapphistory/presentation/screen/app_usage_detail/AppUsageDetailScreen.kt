@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -333,8 +335,9 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(datePagerState.isScrollInProgress) {
-
         if (state.dateList.isEmpty()) return@LaunchedEffect
+
+        if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         if (state.displayDate == state.dateList[datePagerState.currentPage][6 - selectDateIdx])
             return@LaunchedEffect
@@ -364,8 +367,9 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(appUsedWeekPagerState.isScrollInProgress) {
-
         if (appUsedWeekPagingData == null) return@LaunchedEffect
+
+        if (appUsedWeekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         if (appUsedWeekPagingData.itemCount == 0) return@LaunchedEffect
 
@@ -378,8 +382,9 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(appForegroundWeekPagerState.isScrollInProgress) {
-
         if (appForegroundWeekPagingData == null) return@LaunchedEffect
+
+        if (appForegroundWeekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         if (appForegroundWeekPagingData.itemCount == 0) return@LaunchedEffect
 
@@ -392,8 +397,9 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(appNotifyWeekPagerState.isScrollInProgress) {
-
         if (appNotifyWeekPagingData == null) return@LaunchedEffect
+
+        if (appNotifyWeekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         if (appNotifyWeekPagingData.itemCount == 0) return@LaunchedEffect
 
@@ -406,8 +412,9 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(appLaunchWeekPagerState.isScrollInProgress) {
-
         if (appLaunchWeekPagingData == null) return@LaunchedEffect
+
+        if (appLaunchWeekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         if (appLaunchWeekPagingData.itemCount == 0) return@LaunchedEffect
 
@@ -478,7 +485,12 @@ fun AppUsageDetailScreen(
 
     LaunchedEffect(weekPagerState.isScrollInProgress) {
         if (state.weekList.isEmpty()) return@LaunchedEffect
+
+        if (weekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+
         val idx = state.weekList[weekPagerState.currentPage].count() - 1 - selectWeekIdx
+
+        Log.e("123", idx.toString())
 
         if (state.displayWeek.max() == state.dateList[datePagerState.currentPage][idx])
             return@LaunchedEffect

@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.welcome
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -44,6 +45,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
 import com.chs.yourapphistory.presentation.Screen
+import androidx.core.net.toUri
 
 @Composable
 fun WelcomeScreen(
@@ -99,19 +101,23 @@ fun WelcomeScreen(
             }
         }
 
-
-
         if (pagerState.currentPage == lottieList.size - 1) {
             Button(
                 modifier = Modifier
                     .align(Alignment.CenterHorizontally),
                 onClick = {
-                    requestPermission.launch(
-                        Intent(
-                            Settings.ACTION_USAGE_ACCESS_SETTINGS,
-                            Uri.parse("package:${context.packageName}")
+                    try {
+                        requestPermission.launch(
+                            Intent(
+                                Settings.ACTION_USAGE_ACCESS_SETTINGS,
+                                "package:${context.packageName}".toUri()
+                            )
                         )
-                    )
+                    } catch (e: ActivityNotFoundException) {
+                        requestPermission.launch(
+                            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                        )
+                    }
                 },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Color.White

@@ -83,9 +83,13 @@ fun UsedAppListScreenScreen(
         when (pagingData.loadState.refresh) {
             is LoadState.Loading -> Unit
 
-            is LoadState.Error -> { onEvent(UsedAppEvent.ChangeLoadingInfo) }
+            is LoadState.Error -> {
+                onEvent(UsedAppEvent.ChangeLoadingInfo)
+            }
 
-            else -> { onEvent(UsedAppEvent.ChangeLoadingInfo) }
+            else -> {
+                onEvent(UsedAppEvent.ChangeLoadingInfo)
+            }
         }
 
         LaunchedEffect(pagerState.currentPage) {
@@ -187,8 +191,6 @@ fun UsedAppListScreenScreen(
                         }
                     }
                 }
-
-
             }
         }
     }

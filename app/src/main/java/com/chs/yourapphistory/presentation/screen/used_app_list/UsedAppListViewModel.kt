@@ -61,8 +61,8 @@ class UsedAppListViewModel @Inject constructor(
 
     fun changeEvent(option: UsedAppEvent) {
         when (option) {
-            UsedAppEvent.RefreshAppUsageInfo -> { _state.update { UsedAppListState()
-                }
+            UsedAppEvent.RefreshAppUsageInfo -> {
+                _state.update { UsedAppListState() }
                 viewModelScope.launch {
                     getApplicationsInfo()
                 }
