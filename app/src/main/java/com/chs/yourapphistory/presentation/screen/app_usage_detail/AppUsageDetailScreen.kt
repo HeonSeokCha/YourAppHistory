@@ -38,7 +38,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -342,8 +341,6 @@ fun AppUsageDetailScreen(
         if (state.displayDate == state.dateList[datePagerState.currentPage][6 - selectDateIdx])
             return@LaunchedEffect
 
-        if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
-
         if (state.dateList[datePagerState.currentPage][6 - selectDateIdx] > LocalDate.now()) {
             onEvent(
                 AppUsageDetailEvent.OnChangeTargetDate(LocalDate.now())
@@ -427,19 +424,22 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(state.displayWeek) {
+        Log.e("123", weekPagerState.currentPage.toString())
         if (state.weekList.isEmpty()) return@LaunchedEffect
 
         if (state.weekList[weekPagerState.currentPage].min() > state.displayWeek.max()) {
+            Log.e("123_min", weekPagerState.currentPage.toString())
             launch {
-                weekPagerState.scrollToPage(weekPagerState.currentPage + 1)
                 selectWeekIdx = state.weekList[weekPagerState.currentPage + 1].count() - 1
+                weekPagerState.scrollToPage(weekPagerState.currentPage + 1)
             }
         }
 
         if (state.weekList[weekPagerState.currentPage].max() < state.displayWeek.max()) {
+            Log.e("123_max", weekPagerState.currentPage.toString())
             launch {
-                weekPagerState.scrollToPage(weekPagerState.currentPage - 1)
                 selectWeekIdx = 0
+                weekPagerState.scrollToPage(weekPagerState.currentPage - 1)
             }
         }
 
@@ -488,14 +488,10 @@ fun AppUsageDetailScreen(
 
         if (weekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
-        val idx = state.weekList[weekPagerState.currentPage].count() - 1 - selectWeekIdx
+        val idx = state.weekList[weekPagerState.currentPage].count() - 1
 
-        Log.e("123", idx.toString())
-
-        if (state.displayWeek.max() == state.dateList[datePagerState.currentPage][idx])
+        if (state.displayWeek.max() == state.weekList[weekPagerState.currentPage][idx])
             return@LaunchedEffect
-
-        if (weekPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
         onEvent(
             AppUsageDetailEvent.OnChangeTargetWeek(

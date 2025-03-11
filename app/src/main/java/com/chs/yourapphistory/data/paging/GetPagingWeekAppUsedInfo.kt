@@ -33,9 +33,6 @@ class GetPagingWeekAppUsedInfo(
             }
         }
 
-
-        Log.e("123", "$targetDate, $pageDate")
-
         val data = pageDate.run {
             if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
             else {
@@ -59,7 +56,6 @@ class GetPagingWeekAppUsedInfo(
                     )
                 )
             }
-        Log.e("123", "$pageDate ${data.map { it.first }}")
 
         return LoadResult.Page(
             prevKey = if (pageDate.containsWeek(LocalDate.now())) {
