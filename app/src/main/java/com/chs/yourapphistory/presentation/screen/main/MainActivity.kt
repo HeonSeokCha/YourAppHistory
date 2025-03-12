@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -55,7 +56,13 @@ class MainActivity : ComponentActivity() {
                         )
                     } else {
                         TopAppBar(
-                            title = { Text(text = selectPackageLabel!!) },
+                            title = {
+                                Text(
+                                    text = selectPackageLabel!!,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            },
                             navigationIcon = {
                                 IconButton(
                                     onClick = {

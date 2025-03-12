@@ -121,7 +121,6 @@ fun UsedAppListScreenScreen(
         ) {
             Text(
                 modifier = Modifier
-                    .padding(bottom = 4.dp)
                     .placeholder(
                         visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
@@ -132,14 +131,15 @@ fun UsedAppListScreenScreen(
                     state.displayDate
                 },
                 textAlign = TextAlign.Center,
-                fontSize = 24.sp
+                fontSize = 24.sp,
+                lineHeight = 36.sp
             )
+
+            Spacer(modifier = Modifier.height(4.dp))
 
             Text(
                 modifier = Modifier
-                    .clickable {
-                        filterDialogShow = true
-                    }
+                    .clickable { filterDialogShow = true }
                     .placeholder(
                         visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
