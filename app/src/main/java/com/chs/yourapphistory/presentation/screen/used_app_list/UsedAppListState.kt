@@ -9,6 +9,9 @@ import java.time.LocalDate
 
 data class UsedAppListState(
     val isLoading: Boolean = true,
+    val isAppending: Boolean = false,
+    val isRefreshing: Boolean = false,
+    val isShowFilterDialog: Boolean = false,
     val displayDate: String = "오늘",
     val appInfoList: Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>? = null,
     val appIconList: HashMap<String, Bitmap?> = hashMapOf(),

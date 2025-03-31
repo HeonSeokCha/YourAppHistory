@@ -1,5 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
+import android.widget.Toast
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -50,20 +53,28 @@ fun UsedAppListScreenScreenRoot(
     onClickApp: (AppInfo, Long) -> Unit,
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
+    val event by viewModel.usedAppEvent.collectAsStateWithLifecycle(UsedAppEvent.Idle)
+    val context = LocalContext.current
+
+    LaunchedEffect(event) {
+        when (event) {
+            UsedAppEvent.Load.Error -> {
+                Toast.makeText(context, "Something error in load Data..", Toast.LENGTH_SHORT).show()
+            }
+
+            is UsedAppEvent.Click.Application -> {
+                (event as UsedAppEvent.Click.Application).run {
+                    onClickApp(appInfo, targetDate)
+                }
+            }
+
+            else -> Unit
+        }
+    }
 
     UsedAppListScreenScreen(
         state = state,
-        onEvent = { event ->
-            when (event) {
-                is UsedAppEvent.ClickApplication -> {
-                    onClickApp(event.appInfo, event.targetDate)
-                }
-
-                else -> Unit
-            }
-
-            viewModel.changeEvent(event)
-        }
+        onEvent = viewModel::changeEvent
     )
 }
 
@@ -73,45 +84,48 @@ fun UsedAppListScreenScreen(
     onEvent: (UsedAppEvent) -> Unit
 ) {
     val pagingData = state.appInfoList?.collectAsLazyPagingItems()
-    var filterDialogShow by remember { mutableStateOf(false) }
     val pagerState =
         rememberPagerState(pageCount = { pagingData?.itemCount ?: Constants.NUMBER_LOADING_COUNT })
-    val coroutineScope = rememberCoroutineScope()
-    var isRefreshing by remember { mutableStateOf(false) }
 
     if (pagingData != null) {
         when (pagingData.loadState.refresh) {
             is LoadState.Loading -> Unit
 
             is LoadState.Error -> {
-                onEvent(UsedAppEvent.ChangeLoadingInfo)
+                onEvent(UsedAppEvent.Load.Error)
             }
 
             else -> {
-                onEvent(UsedAppEvent.ChangeLoadingInfo)
+                onEvent(UsedAppEvent.Load.Complete)
+            }
+        }
+
+        when (pagingData.loadState.append) {
+            is LoadState.Loading -> {
+                onEvent(UsedAppEvent.Load.Appending)
+            }
+
+            is LoadState.Error -> {
+                onEvent(UsedAppEvent.Load.Error)
+            }
+
+            else -> {
+                onEvent(UsedAppEvent.Load.Complete)
             }
         }
 
         LaunchedEffect(pagerState.currentPage) {
             if (pagingData.itemCount != 0) {
                 onEvent(
-                    UsedAppEvent.ChangeDate(pagingData[pagerState.currentPage]!!.first)
+                    UsedAppEvent.Click.ChangeDate(pagingData[pagerState.currentPage]!!.first)
                 )
             }
         }
     }
 
-
     ItemPullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            coroutineScope.launch {
-                onEvent(UsedAppEvent.RefreshAppUsageInfo)
-                delay(500L)
-                isRefreshing = false
-            }
-        }
+        isRefreshing = state.isRefreshing,
+        onRefresh = { onEvent(UsedAppEvent.Click.RefreshAppUsageInfo) }
     ) {
         Column(
             modifier = Modifier
@@ -125,11 +139,7 @@ fun UsedAppListScreenScreen(
                         visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
                     ),
-                text = if (state.isLoading) {
-                    Constants.TEXT_TITLE_PREVIEW
-                } else {
-                    state.displayDate
-                },
+                text = state.displayDate,
                 textAlign = TextAlign.Center,
                 fontSize = 24.sp,
                 lineHeight = 36.sp
@@ -139,7 +149,7 @@ fun UsedAppListScreenScreen(
 
             Text(
                 modifier = Modifier
-                    .clickable { filterDialogShow = true }
+                    .clickable { onEvent(UsedAppEvent.Click.Sort) }
                     .placeholder(
                         visible = state.isLoading,
                         highlight = PlaceholderHighlight.shimmer()
@@ -149,27 +159,22 @@ fun UsedAppListScreenScreen(
                 fontSize = 18.sp
             )
 
-            if (state.isLoading) {
+            HorizontalPager(
+                modifier = Modifier.fillMaxSize(),
+                state = pagerState,
+                reverseLayout = true,
+                userScrollEnabled = true,
+                key = pagingData?.itemKey { it.first }
+            ) { page ->
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    items(10) {
-                        ItemAppInfoSmall(null, null) { }
-                    }
-                }
-            } else {
-                HorizontalPager(
-                    modifier = Modifier.fillMaxSize(),
-                    state = pagerState,
-                    reverseLayout = true,
-                    userScrollEnabled = true,
-                    key = pagingData?.itemKey { it.first }
-                ) { page ->
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
+                    if (state.isLoading) {
+                        items(10) {
+                            ItemAppInfoSmall(null, null) { }
+                        }
+                    } else {
                         val packageList = pagingData!![page]!!.second
                         items(
                             count = packageList.size,
@@ -182,11 +187,17 @@ fun UsedAppListScreenScreen(
                                 sortOption = state.sortOption
                             ) { appInfo ->
                                 onEvent(
-                                    UsedAppEvent.ClickApplication(
+                                    UsedAppEvent.Click.Application(
                                         appInfo = appInfo,
                                         targetDate = pagingData[page]!!.first.toMillis()
                                     )
                                 )
+                            }
+                        }
+
+                        if (state.isAppending) {
+                            items(10) {
+                                ItemAppInfoSmall(null, null) { }
                             }
                         }
                     }
@@ -195,13 +206,11 @@ fun UsedAppListScreenScreen(
         }
     }
 
-
-
-    if (filterDialogShow) {
+    if (state.isShowFilterDialog) {
         FilterDialog(
             list = state.sortList,
             onDismiss = {
-                filterDialogShow = false
+                onEvent(UsedAppEvent.Click.Sort)
             }, onClick = { selectSortType ->
                 onEvent(selectSortType)
             }
