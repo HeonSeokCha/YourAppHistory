@@ -146,25 +146,37 @@ class UsedAppListViewModel @Inject constructor(
             when (option) {
                 is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
                     _state.update {
-                        it.copy(appInfoList = getPagingForegroundListUseCase().cachedIn(viewModelScope))
+                        it.copy(
+                            appInfoList = getPagingForegroundListUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
                     }
                 }
 
                 is UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
                     _state.update {
-                        it.copy(appInfoList = getPagingLaunchListUseCase().cachedIn(viewModelScope))
+                        it.copy(
+                            appInfoList = getPagingLaunchListUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
                     }
                 }
 
                 is UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
                     _state.update {
-                        it.copy(appInfoList = getPagingNotifyListUseCase().cachedIn(viewModelScope))
+                        it.copy(
+                            appInfoList = getPagingNotifyListUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
                     }
                 }
 
                 is UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
                     _state.update {
-                        it.copy(appInfoList = getPagingUsedListUseCase().cachedIn(viewModelScope))
+                        it.copy(
+                            appInfoList = getPagingUsedListUseCase().cachedIn(viewModelScope),
+                            sortOption = option
+                        )
                     }
                 }
             }

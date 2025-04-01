@@ -330,7 +330,7 @@ internal fun calcDayUsedList(
 }
 
 fun chsLog(value: String) {
-    Log.e("CHS_LOG", value)
+    Log.e("CHS_123", value)
 }
 
 fun LocalDate.toConvertDisplayYearDate(): String {

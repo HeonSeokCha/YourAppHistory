@@ -86,7 +86,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     ): Map<@MapColumn("beginDate") String, @MapColumn("cnt") Int>
 
     @Query("DELETE FROM appUsage")
-    abstract suspend fun deleteAllUsageInfo()
+    abstract suspend fun deleteAll()
 
     @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appUsage")
     abstract suspend fun getLastTime(): Long

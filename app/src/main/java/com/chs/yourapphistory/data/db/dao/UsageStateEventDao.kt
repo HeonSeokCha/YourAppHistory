@@ -7,6 +7,12 @@ import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
 @Dao
 abstract class UsageStateEventDao : BaseDao<UsageStateEventEntity> {
 
+    @Query("SELECT * FROM usageStateEvent ORDER BY eventTime ASC")
+    abstract suspend fun getAll(): List<UsageStateEventEntity>
+
+    @Query("SELECT IFNULL(MIN(eventTime), 0) FROM  usageStateEvent")
+    abstract suspend fun getFirstEventTime(): Long
+
     @Query("SELECT IFNULL(MAX(eventTime), 0) FROM  usageStateEvent")
     abstract suspend fun getLastEventTime(): Long
 }

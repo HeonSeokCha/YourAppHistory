@@ -46,4 +46,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
 
     @Query("SELECT IFNULL(MAX(notifyTime), 0) FROM appNotifyInfo")
     abstract suspend fun getLastTime(): Long
+
+    @Query("DELETE FROM appNotifyInfo")
+    abstract suspend fun deleteAll()
 }

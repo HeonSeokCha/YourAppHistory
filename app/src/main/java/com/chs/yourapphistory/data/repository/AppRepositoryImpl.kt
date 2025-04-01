@@ -30,6 +30,7 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
@@ -102,10 +103,23 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-//            withContext(Dispatchers.IO) { appUsageDao.deleteAllUsageInfo() }
+            withContext(Dispatchers.IO) {
+                appUsageDao.deleteAll()
+                appForegroundUsageDao.deleteAll()
+                appNotifyInfoDao.deleteAll()
+            }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+            applicationInfoSource.getUsageEvent(getLastEventTime())
+
+            val rangeList = usageStateEventDao.getAll().map {
+                AppUsageEventRawInfo(
+                    packageName = it.packageName,
+                    className = it.className,
+                    eventType = it.eventType,
+                    eventTime = it.eventTime
+                )
+            }
 
             withContext(Dispatchers.IO) {
                 val usageStateEvent = async(Dispatchers.IO) {

@@ -8,7 +8,10 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
+import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
@@ -103,6 +106,10 @@ class ApplicationInfoSource @Inject constructor(
             )
         }
 
+        resultArr.forEach {
+            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
+        }
+
         return resultArr
     }
 
@@ -110,29 +117,29 @@ class ApplicationInfoSource @Inject constructor(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventRawInfo>
     ): List<AppForegroundUsageEntity> {
-        val inCompletedUsageList: HashMap<String, AppForegroundUsageEntity> = hashMapOf()
+        val inCompletedUsageList: HashMap<Pair<String, String?>, AppForegroundUsageEntity> =
+            hashMapOf()
         val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
 
-        usageEventList.filter {
-            (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START
-                    || it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP)
-                    && installPackageNames.any { packageName -> packageName == it.packageName }
+        usageEventList.filter { usageEvent ->
+            Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == usageEvent.eventType }
+                    && installPackageNames.any { packageName -> packageName == usageEvent.packageName }
         }.forEach {
+//            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
             if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
-                if (!inCompletedUsageList.containsKey(it.packageName))
-                    inCompletedUsageList[it.packageName] = AppForegroundUsageEntity(
-                        packageName = it.packageName,
-                        beginUseTime = it.eventTime
-                    )
+                inCompletedUsageList[it.packageName to it.className] = AppForegroundUsageEntity(
+                    packageName = it.packageName,
+                    beginUseTime = it.eventTime
+                )
             } else {
-                if (inCompletedUsageList.containsKey(it.packageName)) {
+                if (inCompletedUsageList.containsKey(it.packageName to it.className)) {
                     completedUsageList.add(
-                        inCompletedUsageList[it.packageName]!!.copy(
+                        inCompletedUsageList[it.packageName to it.className]!!.copy(
                             endUseTime = it.eventTime
                         )
                     )
 
-                    inCompletedUsageList.remove(it.packageName)
+                    inCompletedUsageList.remove(it.packageName to it.className)
                 }
             }
         }

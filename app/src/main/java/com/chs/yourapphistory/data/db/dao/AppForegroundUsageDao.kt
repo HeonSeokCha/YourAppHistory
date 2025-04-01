@@ -53,4 +53,8 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
         targetDate: Long,
         packageName: String
     ): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
+
+
+    @Query("DELETE FROM appForegroundUsage")
+    abstract suspend fun deleteAll()
 }
