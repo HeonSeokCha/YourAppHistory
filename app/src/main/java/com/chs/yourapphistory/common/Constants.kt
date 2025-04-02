@@ -28,12 +28,14 @@ object Constants {
         UsageEvents.Event.ACTIVITY_PAUSED,
         UsageEvents.Event.ACTIVITY_STOPPED,
         UsageEvents.Event.SCREEN_NON_INTERACTIVE,
-        UsageEvents.Event.SCREEN_INTERACTIVE
+        UsageEvents.Event.SCREEN_INTERACTIVE,
+        UsageEvents.Event.DEVICE_SHUTDOWN
     )
 
     val APP_FOREGROUND_USAGE_EVENT_FILTER = listOf(
         UsageEvents.Event.FOREGROUND_SERVICE_START,
-        UsageEvents.Event.FOREGROUND_SERVICE_STOP
+        UsageEvents.Event.FOREGROUND_SERVICE_STOP,
+        UsageEvents.Event.DEVICE_SHUTDOWN
     )
 
     val APP_NOTIFY_EVENT_FILTER = listOf(12)

@@ -103,14 +103,14 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-            withContext(Dispatchers.IO) {
-                appUsageDao.deleteAll()
-                appForegroundUsageDao.deleteAll()
-                appNotifyInfoDao.deleteAll()
-            }
+//            withContext(Dispatchers.IO) {
+//                appUsageDao.deleteAll()
+//                appForegroundUsageDao.deleteAll()
+//                appNotifyInfoDao.deleteAll()
+//            }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-            applicationInfoSource.getUsageEvent(getLastEventTime())
+//            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
 
             val rangeList = usageStateEventDao.getAll().map {
                 AppUsageEventRawInfo(

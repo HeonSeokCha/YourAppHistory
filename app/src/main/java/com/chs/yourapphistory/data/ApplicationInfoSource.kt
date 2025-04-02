@@ -121,25 +121,40 @@ class ApplicationInfoSource @Inject constructor(
             hashMapOf()
         val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
 
-        usageEventList.filter { usageEvent ->
-            Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == usageEvent.eventType }
-                    && installPackageNames.any { packageName -> packageName == usageEvent.packageName }
-        }.forEach {
+        usageEventList.forEach {
 //            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
-            if (it.eventType == UsageEvents.Event.FOREGROUND_SERVICE_START) {
-                inCompletedUsageList[it.packageName to it.className] = AppForegroundUsageEntity(
-                    packageName = it.packageName,
-                    beginUseTime = it.eventTime
-                )
-            } else {
-                if (inCompletedUsageList.containsKey(it.packageName to it.className)) {
-                    completedUsageList.add(
-                        inCompletedUsageList[it.packageName to it.className]!!.copy(
+
+            when (it.eventType) {
+                UsageEvents.Event.FOREGROUND_SERVICE_START -> {
+                    if (!installPackageNames.contains(it.packageName)) return@forEach
+
+                    inCompletedUsageList[it.packageName to it.className] = AppForegroundUsageEntity(
+                        packageName = it.packageName,
+                        beginUseTime = it.eventTime
+                    )
+                }
+
+                UsageEvents.Event.FOREGROUND_SERVICE_STOP -> {
+                    if (inCompletedUsageList.containsKey(it.packageName to it.className)) {
+                        completedUsageList.add(
+                            inCompletedUsageList[it.packageName to it.className]!!.copy(
+                                endUseTime = it.eventTime
+                            )
+                        )
+
+                        inCompletedUsageList.remove(it.packageName to it.className)
+                    }
+                }
+
+                UsageEvents.Event.DEVICE_SHUTDOWN -> {
+                    inCompletedUsageList.replaceAll { key,value ->
+                        value.copy(
                             endUseTime = it.eventTime
                         )
-                    )
+                    }
 
-                    inCompletedUsageList.remove(it.packageName to it.className)
+                    completedUsageList.addAll(inCompletedUsageList.map { it.value })
+                    inCompletedUsageList.clear()
                 }
             }
         }
@@ -296,6 +311,23 @@ class ApplicationInfoSource @Inject constructor(
                 }
 
                 UsageEvents.Event.SCREEN_INTERACTIVE -> {
+                    isScreenOff = false
+                }
+
+                UsageEvents.Event.DEVICE_SHUTDOWN -> {
+                    inCompletedUsageList.replaceAll { key,value ->
+                        value.copy(
+                            value.first.copy(
+                                endUseTime = usageEvent.eventTime
+                            )
+                        )
+                    }
+
+                    completedUsageList.addAll(inCompletedUsageList.map { it.value.first })
+                    inCompletedUsageList.clear()
+
+                    prevPackageName = null
+                    prevClassName = null
                     isScreenOff = false
                 }
             }
