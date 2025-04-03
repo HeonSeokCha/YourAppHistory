@@ -44,16 +44,15 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
     }.sumOf {
         val (begin, end) = it.first to it.second
 
-        if (targetDate.dayOfMonth > begin.dayOfMonth) {
-            if (targetDate.dayOfMonth != end.dayOfMonth) return@sumOf 0
+        if (targetDate > begin.toLocalDate()) {
             return@sumOf end.toMillis() - targetDate.atStartOfDayToMillis()
         }
 
-        if (targetDate.dayOfMonth < end.dayOfMonth) {
+        if (targetDate < end.toLocalDate()) {
             return@sumOf targetDate.plusDays(1L).atStartOfDayToMillis() - begin.toMillis()
         }
 
-        return@sumOf end.toMillis() - begin.toMillis()
+        end.toMillis() - begin.toMillis()
     }.toInt()
 }
 
@@ -176,9 +175,9 @@ internal fun calcHourUsageList(
     list.forEach {
         val (begin, end) = it.key.toLocalDateTime() to it.value.toLocalDateTime()
 
-        if (targetDate.dayOfMonth < end.dayOfMonth) {
+        if (targetDate < end.toLocalDate()) {
             val targetDateZeroHour = targetDate.atStartOfDay()
-            if (begin.dayOfMonth < targetDate.dayOfMonth) {
+            if (targetDate > begin.toLocalDate()) {
                 usageMap.keys.forEach {
                     usageMap.computeIfPresent(it) { _, value ->
                         1.hours.inWholeMilliseconds
@@ -203,7 +202,7 @@ internal fun calcHourUsageList(
             return@forEach
         }
 
-        if (begin.dayOfMonth < targetDate.dayOfMonth) {
+        if (targetDate > begin.toLocalDate()) {
             val targetDateZeroHour = targetDate.atStartOfDay()
             for (i in 0..end.hour) {
                 usageMap.computeIfPresent(i) { key, value ->
@@ -280,19 +279,10 @@ internal fun calcDayUsedList(
     }
 
     list.forEach { mapInfo ->
-//        val targetDate: LocalDate = mapInfo.key.toLocalDate()
         val date = LocalDate.parse(mapInfo.key, DateTimeFormatter.ISO_LOCAL_DATE)
 
         usageMap.computeIfPresent(date.dayOfWeek.value) { _, value ->
             value + mapInfo.value.toList().sumOf {
-//                val (beginTim, endTime) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
-//                if (targetDate.dayOfMonth != beginTim.dayOfMonth) {
-//                    return@sumOf targetDate.atStartOfDayToMillis() - it.first
-//                }
-//
-//                if (targetDate.dayOfMonth != endTime.dayOfMonth) {
-//                    return@sumOf it.second - targetDate.atStartOfDayToMillis()
-//                }
                 it.second - it.first
             }.toInt()
         }

@@ -3,8 +3,10 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toConvertDayUsedTime
+import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.toAppInfo
@@ -32,6 +34,11 @@ class GetPagingForegroundList(
             .reverseDateUntil(pageDate)
             .map { date ->
                 date to appForegroundUsageDao.getDayForegroundUsedList(date.toMillis()).map {
+                    if (it.key.packageName == "com.sec.android.app.shealth") {
+                        chsLog(
+                           "$pageDate == " + it.value.map { it.key.toLocalDateTime() to it.value.toLocalDateTime() }.toString()
+                        )
+                    }
                     it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(

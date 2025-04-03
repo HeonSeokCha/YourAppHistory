@@ -106,9 +106,9 @@ class ApplicationInfoSource @Inject constructor(
             )
         }
 
-        resultArr.forEach {
-            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
-        }
+//        resultArr.forEach {
+//            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
+//        }
 
         return resultArr
     }

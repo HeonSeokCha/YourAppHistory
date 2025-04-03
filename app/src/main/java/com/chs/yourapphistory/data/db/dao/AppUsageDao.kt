@@ -24,7 +24,6 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         targetDate: Long
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
-
     @Query(
         "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
           "FROM appInfo " +
