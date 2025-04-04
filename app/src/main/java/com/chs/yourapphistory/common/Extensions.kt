@@ -45,6 +45,9 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
         val (begin, end) = it.first to it.second
 
         if (targetDate > begin.toLocalDate()) {
+            if (targetDate < end.toLocalDate()) {
+                return@sumOf 1.days.inWholeMilliseconds
+            }
             return@sumOf end.toMillis() - targetDate.atStartOfDayToMillis()
         }
 

@@ -34,11 +34,6 @@ class GetPagingForegroundList(
             .reverseDateUntil(pageDate)
             .map { date ->
                 date to appForegroundUsageDao.getDayForegroundUsedList(date.toMillis()).map {
-                    if (it.key.packageName == "com.sec.android.app.shealth") {
-                        chsLog(
-                           "$pageDate == " + it.value.map { it.key.toLocalDateTime() to it.value.toLocalDateTime() }.toString()
-                        )
-                    }
                     it.key.toAppInfo() to it.value.toConvertDayUsedTime(date)
                 }.sortedWith(
                     compareBy(
