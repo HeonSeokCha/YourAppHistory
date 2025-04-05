@@ -13,28 +13,30 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     abstract suspend fun getLastTime(): Long
 
     @Query(
-        "SELECT IFNULL(MAX(endUseTime), 0) " +
-          "FROM appForegroundUsage "
-    )
-    abstract suspend fun getLastEventTime(): Long
-
-    @Query(
         "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
-                "FROM appInfo " +
-                "LEFT JOIN appForegroundUsage ON date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
-                "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')" +
-                "AND appInfo.packageName = appForegroundUsage.packageName "
+          "FROM appInfo " +
+          "LEFT JOIN appForegroundUsage ON date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
+               "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')" +
+           "AND appInfo.packageName = appForegroundUsage.packageName "
     )
     abstract suspend fun getDayForegroundUsedList(
         targetDate: Long
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
+//    @Query(
+//        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
+//          "FROM appForegroundUsage " +
+//         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
+//            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +
+//           "AND packageName = :packageName"
+//    )
+
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
-          "FROM appForegroundUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +
-           "AND packageName = :packageName"
+                "FROM appForegroundUsage " +
+                "WHERE (date(:beginDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime') " +
+                "   OR date(:endDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime'))" +
+                "AND packageName = :packageName"
     )
     abstract suspend fun getWeeklyForegroundUsedList(
         beginDate: Long,

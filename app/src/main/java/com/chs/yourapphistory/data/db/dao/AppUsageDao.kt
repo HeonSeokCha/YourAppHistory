@@ -61,8 +61,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
           "FROM appUsage " +
-         "WHERE (date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
-            "OR date(endUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')) " +
+         "WHERE (date(:beginDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime') " +
+            "OR date(:endDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getWeeklyAppUsedInfo(

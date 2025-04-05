@@ -285,9 +285,7 @@ internal fun calcDayUsedList(
         val date = LocalDate.parse(mapInfo.key, DateTimeFormatter.ISO_LOCAL_DATE)
 
         usageMap.computeIfPresent(date.dayOfWeek.value) { _, value ->
-            value + mapInfo.value.toList().sumOf {
-                it.second - it.first
-            }.toInt()
+            value + mapInfo.value.toConvertDayUsedTime(date)
         }
     }
 
