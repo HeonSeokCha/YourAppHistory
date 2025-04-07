@@ -12,7 +12,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     @Query(
         "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as cnt " +
           "FROM appInfo " +
-          "LEFT JOIN appNotifyInfo ON date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+          "LEFT JOIN appNotifyInfo ON notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +
            "AND appInfo.packageName = appNotifyInfo.packageName " +
          "GROUP BY appInfo.packageName "
     )
@@ -23,7 +23,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     @Query(
         "SELECT notifyTime " +
           "FROM appNotifyInfo " +
-         "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+         "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getDayNotifyCount(
@@ -34,7 +34,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     @Query(
         "SELECT date(notifyTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(notifyTime) as cnt " +
           "FROM appNotifyInfo " +
-         "WHERE date(notifyTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime')" +
+         "WHERE notifyTime BETWEEN :beginDate AND :endDate + 86399999 " +
            "AND packageName = :packageName " +
          "GROUP BY date(notifyTime / 1000, 'unixepoch', 'localtime')"
     )

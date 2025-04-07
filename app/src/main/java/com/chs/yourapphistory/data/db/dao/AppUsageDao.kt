@@ -16,8 +16,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
-          "LEFT JOIN appUsage ON date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
-                "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')" +
+          "LEFT JOIN appUsage ON (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
+            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
            "AND appInfo.packageName = appUsage.packageName "
     )
     abstract suspend fun getDayAppUsedInfo(
@@ -27,7 +27,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
           "FROM appInfo " +
-          "LEFT JOIN appUsage ON date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
+          "LEFT JOIN appUsage ON beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
            "AND appInfo.packageName = appUsage.packageName " +
          "GROUP BY appInfo.packageName " +
          "ORDER BY cnt DESC, appInfo.label ASC"
@@ -39,8 +39,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT beginUseTime, endUseTime " +
           "FROM appUsage " +
-         "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
-               "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')" +
+         "WHERE (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
+            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getDayPackageUsageInfo(
@@ -51,8 +51,9 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT beginUseTime " +
           "FROM appUsage " +
-         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') = date(:targetDate / 1000, 'unixepoch', 'localtime') " +
-           "AND packageName = :packageName" )
+         "WHERE beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
+           "AND packageName = :packageName"
+    )
     abstract suspend fun getDayPackageLaunchInfo(
         targetDate: Long,
         packageName: String
@@ -61,8 +62,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
           "FROM appUsage " +
-         "WHERE (date(:beginDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime') " +
-            "OR date(:endDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
+         "WHERE (beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
+            "OR endUseTime BETWEEN :beginDate AND :endDate + 86399999) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getWeeklyAppUsedInfo(
@@ -74,9 +75,9 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(beginUseTime) as cnt " +
           "FROM appUsage " +
-         "WHERE date(beginUseTime / 1000, 'unixepoch', 'localtime') BETWEEN date(:beginDate / 1000, 'unixepoch', 'localtime') AND date(:endDate / 1000, 'unixepoch', 'localtime') " +
+         "WHERE beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
            "AND packageName = :packageName " +
-         "GROUP BY date(beginUseTime / 1000, 'unixepoch', 'localtime') "
+         "GROUP BY date(beginUseTime / 1000, 'unixepoch', 'localtime')"
     )
     abstract suspend fun getWeeklyAppLaunchInfo(
         beginDate: Long,
