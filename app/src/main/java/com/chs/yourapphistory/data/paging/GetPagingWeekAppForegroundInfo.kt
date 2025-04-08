@@ -47,13 +47,15 @@ class GetPagingWeekAppForegroundInfo(
             .chunked(7)
             .map {
                 val dateRangeList = it
+
                 dateRangeList to calcDayUsedList(
                     dateRangeList = dateRangeList,
-                    list = dao.getWeeklyForegroundUsedList(
-                        beginDate = dateRangeList.min().toMillis(),
-                        endDate = dateRangeList.max().toMillis(),
-                        packageName = packageName
-                    )
+                    list = dateRangeList.associateWith { date ->
+                        dao.getForegroundUsageInfo(
+                            targetDate = date.toMillis(),
+                            packageName = packageName
+                        )
+                    }
                 )
             }
 

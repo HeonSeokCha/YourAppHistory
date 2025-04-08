@@ -69,12 +69,16 @@ fun Int.convertToRealUsageMinutes(): String {
 
 @SuppressLint("DefaultLocale")
 fun Int.convertToRealUsageHour(): String {
-    val hour: Int = (this / 1000) / 60 / 60 % 24
+    val hour: Int = (this / 1000) / 60 / 60
     val minutes: Int = (this / 1000) / 60 % 60
 
     if (hour == 0) return this.convertToRealUsageMinutes()
 
-    return String.format("%d시간 %d분", hour, minutes)
+    return if (minutes == 0) {
+        String.format("%d시간", hour, minutes)
+    } else {
+        String.format("%d시간 %d분", hour, minutes)
+    }
 }
 
 @SuppressLint("DefaultLocale")
@@ -270,7 +274,7 @@ internal fun calcHourUsageList(list: List<Long>): List<Pair<Int, Int>> {
 @JvmName("calcDayUsedFromUsage")
 internal fun calcDayUsedList(
     dateRangeList: List<LocalDate>,
-    list: Map<String, Map<Long, Long>>
+    list: Map<LocalDate, Map<Long, Long>>
 ): List<Pair<LocalDate, Int>> {
     val usageMap = object : LinkedHashMap<Int, Int>() {
         init {
@@ -282,7 +286,7 @@ internal fun calcDayUsedList(
     }
 
     list.forEach { mapInfo ->
-        val date = LocalDate.parse(mapInfo.key, DateTimeFormatter.ISO_LOCAL_DATE)
+        val date = mapInfo.key
 
         usageMap.computeIfPresent(date.dayOfWeek.value) { _, value ->
             value + mapInfo.value.toConvertDayUsedTime(date)

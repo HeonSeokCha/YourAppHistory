@@ -15,8 +15,8 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query(
         "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
-          "LEFT JOIN appForegroundUsage ON (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
+          "LEFT JOIN appForegroundUsage ON (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
+            "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
            "AND appInfo.packageName = appForegroundUsage.packageName "
     )
     abstract suspend fun getDayForegroundUsedList(
@@ -24,23 +24,10 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
-          "FROM appForegroundUsage " +
-         "WHERE (beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
-            "OR endUseTime BETWEEN :beginDate AND :endDate + 86399999) " +
-           "AND packageName = :packageName"
-    )
-    abstract suspend fun getWeeklyForegroundUsedList(
-        beginDate: Long,
-        endDate: Long,
-        packageName: String
-    ): Map<@MapColumn("beginDate") String, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
-
-    @Query(
         "SELECT beginUseTime, endUseTime " +
           "FROM appForegroundUsage " +
-         "WHERE (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
+         "WHERE (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
+                "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName "
     )
     abstract suspend fun getForegroundUsageInfo(

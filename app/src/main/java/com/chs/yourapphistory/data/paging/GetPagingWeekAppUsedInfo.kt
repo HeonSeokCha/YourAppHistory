@@ -49,11 +49,12 @@ class GetPagingWeekAppUsedInfo(
                 val dateRangeList = it
                 dateRangeList to calcDayUsedList(
                     dateRangeList = dateRangeList,
-                    list = dao.getWeeklyAppUsedInfo(
-                        beginDate = dateRangeList.min().toMillis(),
-                        endDate = dateRangeList.max().toMillis(),
-                        packageName = packageName
-                    )
+                    list = dateRangeList.associateWith { date ->
+                        dao.getDayPackageUsageInfo(
+                            targetDate = date.toMillis(),
+                            packageName = packageName
+                        )
+                    }
                 )
             }
 

@@ -60,19 +60,6 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     ): List<Long>
 
     @Query(
-        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
-          "FROM appUsage " +
-         "WHERE (beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
-            "OR endUseTime BETWEEN :beginDate AND :endDate + 86399999) " +
-           "AND packageName = :packageName"
-    )
-    abstract suspend fun getWeeklyAppUsedInfo(
-        beginDate: Long,
-        endDate: Long,
-        packageName: String
-    ): Map<@MapColumn("beginDate") String, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
-
-    @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(beginUseTime) as cnt " +
           "FROM appUsage " +
          "WHERE beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
