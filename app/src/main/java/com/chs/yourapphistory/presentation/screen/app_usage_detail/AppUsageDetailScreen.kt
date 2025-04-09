@@ -41,8 +41,8 @@ import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
-import com.chs.yourapphistory.common.divideDayOfWeek
 import com.chs.yourapphistory.common.getYearOfWeek
+import com.chs.yourapphistory.common.toCalcDailyUsage
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.common.toDisplayYearDate
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
@@ -783,11 +783,10 @@ fun AppUsageDetailScreen(
                             key = appUsedWeekPagingData.itemKey { it.first }
                         ) { page ->
                             val item = appUsedWeekPagingData[page]?.second
-                            if (item != null) {
+                            if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "${
-                                        item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageHour()
+                                        item.toCalcDailyUsage()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
@@ -816,11 +815,10 @@ fun AppUsageDetailScreen(
                             key = appForegroundWeekPagingData.itemKey { it.first }
                         ) { page ->
                             val item = appForegroundWeekPagingData[page]?.second
-                            if (item != null) {
+                            if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "${
-                                        item.sumOf { it.second }
-                                            .divideDayOfWeek().convertToRealUsageHour()
+                                        item.toCalcDailyUsage()
                                     }/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 ")
@@ -849,11 +847,10 @@ fun AppUsageDetailScreen(
                             key = appNotifyWeekPagingData.itemKey { it.first }
                         ) { page ->
                             val item = appNotifyWeekPagingData[page]?.second
-                            if (item != null) {
+                            if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "알림 ${
-                                        item.sumOf { it.second }
-                                            .divideDayOfWeek()
+                                        item.toCalcDailyUsage()
                                     }개/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 알림 ")
@@ -882,11 +879,10 @@ fun AppUsageDetailScreen(
                             key = appLaunchWeekPagingData.itemKey { it.first }
                         ) { page ->
                             val item = appLaunchWeekPagingData[page]?.second
-                            if (item != null) {
+                            if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "앱 실행 ${
-                                        item.sumOf { it.second }
-                                            .divideDayOfWeek()
+                                        item.toCalcDailyUsage()
                                     }회/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 앱 실행 ")

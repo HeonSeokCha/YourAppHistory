@@ -378,14 +378,14 @@ fun LocalDate.getYearOfWeek(): Int {
     return this.get(WeekFields.of(Locale.KOREA).weekOfYear())
 }
 
-fun Int.divideDayOfWeek(): Int {
-    val a = if (LocalDate.now().dayOfWeek == DayOfWeek.SUNDAY) {
-        1
-    } else LocalDate.now().dayOfWeek.value + 1
-    return this.div(a)
-}
-
-
 fun LocalDate.toConvertDisplayDay(): String {
     return this.dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.KOREA)
+}
+
+fun List<Pair<LocalDate, Int>>.toCalcDailyUsage(): String {
+    return this.sumOf { it.second }.run {
+        if (this@toCalcDailyUsage.count { it.second != 0 } == 0) return@run 0
+
+        this / this@toCalcDailyUsage.count { it.second != 0 }
+    }.convertToRealUsageHour()
 }
