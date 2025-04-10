@@ -3,6 +3,7 @@ package com.chs.yourapphistory.data.paging
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
 import com.chs.yourapphistory.common.containsWeek
 import com.chs.yourapphistory.common.reverseDateUntilWeek
@@ -50,7 +51,7 @@ class GetPagingWeekAppNotifyInfo(
                     dateRangeList = dateRangeList,
                     list = dao.getWeeklyNotifyCount(
                         beginDate = dateRangeList.min().toMillis(),
-                        endDate = dateRangeList.max().toMillis(),
+                        endDate = dateRangeList.max().atEndOfDayToMillis(),
                         packageName = packageName
                     )
                 )

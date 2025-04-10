@@ -35,6 +35,17 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
         packageName: String
     ): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
 
+//    @Query(
+//        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
+//          "FROM appForegroundUsage " +
+//         "WHERE (beginUseTime >= :beginDate AND endUseTime <= :endDate) " +
+//           "AND packageName = :packageName"
+//    )
+//    abstract suspend fun getForegroundWeeklyUsageInfo(
+//        beginDate: Long,
+//        endDate: Long,
+//        packageName: String
+//    ): Map<@MapColumn("beginDate") String, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query("DELETE FROM appForegroundUsage")
     abstract suspend fun deleteAll()

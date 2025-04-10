@@ -16,8 +16,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
-          "LEFT JOIN appUsage ON (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
+          "LEFT JOIN appUsage ON (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
+                    "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
            "AND appInfo.packageName = appUsage.packageName "
     )
     abstract suspend fun getDayAppUsedInfo(
@@ -39,8 +39,8 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT beginUseTime, endUseTime " +
           "FROM appUsage " +
-         "WHERE (beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-            "OR endUseTime BETWEEN :targetDate AND :targetDate + 86399999) " +
+         "WHERE (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
+               "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
            "AND packageName = :packageName"
     )
     abstract suspend fun getDayPackageUsageInfo(
@@ -62,7 +62,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query(
         "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(beginUseTime) as cnt " +
           "FROM appUsage " +
-         "WHERE beginUseTime BETWEEN :beginDate AND :endDate + 86399999 " +
+         "WHERE beginUseTime BETWEEN :beginDate AND :endDate " +
            "AND packageName = :packageName " +
          "GROUP BY date(beginUseTime / 1000, 'unixepoch', 'localtime')"
     )
@@ -71,6 +71,18 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
         endDate: Long,
         packageName: String
     ): Map<@MapColumn("beginDate") String, @MapColumn("cnt") Int>
+
+//    @Query(
+//        "SELECT date(beginUseTime / 1000, 'unixepoch', 'localtime') as beginDate, beginUseTime, endUseTime " +
+//          "FROM appUsage " +
+//         "WHERE (beginUseTime >= :beginDate AND endUseTime <= :endDate) " +
+//           "AND packageName = :packageName"
+//    )
+//    abstract suspend fun getWeeklyAppUsageInfo(
+//        beginDate: Long,
+//        endDate: Long,
+//        packageName: String
+//    ): Map<@MapColumn("beginDate") String, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query("DELETE FROM appUsage")
     abstract suspend fun deleteAll()

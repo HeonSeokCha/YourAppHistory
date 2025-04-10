@@ -34,7 +34,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     @Query(
         "SELECT date(notifyTime / 1000, 'unixepoch', 'localtime') as beginDate, COUNT(notifyTime) as cnt " +
           "FROM appNotifyInfo " +
-         "WHERE notifyTime BETWEEN :beginDate AND :endDate + 86399999 " +
+         "WHERE notifyTime BETWEEN :beginDate AND :endDate " +
            "AND packageName = :packageName " +
          "GROUP BY date(notifyTime / 1000, 'unixepoch', 'localtime')"
     )
