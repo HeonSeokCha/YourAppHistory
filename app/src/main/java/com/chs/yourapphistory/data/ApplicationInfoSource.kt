@@ -147,7 +147,7 @@ class ApplicationInfoSource @Inject constructor(
                 }
 
                 UsageEvents.Event.DEVICE_SHUTDOWN -> {
-                    inCompletedUsageList.replaceAll { key,value ->
+                    inCompletedUsageList.replaceAll { key, value ->
                         value.copy(
                             endUseTime = it.eventTime
                         )
@@ -202,12 +202,9 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
-                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second.apply {
-                                        if (this.none { it == usageEvent.className }) {
-                                            if (usageEvent.packageName == prevPackageName) {
-                                                this.add(usageEvent.className)
-                                            }
+                                        if (usageEvent.packageName == prevPackageName) {
+                                            this.add(usageEvent.className)
                                         }
                                     }
                                 )
@@ -234,10 +231,10 @@ class ApplicationInfoSource @Inject constructor(
                         value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
                     }
 
-
                     if (isScreenOff) {
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
+                        continue
                     }
                 }
 
@@ -249,7 +246,6 @@ class ApplicationInfoSource @Inject constructor(
                             it.key != usageEvent.packageName
                                     && it.key != prevPackageName
                                     && it.value.first.endUseTime != 0L
-                                    && it.value.second.isEmpty()
                         }.forEach {
                             completedUsageList.add(it.value.first)
                             inCompletedUsageList.remove(it.key)
@@ -257,20 +253,11 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        if (value.first.endUseTime.isZero()) {
-                            value.copy(
-                                first = value.first.copy(endUseTime = usageEvent.eventTime),
-                                second = value.second.apply {
-                                    this.remove(usageEvent.className)
-                                }
-                            )
-                        } else {
-                            value.copy(
-                                second = value.second.apply {
-                                    this.remove(usageEvent.className)
-                                }
-                            )
-                        }
+                        value.copy(
+                            second = value.second.apply {
+                                this.remove(usageEvent.className)
+                            }
+                        )
                     }
 
                     if (isScreenOff) {
@@ -286,7 +273,6 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     if (inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()) {
-                        if (usageEvent.packageName == prevPackageName && usageEvent.className == prevClassName) continue
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     } else {
@@ -303,7 +289,6 @@ class ApplicationInfoSource @Inject constructor(
                     isScreenOff = true
                     inCompletedUsageList.filter {
                         it.value.first.endUseTime != 0L
-                                && it.value.second.isEmpty()
                     }.forEach {
                         completedUsageList.add(it.value.first)
                         inCompletedUsageList.remove(it.key)
@@ -315,7 +300,7 @@ class ApplicationInfoSource @Inject constructor(
                 }
 
                 UsageEvents.Event.DEVICE_SHUTDOWN -> {
-                    inCompletedUsageList.replaceAll { key,value ->
+                    inCompletedUsageList.replaceAll { key, value ->
                         value.copy(
                             value.first.copy(
                                 endUseTime = usageEvent.eventTime
