@@ -93,21 +93,20 @@ class AppRepositoryImpl @Inject constructor(
 
         val removePackageList = localList.filterNot { packageInfo ->
             currentLauncherList.any { it == packageInfo.packageName }
-        }
+        }.map { it.packageName }
 
         if (removePackageList.isEmpty()) return
 
-        appInfoDao.delete(*removePackageList.toTypedArray())
-        appUsageDao.deleteUsageInfo(removePackageList.map { it.packageName })
+        deleteUsageInfoFromPackageNames(removePackageList)
     }
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-            withContext(Dispatchers.IO) {
-                appUsageDao.deleteAll()
+//            withContext(Dispatchers.IO) {
+//                appUsageDao.deleteAll()
 //                appForegroundUsageDao.deleteAll()
 //                appNotifyInfoDao.deleteAll()
-            }
+//            }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
@@ -376,10 +375,22 @@ class AppRepositoryImpl @Inject constructor(
             ?: LocalDate.now()
     }
 
+    override suspend fun deleteUsageInfo(packageName: String) {
+        deleteUsageInfoFromPackageNames(listOf(packageName))
+    }
+
+    private suspend fun deleteUsageInfoFromPackageNames(packageNames: List<String>) {
+        appInfoDao.deleteFromPackageName(packageNames)
+        appUsageDao.deleteFromPackageName(packageNames)
+        appForegroundUsageDao.deleteFromPackageName(packageNames)
+        appNotifyInfoDao.deleteFromPackageName(packageNames)
+    }
+
     private suspend fun updateFirstCollectDate(dateMilli: Long) {
         dataStoreSource.updateData(
             key = Constants.PREF_KEY_FIRST_DATE,
             value = dateMilli
         )
     }
+
 }

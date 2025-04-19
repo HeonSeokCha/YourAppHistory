@@ -9,6 +9,9 @@ import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 @Dao
 abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
 
+    @Query("DELETE FROM appNotifyInfo WHERE packageName IN(:packageNames)")
+    abstract suspend fun deleteFromPackageName(packageNames: List<String>)
+
     @Query(
         "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as cnt " +
           "FROM appInfo " +

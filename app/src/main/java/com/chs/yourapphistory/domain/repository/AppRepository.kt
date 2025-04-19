@@ -64,4 +64,6 @@ interface AppRepository {
     suspend fun getAppIconMap(): HashMap<String, Bitmap?>
 
     suspend fun getMinDate(): LocalDate
+
+    suspend fun deleteUsageInfo(packageName: String)
 }

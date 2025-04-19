@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 abstract class AppUsageDao : BaseDao<AppUsageEntity> {
 
     @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
-    abstract suspend fun deleteUsageInfo(packageNames: List<String>)
+    abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
     @Query(
         "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +

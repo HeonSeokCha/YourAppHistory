@@ -12,6 +12,9 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appForegroundUsage")
     abstract suspend fun getLastTime(): Long
 
+    @Query("DELETE FROM appForegroundUsage WHERE packageName IN(:packageNames)")
+    abstract suspend fun deleteFromPackageName(packageNames: List<String>)
+
     @Query(
         "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
           "FROM appInfo " +

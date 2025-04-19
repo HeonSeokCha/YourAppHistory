@@ -22,6 +22,7 @@ object Constants {
     const val TAG_WORKER_NAME: String = "app_worker"
     const val PREF_NAME: String = "YourAppPref"
     val PREF_KEY_FIRST_DATE: Preferences.Key<Long> = longPreferencesKey("first_date")
+    const val DATA_KEY_REMOVE_PACKAGE_NAME: String = "remove_package_name"
 
     val APP_USAGE_EVENT_FILTER = listOf(
         UsageEvents.Event.ACTIVITY_RESUMED,
