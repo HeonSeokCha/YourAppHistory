@@ -11,13 +11,17 @@ import androidx.core.graphics.drawable.toBitmap
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.time.LocalDate
+import java.time.LocalDateTime
 import javax.inject.Inject
 
 class ApplicationInfoSource @Inject constructor(
@@ -106,9 +110,11 @@ class ApplicationInfoSource @Inject constructor(
             )
         }
 
-//        resultArr.forEach {
-//            chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
-//        }
+        resultArr.forEach {
+            if (it.eventTime.toLocalDate() == LocalDate.now().minusDays(12L)) {
+                chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
+            }
+        }
 
         return resultArr
     }
@@ -188,6 +194,14 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
+            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(12L)) {
+                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
+            }
+            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(12L)
+                && usageEvent.packageName == "com.hyundaicard.appcard") {
+                Unit
+            }
+
 //            chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
 
             when (usageEvent.eventType) {
@@ -198,13 +212,20 @@ class ApplicationInfoSource @Inject constructor(
                                 AppUsageEntity(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
-                                ) to arrayListOf(usageEvent.className)
+                                ) to if (isScreenOff) {
+                                    arrayListOf()
+                                } else {
+                                    arrayListOf(usageEvent.className)
+                                }
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
+                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second.apply {
-                                        if (usageEvent.packageName == prevPackageName) {
-                                            this.add(usageEvent.className)
+                                        if (this.none { it == usageEvent.className }) {
+                                            if (!isScreenOff) {
+                                                this.add(usageEvent.className)
+                                            }
                                         }
                                     }
                                 )
@@ -254,6 +275,11 @@ class ApplicationInfoSource @Inject constructor(
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
+                            first = if (isScreenOff || value.second.size == 1) {
+                                value.first.copy(endUseTime = usageEvent.eventTime)
+                            } else {
+                                value.first
+                            },
                             second = value.second.apply {
                                 this.remove(usageEvent.className)
                             }
@@ -289,6 +315,7 @@ class ApplicationInfoSource @Inject constructor(
                     isScreenOff = true
                     inCompletedUsageList.filter {
                         it.value.first.endUseTime != 0L
+                                && it.value.second.isEmpty()
                     }.forEach {
                         completedUsageList.add(it.value.first)
                         inCompletedUsageList.remove(it.key)
