@@ -104,12 +104,12 @@ class AppRepositoryImpl @Inject constructor(
         mutex.withLock {
             withContext(Dispatchers.IO) {
                 appUsageDao.deleteAll()
-                appForegroundUsageDao.deleteAll()
-                appNotifyInfoDao.deleteAll()
+//                appForegroundUsageDao.deleteAll()
+//                appNotifyInfoDao.deleteAll()
             }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-//            val rangeList1 = applicationInfoSource.getUsageEvent(getLastEventTime())
+//            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
 
             val rangeList = usageStateEventDao.getAll().map {
                 AppUsageEventRawInfo(
