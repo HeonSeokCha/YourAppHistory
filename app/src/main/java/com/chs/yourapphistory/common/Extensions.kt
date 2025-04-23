@@ -59,6 +59,8 @@ fun Map<Long, Long>.toConvertDayUsedTime(targetDate: LocalDate): Int {
     }.toInt()
 }
 
+fun Long?.isNotZero(): Boolean = this != null && this != 0L
+
 fun Long?.isZero(): Boolean = this == null || this == 0L
 
 fun Int?.isZero(): Boolean = this == null || this == 0

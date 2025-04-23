@@ -102,23 +102,23 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-            withContext(Dispatchers.IO) {
-                appUsageDao.deleteAll()
+//            withContext(Dispatchers.IO) {
+//                appUsageDao.deleteAll()
 //                appForegroundUsageDao.deleteAll()
 //                appNotifyInfoDao.deleteAll()
-            }
+//            }
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-//            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
 
-            val rangeList = usageStateEventDao.getAll().map {
-                AppUsageEventRawInfo(
-                    packageName = it.packageName,
-                    className = it.className,
-                    eventType = it.eventType,
-                    eventTime = it.eventTime
-                )
-            }
+//            val rangeList = usageStateEventDao.getAll().map {
+//                AppUsageEventRawInfo(
+//                    packageName = it.packageName,
+//                    className = it.className,
+//                    eventType = it.eventType,
+//                    eventTime = it.eventTime
+//                )
+//            }
 
             withContext(Dispatchers.IO) {
                 val usageStateEvent = async(Dispatchers.IO) {
@@ -137,9 +137,7 @@ class AppRepositoryImpl @Inject constructor(
                 val appUsageInsert = async(Dispatchers.IO) {
                     val usageList: List<AppUsageEntity> = applicationInfoSource.getAppUsageInfoList(
                         installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
+                        usageEventList = rangeList
                     )
 
                     if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {

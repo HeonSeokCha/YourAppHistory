@@ -9,6 +9,7 @@ import android.graphics.Bitmap
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.isNotZero
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
@@ -191,13 +192,17 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(23L)) {
-                chsLog("${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()} - ${usageEvent.eventType} - ${usageEvent.className}")
-            }
+//            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(21)) {
+//                chsLog(
+//                    "${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()}" +
+//                            " - ${usageEvent.eventType}" +
+//                            " - ${inCompletedUsageList[usageEvent.packageName]?.second?.count()}" +
+//                            " - ${usageEvent.className}"
+//                )
+//            }
 //            if (usageEvent.eventTime.toLocalDateTime().toString() == "2025-03-31T19:49:05.384") {
 //                Unit
 //            }
-
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
@@ -215,12 +220,9 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
-                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second.apply {
-                                        if (this.none { it == usageEvent.className }) {
-                                            if (!isScreenOff) {
-                                                this.add(usageEvent.className)
-                                            }
+                                        if (!isScreenOff) {
+                                            this.add(usageEvent.className)
                                         }
                                     }
                                 )
@@ -258,10 +260,14 @@ class ApplicationInfoSource @Inject constructor(
                         value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
                     }
 
-//                    if (isScreenOff && inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty) {
-//                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-//                        inCompletedUsageList.remove(usageEvent.packageName)
-//                        continue
+//                    inCompletedUsageList.filter {
+//                        it.key != usageEvent.packageName
+//                                && it.key != prevPackageName
+//                                && it.value.first.endUseTime.isNotZero()
+//                                && it.value.second.isNotEmpty()
+//                    }.forEach {
+//                        completedUsageList.add(it.value.first)
+//                        inCompletedUsageList.remove(it.key)
 //                    }
                 }
 
@@ -272,7 +278,7 @@ class ApplicationInfoSource @Inject constructor(
                         inCompletedUsageList.filter {
                             it.key != usageEvent.packageName
                                     && it.key != prevPackageName
-                                    && it.value.first.endUseTime != 0L
+                                    && it.value.first.endUseTime.isNotZero()
                         }.forEach {
                             completedUsageList.add(it.value.first)
                             inCompletedUsageList.remove(it.key)
@@ -299,7 +305,7 @@ class ApplicationInfoSource @Inject constructor(
                         )
                     }
 
-                    if (isScreenOff || crashApp) {
+                    if (isScreenOff || crashApp || prevPackageName == null) {
                         if (usageEvent.packageName == prevPackageName
                             && usageEvent.className != prevClassName
                         ) {
@@ -315,14 +321,6 @@ class ApplicationInfoSource @Inject constructor(
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
                     }
-
-//                    if (usageEvent.packageName == prevPackageName
-//                        && usageEvent.className == prevClassName
-//                        && inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()
-//                    ) {
-//                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
-//                        inCompletedUsageList.remove(usageEvent.packageName)
-//                    }
                 }
 
                 UsageEvents.Event.SCREEN_NON_INTERACTIVE -> {
@@ -334,6 +332,8 @@ class ApplicationInfoSource @Inject constructor(
                         completedUsageList.add(it.value.first)
                         inCompletedUsageList.remove(it.key)
                     }
+                    prevPackageName = null
+                    prevClassName = null
                 }
 
                 UsageEvents.Event.SCREEN_INTERACTIVE -> {
