@@ -42,6 +42,7 @@ import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.getYearOfWeek
+import com.chs.yourapphistory.common.toCalcDailyCount
 import com.chs.yourapphistory.common.toCalcDailyUsage
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.common.toDisplayYearDate
@@ -850,7 +851,7 @@ fun AppUsageDetailScreen(
                             if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "알림 ${
-                                        item.toCalcDailyUsage()
+                                        item.toCalcDailyCount()
                                     }개/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 알림 ")
@@ -882,7 +883,7 @@ fun AppUsageDetailScreen(
                             if (!item.isNullOrEmpty()) {
                                 WeeklyUsageChart(
                                     title = "앱 실행 ${
-                                        item.toCalcDailyUsage()
+                                        item.toCalcDailyCount()
                                     }회/일",
                                     subTitle = buildAnnotatedString {
                                         append("이번 주 총 앱 실행 ")

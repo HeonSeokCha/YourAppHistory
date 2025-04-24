@@ -31,6 +31,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,7 @@ fun ItemWeeklyChart(
     val smallPadding = with(density) { 4.dp.toPx() }
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
-    val barWidth = with(density) { 12.dp.toPx() }
+    val barWidth = with(density) { 16.dp.toPx() }
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 25).div(7).dp.toPx()
     }
@@ -86,8 +87,8 @@ fun ItemWeeklyChart(
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = distance.times(idx) + barWidth + smallPadding.times(2),
-            xEnd = distance.times(idx) + barWidth + smallPadding.times(2) + barWidth
+            xStart = distance.times(idx) + barWidth + smallPadding.times(1),
+            xEnd = distance.times(idx) + barWidth + smallPadding.times(1) + barWidth
         )
     }
 
@@ -143,7 +144,7 @@ fun ItemWeeklyChart(
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = distance.times(idx) + barWidth + smallPadding.times(2),
+                    x = distance.times(idx) + barWidth + smallPadding.times(1),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -224,7 +225,12 @@ fun WeeklyUsageChart(
 
         ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
             val selectDateValue = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontSize = 12.sp)) {
+                withStyle(
+                    style = SpanStyle(
+                        baselineShift = BaselineShift(+0.1f),
+                        fontSize = 12.sp
+                    )
+                ) {
                     append(list[selectedBar.idx].first.format(Constants.DATE_FORMAT) + " ")
                 }
 
@@ -276,7 +282,7 @@ fun WeeklyUsageChart(
 private fun PreViewUsageChart2() {
     val usageMap = object : HashMap<LocalDate, Int>() {
         init {
-            repeat(6) {
+            repeat(7) {
                 put(
                     LocalDate.now().minusDays(it.toLong()),
                     it * 2 + 1

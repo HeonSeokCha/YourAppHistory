@@ -192,15 +192,8 @@ class ApplicationInfoSource @Inject constructor(
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-//            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(21)) {
-//                chsLog(
-//                    "${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()}" +
-//                            " - ${usageEvent.eventType}" +
-//                            " - ${inCompletedUsageList[usageEvent.packageName]?.second?.count()}" +
-//                            " - ${usageEvent.className}"
-//                )
-//            }
-//            if (usageEvent.eventTime.toLocalDateTime().toString() == "2025-03-31T19:49:05.384") {
+
+//            if (usageEvent.eventTime.toLocalDateTime().toString() == "2025-04-24T10:11:49.420") {
 //                Unit
 //            }
 
@@ -220,6 +213,7 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
+                                    first = value.first.copy(endUseTime = 0L),
                                     second = value.second.apply {
                                         if (!isScreenOff) {
                                             this.add(usageEvent.className)
@@ -292,7 +286,7 @@ class ApplicationInfoSource @Inject constructor(
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
                             first = if (isScreenOff
-                                || value.second.size == 1
+                                || value.second.isNotEmpty()
                                 || value.first.endUseTime.isZero()
                             ) {
                                 value.first.copy(endUseTime = usageEvent.eventTime)
@@ -357,6 +351,15 @@ class ApplicationInfoSource @Inject constructor(
                     isScreenOff = false
                 }
             }
+
+//            if (usageEvent.eventTime.toLocalDate() == LocalDate.now().minusDays(0)) {
+//                chsLog(
+//                    "${usageEvent.packageName} | ${usageEvent.eventTime.toLocalDateTime()}" +
+//                            " - ${usageEvent.eventType}" +
+//                            " - ${inCompletedUsageList[usageEvent.packageName]?.second?.count()}" +
+//                            " - ${usageEvent.className}"
+//                )
+//            }
         }
 
 //        inCompletedUsageList.map { it.value.first} .forEach {

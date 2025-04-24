@@ -36,6 +36,7 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.BaselineShift
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -60,7 +61,7 @@ fun ItemDailyChart(
     val smallPadding = with(density) { 4.dp.toPx() }
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
-    val barWidth = with(density) { 6.dp.toPx() }
+    val barWidth = with(density) { 8.dp.toPx() }
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
     }
@@ -227,7 +228,12 @@ fun DailyUsageChart(
 
 
             val selectValue = buildAnnotatedString {
-                withStyle(style = SpanStyle(fontSize = 12.sp)) {
+                withStyle(
+                    style = SpanStyle(
+                        baselineShift = BaselineShift(+0.1f),
+                        fontSize = 12.sp
+                    )
+                ) {
                     append(selectedBar.idx.convertBetweenHourString() + " ")
                 }
 
