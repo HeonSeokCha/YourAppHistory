@@ -205,21 +205,21 @@ class ApplicationInfoSource @Inject constructor(
                                 AppUsageEntity(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
-                                ) to if (isScreenOff) {
-                                    arrayListOf()
-                                } else {
-                                    arrayListOf(usageEvent.className)
-                                }
+                                ) to arrayListOf(usageEvent.className)
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                                value.copy(
-                                    first = value.first.copy(endUseTime = 0L),
-                                    second = value.second.apply {
-                                        if (!isScreenOff) {
+                                if ((value.first.endUseTime.isZero() && value.second.any { it == usageEvent.className })
+                                    || isScreenOff
+                                ) {
+                                    value.copy(first = value.first.copy(endUseTime = 0L))
+                                } else {
+                                    value.copy(
+                                        first = value.first.copy(endUseTime = 0L),
+                                        second = value.second.apply {
                                             this.add(usageEvent.className)
                                         }
-                                    }
-                                )
+                                    )
+                                }
                             }
                         }
                     }
@@ -285,14 +285,7 @@ class ApplicationInfoSource @Inject constructor(
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(
-                            first = if (isScreenOff
-                                || value.second.isNotEmpty()
-                                || value.first.endUseTime.isZero()
-                            ) {
-                                value.first.copy(endUseTime = usageEvent.eventTime)
-                            } else {
-                                value.first
-                            },
+                            first = value.first.copy(endUseTime = usageEvent.eventTime),
                             second = value.second.apply {
                                 this.remove(usageEvent.className)
                             }
@@ -314,6 +307,15 @@ class ApplicationInfoSource @Inject constructor(
                     if (usageEvent.packageName != prevPackageName) {
                         completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
                         inCompletedUsageList.remove(usageEvent.packageName)
+                        continue
+                    }
+
+                    if (usageEvent.className == prevClassName
+                        && inCompletedUsageList[usageEvent.packageName]!!.second.isEmpty()
+                    ) {
+                        completedUsageList.add(inCompletedUsageList[usageEvent.packageName]!!.first)
+                        inCompletedUsageList.remove(usageEvent.packageName)
+                        continue
                     }
                 }
 
