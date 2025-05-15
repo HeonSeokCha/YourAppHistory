@@ -386,16 +386,12 @@ fun LocalDate.toConvertDisplayDay(): String {
 
 fun List<Pair<LocalDate, Int>>.toCalcDailyUsage(): String {
     return this.sumOf { it.second }.run {
-        if (this@toCalcDailyUsage.count { it.second != 0 } == 0) return@run 0
-
-        this / this@toCalcDailyUsage.count { it.second != 0 }
+        this / this@toCalcDailyUsage.count { it.first <= LocalDate.now() }
     }.convertToRealUsageHour()
 }
 
 fun List<Pair<LocalDate, Int>>.toCalcDailyCount(): Int {
     return this.sumOf { it.second }.run {
-        if (this@toCalcDailyCount.count { it.second != 0 } == 0) return@run 0
-
-        this / this@toCalcDailyCount.count { it.second != 0 }
+        this / this@toCalcDailyCount.count { it.first <= LocalDate.now() }
     }
 }
