@@ -251,7 +251,17 @@ class ApplicationInfoSource @Inject constructor(
                     }
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
-                        value.copy(value.first.copy(endUseTime = usageEvent.eventTime))
+                        value.copy(
+                            first = value.first.copy(endUseTime = usageEvent.eventTime),
+                            second = if (
+                                usageEvent.packageName == prevPackageName
+                                && usageEvent.className == prevClassName
+                                && value.first.endUseTime == 0L
+                                && value.second.count { it == usageEvent.className } > 1
+                            ) {
+                                value.second.apply { this.remove((usageEvent.className)) }
+                            } else value.second
+                        )
                     }
 
 //                    inCompletedUsageList.filter {
