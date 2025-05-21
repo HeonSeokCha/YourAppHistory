@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.repository
 
+import android.R
 import android.graphics.Bitmap
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -137,7 +138,9 @@ class AppRepositoryImpl @Inject constructor(
                 val appUsageInsert = async(Dispatchers.IO) {
                     val usageList: List<AppUsageEntity> = applicationInfoSource.getAppUsageInfoList(
                         installPackageNames = installPackageNames,
-                        usageEventList = rangeList
+                        usageEventList = rangeList.filter { rawInfo ->
+                            Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                        }
                     )
 
                     if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
