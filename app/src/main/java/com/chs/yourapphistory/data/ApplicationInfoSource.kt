@@ -197,7 +197,7 @@ class ApplicationInfoSource @Inject constructor(
 
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
-                    if (installPackageNames.contains(usageEvent.packageName)) {
+                    if (installPackageNames.any { it == usageEvent.packageName }) {
                         if (inCompletedUsageList[usageEvent.packageName] == null) {
                             inCompletedUsageList[usageEvent.packageName] =
                                 AppUsageEntity(
@@ -238,7 +238,16 @@ class ApplicationInfoSource @Inject constructor(
                 }
 
                 UsageEvents.Event.ACTIVITY_PAUSED -> {
-                    if (inCompletedUsageList[usageEvent.packageName] == null) continue
+                    if (inCompletedUsageList[usageEvent.packageName] == null) {
+                        if (installPackageNames.none { it == usageEvent.packageName }) continue
+
+                        inCompletedUsageList[usageEvent.packageName] =
+                            AppUsageEntity(
+                                packageName = usageEvent.packageName,
+                                beginUseTime = usageEvent.eventTime
+                            ) to arrayListOf(usageEvent.className)
+                        continue
+                    }
 
                     if (prevPackageName != null && usageEvent.packageName != prevPackageName) {
                         if (inCompletedUsageList[prevPackageName] != null
