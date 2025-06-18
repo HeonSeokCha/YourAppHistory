@@ -344,6 +344,17 @@ class ApplicationInfoSource @Inject constructor(
                     isScreenOff = false
                 }
 
+                UsageEvents.Event.KEYGUARD_SHOWN -> {
+                    if (!isScreenOff) continue
+                    if (inCompletedUsageList[prevPackageName] == null) continue
+
+                    inCompletedUsageList.computeIfPresent(prevPackageName!!) { _, value ->
+                        value.copy(first = value.first.copy(endUseTime = usageEvent.eventTime))
+                    }
+                    completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
+                    inCompletedUsageList.remove(prevPackageName)
+                }
+
                 UsageEvents.Event.DEVICE_SHUTDOWN -> {
                     inCompletedUsageList.replaceAll { key, value ->
                         value.copy(
