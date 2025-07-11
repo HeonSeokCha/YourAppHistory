@@ -93,7 +93,7 @@ class ApplicationInfoSource @Inject constructor(
                 usageEvents.getNextEvent(this)
             }
 
-            val packageName: String = currentEvent.packageName
+            val packageName: String = currentEvent.packageName ?: continue
             val time: Long = currentEvent.timeStamp
             val className: String? = currentEvent.className
             val eventType: Int = currentEvent.eventType
