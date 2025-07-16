@@ -16,6 +16,7 @@ import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.db.entity.IncompleteAppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -74,6 +75,7 @@ class ApplicationInfoSource @Inject constructor(
                         width = 144, height = 144
                     )
                 } catch (e: PackageManager.NameNotFoundException) {
+                    chsLog(e.message.toString())
                     null
                 }
             }
@@ -160,6 +162,19 @@ class ApplicationInfoSource @Inject constructor(
                 }
             }
         }
+
+        if (inCompletedUsageList.isEmpty()) return completedUsageList
+
+
+        inCompletedUsageList.map {
+            IncompleteAppUsageEntity(
+                packageName = it.value.packageName,
+                beginUseTime = it.value.beginUseTime,
+                className = it.key.second,
+                usageType = "BG"
+            )
+        }.toTypedArray()
+
         return completedUsageList
     }
 
