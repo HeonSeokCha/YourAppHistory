@@ -15,6 +15,7 @@ import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import com.chs.yourapphistory.data.DataStoreSource
+import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -75,6 +76,11 @@ object Module {
     @Provides
     fun provideUsageStateDao(db: YourAppHistoryDatabase): UsageStateEventDao {
         return db.usageStateEventDao
+    }
+
+    @Provides
+    fun provideIncompleteInfoDao(db: YourAppHistoryDatabase): InCompleteAppUsageDao {
+        return db.inCompleteAppUsageDao
     }
 
     @Singleton

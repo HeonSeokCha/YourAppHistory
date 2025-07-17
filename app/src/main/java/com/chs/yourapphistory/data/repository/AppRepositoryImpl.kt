@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.data.repository
 
-import android.R
 import android.graphics.Bitmap
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -8,7 +7,6 @@ import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -30,6 +28,7 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppLaunchInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppNotifyInfo
 import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
+import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -51,7 +50,8 @@ class AppRepositoryImpl @Inject constructor(
     private val appForegroundUsageDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
     private val usageStateEventDao: UsageStateEventDao,
-    private val dataStoreSource: DataStoreSource
+    private val dataStoreSource: DataStoreSource,
+    private val inCompleteAppUsageDao: InCompleteAppUsageDao
 ) : AppRepository {
 
     private val mutex: Mutex by lazy { Mutex() }
@@ -61,7 +61,8 @@ class AppRepositoryImpl @Inject constructor(
             awaitAll(
                 async { appUsageDao.getLastTime() },
                 async { appForegroundUsageDao.getLastTime() },
-                async { appNotifyInfoDao.getLastTime() }
+                async { appNotifyInfoDao.getLastTime() },
+                async { inCompleteAppUsageDao.getMinBeginTime() }
             ).min()
         }.run {
             if (this == 0L) {
@@ -136,29 +137,37 @@ class AppRepositoryImpl @Inject constructor(
                 }
 
                 val appUsageInsert = async(Dispatchers.IO) {
-                    val usageList: List<AppUsageEntity> = applicationInfoSource.getAppUsageInfoList(
+                    applicationInfoSource.getAppUsageInfoList(
                         installPackageNames = installPackageNames,
                         usageEventList = rangeList.filter { rawInfo ->
                             Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
                         }
-                    )
+                    ).run {
+                        val usageList: List<AppUsageEntity> = this.first
+                        if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
+                            updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
+                        }
 
-                    if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
-                        updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
+                        appUsageDao.upsert(*usageList.toTypedArray())
+
+                        val incompList = this.second.ifEmpty { return@async }
+//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
                     }
-
-                    appUsageDao.upsert(*usageList.toTypedArray())
                 }
 
                 val appForegroundUsageInsert = async(Dispatchers.IO) {
-                    appForegroundUsageDao.upsert(
-                        *applicationInfoSource.getAppForeGroundUsageInfoList(
-                            installPackageNames = installPackageNames,
-                            usageEventList = rangeList.filter { rawInfo ->
-                                Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                            }
-                        ).toTypedArray()
-                    )
+                    applicationInfoSource.getAppForeGroundUsageInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = rangeList.filter { rawInfo ->
+                            Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                        }
+                    ).run {
+                        val foregroundUsageList = this.first
+                        appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
+
+                        val incompList = this.second.ifEmpty { return@async }
+//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+                    }
                 }
 
                 val appNotifyInfoUpsert = async(Dispatchers.IO) {

@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.8.2"
+androidGradlePlugin = "8.11.1"
 
 compileSdkVersion = "35"
 minSdkVersion = "29"
@@ -8,13 +8,13 @@ versionCode = "1"
 versionName = "1.0"
 
 activity = "1.10.1"
-compose-ui = "1.8.2"
-lifecycle = "2.9.1"
-room = "2.7.1"
-hilt = "2.56.2"
-kotlin = "2.1.20"
-ksp = "2.1.20-2.0.0"
-kotlin-coroutine = "1.10.1"
+compose-ui = "1.8.3"
+lifecycle = "2.9.2"
+room = "2.7.2"
+hilt = "2.57"
+kotlin = "2.2.0"
+ksp = "2.2.0-2.0.2"
+kotlin-coroutine = "1.10.2"
 desugar_jdk_libs = "2.1.5"
 
 [libraries]
@@ -26,7 +26,7 @@ androidX-compose-material-icon-extend = "androidx.compose.material:material-icon
 androidX-compose-material3 = "androidx.compose.material3:material3:1.3.2"
 androidX-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
-androidX-navigation-compose = "androidx.navigation:navigation-compose:2.9.0"
+androidX-navigation-compose = "androidx.navigation:navigation-compose:2.9.2"
 androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
 androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
 androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.1.7"
@@ -36,7 +36,7 @@ androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidX-paging-paging-compose = "androidx.paging:paging-compose:3.3.6"
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-lottie = "com.airbnb.android:lottie-compose:6.6.3"
+lottie = "com.airbnb.android:lottie-compose:6.6.7"
 
 ## Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
@@ -44,12 +44,12 @@ hilt-compiler = { module = "com.google.dagger:hilt-android-compiler", version.re
 hilt-navigation-compose = "androidx.hilt:hilt-navigation-compose:1.2.0"
 hilt-worker = "androidx.hilt:hilt-work:1.2.0"
 hilt-worker-compiler = "androidx.hilt:hilt-compiler:1.2.0"
-workmanager = "androidx.work:work-runtime-ktx:2.10.1"
+workmanager = "androidx.work:work-runtime-ktx:2.10.2"
 
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.8.0"
+kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0"
 
 
 [bundles]
@@ -95,3 +95,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 hilt = { id = "com.google.dagger.hilt.android", version.ref = "hilt" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+android-room = { id = "androidx.room", version.ref = "room" }

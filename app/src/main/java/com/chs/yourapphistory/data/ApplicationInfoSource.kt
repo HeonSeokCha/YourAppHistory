@@ -122,7 +122,7 @@ class ApplicationInfoSource @Inject constructor(
     fun getAppForeGroundUsageInfoList(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventRawInfo>
-    ): List<AppForegroundUsageEntity> {
+    ): Pair<List<AppForegroundUsageEntity>, List<IncompleteAppUsageEntity>> {
         val inCompletedUsageList: HashMap<Pair<String, String?>, AppForegroundUsageEntity> =
             hashMapOf()
         val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
@@ -163,19 +163,19 @@ class ApplicationInfoSource @Inject constructor(
             }
         }
 
-        if (inCompletedUsageList.isEmpty()) return completedUsageList
+        if (inCompletedUsageList.isEmpty()) return completedUsageList to emptyList()
 
-
-        inCompletedUsageList.map {
+        val incompUsageEntityList = inCompletedUsageList.map {
+            chsLog("${it.key.first} - ${it.value.beginUseTime} : ${it.key.second}")
             IncompleteAppUsageEntity(
                 packageName = it.value.packageName,
                 beginUseTime = it.value.beginUseTime,
                 className = it.key.second,
                 usageType = "BG"
             )
-        }.toTypedArray()
+        }
 
-        return completedUsageList
+        return completedUsageList to incompUsageEntityList
     }
 
     fun getAppNotifyInfoList(
@@ -196,7 +196,7 @@ class ApplicationInfoSource @Inject constructor(
     fun getAppUsageInfoList(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventRawInfo>
-    ): List<AppUsageEntity> {
+    ): Pair<List<AppUsageEntity>, List<IncompleteAppUsageEntity>> {
         var prevPackageName: String? = null
         var prevClassName: String? = null
         val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, ArrayList<String?>>> =
@@ -388,6 +388,19 @@ class ApplicationInfoSource @Inject constructor(
                 }
             }
         }
-        return completedUsageList
+
+        if (inCompletedUsageList.isEmpty()) return completedUsageList to emptyList()
+
+        val incompUsageEntityList = inCompletedUsageList.map {
+            chsLog("${it.key} - ${it.value.first.beginUseTime} : ${it.value.second}")
+            IncompleteAppUsageEntity(
+                packageName = it.key,
+                beginUseTime = it.value.first.beginUseTime,
+                className = it.value.second.toString(),
+                usageType = "FG"
+            )
+        }
+
+        return completedUsageList to incompUsageEntityList
     }
 }
