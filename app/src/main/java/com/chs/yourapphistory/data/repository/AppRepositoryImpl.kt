@@ -62,7 +62,7 @@ class AppRepositoryImpl @Inject constructor(
                 async { appUsageDao.getLastTime() },
                 async { appForegroundUsageDao.getLastTime() },
                 async { appNotifyInfoDao.getLastTime() },
-                async { inCompleteAppUsageDao.getMinBeginTime() }
+//                async { inCompleteAppUsageDao.getMinBeginTime() }
             ).min()
         }.run {
             if (this == 0L) {
@@ -144,14 +144,23 @@ class AppRepositoryImpl @Inject constructor(
                         }
                     ).run {
                         val usageList: List<AppUsageEntity> = this.first
+                        val incompList = this.second
                         if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
                             updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
+                        } else {
+                            inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
                         }
 
-                        appUsageDao.upsert(*usageList.toTypedArray())
+                        inCompleteAppUsageDao.delete(
+                            *inCompleteAppUsageDao.getListFromType("FG").filter {
+                                usageList.any { usage ->
+                                    usage.packageName == it.packageName
+                                            && usage.beginUseTime == it.beginUseTime
+                                }
+                            }.toTypedArray()
+                        )
 
-                        val incompList = this.second.ifEmpty { return@async }
-//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+                        appUsageDao.upsert(*usageList.toTypedArray())
                     }
                 }
 
@@ -165,8 +174,20 @@ class AppRepositoryImpl @Inject constructor(
                         val foregroundUsageList = this.first
                         appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
 
-                        val incompList = this.second.ifEmpty { return@async }
-//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+                        if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
+
+                        inCompleteAppUsageDao.delete(
+                            *inCompleteAppUsageDao.getListFromType("BG").filter {
+                                foregroundUsageList.any { usage ->
+                                    usage.packageName == it.packageName
+                                            && usage.beginUseTime == it.beginUseTime
+                                }
+                            }.toTypedArray()
+                        )
+
+                        val incompList = this.second.ifEmpty { return@run }
+
+                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
                     }
                 }
 
