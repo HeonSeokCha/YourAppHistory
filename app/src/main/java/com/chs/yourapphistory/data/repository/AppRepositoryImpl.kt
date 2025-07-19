@@ -6,6 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -62,7 +63,7 @@ class AppRepositoryImpl @Inject constructor(
                 async { appUsageDao.getLastTime() },
                 async { appForegroundUsageDao.getLastTime() },
                 async { appNotifyInfoDao.getLastTime() },
-//                async { inCompleteAppUsageDao.getMinBeginTime() }
+                async { inCompleteAppUsageDao.getMinBeginTime() }
             ).min()
         }.run {
             if (this == 0L) {
@@ -104,11 +105,14 @@ class AppRepositoryImpl @Inject constructor(
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
+            chsLog("START")
 //            withContext(Dispatchers.IO) {
 //                appUsageDao.deleteAll()
 //                appForegroundUsageDao.deleteAll()
 //                appNotifyInfoDao.deleteAll()
+//                inCompleteAppUsageDao.deleteAll()
 //            }
+//            chsLog("DELETE ALL")
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())

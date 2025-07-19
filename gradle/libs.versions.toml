@@ -1,9 +1,9 @@
 [versions]
 androidGradlePlugin = "8.11.1"
 
-compileSdkVersion = "35"
+compileSdkVersion = "36"
 minSdkVersion = "29"
-targetSdkVersion = "34"
+targetSdkVersion = "35"
 versionCode = "1"
 versionName = "1.0"
 

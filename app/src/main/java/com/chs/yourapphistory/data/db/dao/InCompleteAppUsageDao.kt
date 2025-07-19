@@ -11,4 +11,7 @@ abstract class InCompleteAppUsageDao : BaseDao<IncompleteAppUsageEntity> {
 
     @Query("SELECT * FROM incompleteappusage WHERE usageType = :type")
     abstract suspend fun getListFromType(type: String): List<IncompleteAppUsageEntity>
+
+    @Query("DELETE FROM inCompleteAppUsage")
+    abstract suspend fun deleteAll()
 }
