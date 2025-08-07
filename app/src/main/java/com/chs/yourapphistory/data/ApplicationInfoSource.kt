@@ -222,7 +222,14 @@ class ApplicationInfoSource @Inject constructor(
                         } else {
                             inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                                 value.copy(
-                                    first = value.first.copy(endUseTime = 0L),
+                                    first = if (value.second.isEmpty()) {
+                                        value.first.copy(
+                                            beginUseTime = usageEvent.eventTime,
+                                            endUseTime = 0L
+                                        )
+                                    } else {
+                                        value.first.copy(endUseTime = 0L)
+                                    },
                                     second = value.second.apply {
                                         if (isScreenOff
                                             || (value.first.endUseTime.isZero()
@@ -260,7 +267,7 @@ class ApplicationInfoSource @Inject constructor(
                             AppUsageEntity(
                                 packageName = usageEvent.packageName,
                                 beginUseTime = usageEvent.eventTime
-                            ) to arrayListOf(usageEvent.className)
+                            ) to arrayListOf()
                         continue
                     }
 
@@ -379,7 +386,11 @@ class ApplicationInfoSource @Inject constructor(
                         )
                     }
 
-                    completedUsageList.addAll(inCompletedUsageList.map { it.value.first })
+                    val a = inCompletedUsageList
+                        .filter { it.value.second.isNotEmpty() }
+                        .map { it.value.first }
+
+                    completedUsageList.addAll(a)
                     inCompletedUsageList.clear()
 
                     prevPackageName = null
