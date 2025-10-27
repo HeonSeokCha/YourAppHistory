@@ -16,7 +16,9 @@ import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetai
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListViewModel
+import com.chs.yourapphistory.presentation.screen.welcome.WelComeViewModel
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreen
+import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreenRoot
 
 @Composable
 fun MainNavHost(
@@ -35,13 +37,17 @@ fun MainNavHost(
         }
     ) {
         composable<Screen.ScreenWelcome> {
-            WelcomeScreen {
-                navController.navigate(it) {
-                    popUpTo(Screen.ScreenWelcome) {
-                        inclusive = true
+            val viewModel: WelComeViewModel = WelComeViewModel()
+            WelcomeScreenRoot(
+                viewModel = viewModel,
+                onNavigateHome = {
+                    navController.navigate(Screen.ScreenUsedAppList) {
+                        popUpTo(Screen.ScreenWelcome) {
+                            inclusive = true
+                        }
                     }
                 }
-            }
+            )
         }
 
         composable<Screen.ScreenUsedAppList> {

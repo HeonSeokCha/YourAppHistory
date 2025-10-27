@@ -27,10 +27,7 @@ import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
         UsageStateEventEntity::class,
         IncompleteAppUsageEntity::class
     ],
-    version = 2,
-    autoMigrations = [
-        AutoMigration(from = 1, to = 2)
-    ],
+    version = 1,
     exportSchema = true
 )
 abstract class YourAppHistoryDatabase : RoomDatabase() {

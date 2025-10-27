@@ -3,12 +3,11 @@ package com.chs.yourapphistory.presentation.screen.welcome
 import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
-import android.net.Uri
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RawRes
-import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +19,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -28,6 +26,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,8 +35,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
@@ -46,23 +43,62 @@ import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
 import com.chs.yourapphistory.presentation.Screen
 import androidx.core.net.toUri
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
-fun WelcomeScreen(
-    onNavigate: (Screen) -> Unit
+fun WelcomeScreenRoot(
+    viewModel: WelComeViewModel,
+    onNavigateHome: () -> Unit
 ) {
+    val state by viewModel.state.collectAsStateWithLifecycle()
     val context: Context = LocalContext.current
-
-    val lottieList = listOf(R.raw.lottie_chart, R.raw.lottie_usage)
-
-    val pagerState = rememberPagerState(pageCount = { lottieList.size })
-
     val requestPermission = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) {
         if (getUsagePermission(context)) {
-            onNavigate(Screen.ScreenUsedAppList)
+            onNavigateHome()
         }
+    }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collect { effect ->
+            when (effect) {
+                WelcomeEffect.RequestPermission -> {
+                    try {
+                        requestPermission.launch(
+                            Intent(
+                                Settings.ACTION_USAGE_ACCESS_SETTINGS,
+                                "package:${context.packageName}".toUri()
+                            )
+                        )
+                    } catch (e: ActivityNotFoundException) {
+                        requestPermission.launch(
+                            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
+                        )
+                    }
+                }
+            }
+        }
+    }
+
+    WelcomeScreen(
+        state = state,
+        onIntent = viewModel::handleIntent
+    )
+}
+
+@Composable
+fun WelcomeScreen(
+    state: WelcomeState,
+    onIntent: (WelcomeIntent) -> Unit
+) {
+    val pagerState = rememberPagerState(pageCount = { state.tabList.count() })
+    LaunchedEffect(state.tabIdx) {
+        pagerState.animateScrollToPage(state.tabIdx)
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        onIntent(WelcomeIntent.OnChangeTabIdx(pagerState.currentPage))
     }
 
     Column(
@@ -70,7 +106,8 @@ fun WelcomeScreen(
             .fillMaxSize(),
     ) {
         HorizontalPager(
-            state = pagerState
+            state = pagerState,
+            key = { it }
         ) {
             Column(
                 modifier = Modifier
@@ -78,7 +115,7 @@ fun WelcomeScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Top
             ) {
-                ContentItem(lottieRawId = lottieList[it])
+                ContentItem(lottieRawId = state.tabList[it])
             }
         }
 
@@ -93,32 +130,20 @@ fun WelcomeScreen(
                 val color = if (pagerState.currentPage == iteration) Color.DarkGray else Color.LightGray
                 Box(
                     modifier = Modifier
+                        .size(16.dp)
                         .padding(4.dp)
                         .clip(CircleShape)
                         .background(color)
-                        .size(16.dp)
                 )
             }
         }
 
-        if (pagerState.currentPage == lottieList.size - 1) {
+        AnimatedVisibility(visible = state.tabIdx + 1 == state.tabList.count()) {
             Button(
                 modifier = Modifier
+                    .fillMaxWidth()
                     .align(Alignment.CenterHorizontally),
-                onClick = {
-                    try {
-                        requestPermission.launch(
-                            Intent(
-                                Settings.ACTION_USAGE_ACCESS_SETTINGS,
-                                "package:${context.packageName}".toUri()
-                            )
-                        )
-                    } catch (e: ActivityNotFoundException) {
-                        requestPermission.launch(
-                            Intent(Settings.ACTION_USAGE_ACCESS_SETTINGS)
-                        )
-                    }
-                },
+                onClick = { onIntent(WelcomeIntent.ClickFinish) },
                 colors = ButtonDefaults.buttonColors(
                     contentColor = Color.White
                 )
@@ -154,6 +179,8 @@ fun ContentItem(@RawRes lottieRawId: Int) {
 @Preview(showBackground = true)
 fun FirstOnBoardingScreenPreview() {
     Column(modifier = Modifier.fillMaxSize()) {
-        WelcomeScreen { }
+        WelcomeScreen(state = WelcomeState()) {
+
+        }
     }
 }
