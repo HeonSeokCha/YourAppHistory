@@ -1,10 +1,12 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
-import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.toMillis
+import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingForegroundListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingLaunchListUseCase
@@ -17,8 +19,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -39,19 +43,23 @@ class UsedAppListViewModel @Inject constructor(
     private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
 
-    private val _usedAppListEvent: Channel<UsedAppEvent> = Channel()
-    val usedAppEvent = _usedAppListEvent.receiveAsFlow()
+    private val _effect: Channel<UsedAppEffect> = Channel(Channel.BUFFERED)
+    val effect = _effect.receiveAsFlow()
+    private val sortOptionState = MutableStateFlow(SortType.UsageEvent)
 
     private val _state = MutableStateFlow(UsedAppListState())
     val state = _state
-        .onStart {
-            getApplicationsInfo()
-        }
+        .onStart { getApplicationsInfo() }
         .stateIn(
             viewModelScope,
             SharingStarted.Lazily,
-            UsedAppListState()
+            _state.value
         )
+
+    val pagingList = sortOptionState
+        .flatMapLatest {
+            getEventList(it)
+        }.cachedIn(viewModelScope)
 
     private suspend fun getApplicationsInfo() {
         withContext(Dispatchers.IO) {
@@ -69,117 +77,45 @@ class UsedAppListViewModel @Inject constructor(
                 }
             )
         }
-
-        getEventList(_state.value.sortOption)
     }
 
-    fun changeEvent(event: UsedAppEvent) {
-        when (event) {
-            UsedAppEvent.Click.RefreshAppUsageInfo -> {
-                _state.update { UsedAppListState(isRefreshing = true) }
-                viewModelScope.launch {
-                    getApplicationsInfo()
-                }
-            }
-
-            is UsedAppEvent.GetUsageEvent -> {
-                getEventList(event)
-            }
-
-            is UsedAppEvent.Click.ChangeDate -> {
+    fun handleIntent(intent: UsedAppIntent) {
+        when (intent) {
+            is UsedAppIntent.ChangeDate -> {
                 _state.update {
-                    it.copy(
-                        displayDate = if (event.date == LocalDate.now()) "오늘"
-                        else event.date.toString()
+                    it.copy(displayDate = if (intent.date == LocalDate.now()) "오늘" else intent.date.toString())
+                }
+            }
+
+            is UsedAppIntent.ClickAppInfo -> {
+                _effect.trySend(
+                    UsedAppEffect.NavigateAppDetail(
+                        appInfo = intent.appInfo,
+                        targetDate = intent.targetDate.toMillis()
                     )
-                }
+                )
             }
 
-            UsedAppEvent.Click.Sort -> {
-                _state.update { it.copy(isShowFilterDialog = !it.isShowFilterDialog) }
+            UsedAppIntent.Error -> _effect.trySend(UsedAppEffect.ShowPagingError)
+            is UsedAppIntent.OnChangeSort -> {
+                _state.update { it.copy(sortOption = intent.sort, isShowFilterDialog = false) }
+                sortOptionState.update { intent.sort }
             }
 
-            UsedAppEvent.Load.Complete -> {
-                _state.update {
-                    it.copy(
-                        isAppending = false,
-                        isLoading = false
-                    )
-                }
-            }
-
-            UsedAppEvent.Load.Appending -> {
-                _state.update {
-                    it.copy(isAppending = false)
-                }
-            }
-
-            UsedAppEvent.Load.Error -> {
-                viewModelScope.launch {
-                    _state.update {
-                        it.copy(
-                            isLoading = false,
-                            isAppending = false
-                        )
-                    }
-                    _usedAppListEvent.send(UsedAppEvent.Load.Error)
-                }
-            }
-
-            is UsedAppEvent.Click.Application -> {
-                viewModelScope.launch {
-                    _usedAppListEvent.send(
-                        UsedAppEvent.Click.Application(
-                            targetDate = event.targetDate,
-                            appInfo = event.appInfo
-                        )
-                    )
-                }
-            }
-
-            UsedAppEvent.Idle -> Unit
+            is UsedAppIntent.OnShowSortDialog -> _state.update { it.copy(isShowFilterDialog = intent.value) }
+            UsedAppIntent.Loading -> _state.update { it.copy(isLoading = true) }
+            UsedAppIntent.LoadComplete -> _state.update { it.copy(isLoading = false) }
+            UsedAppIntent.Appending -> _state.update { it.copy(isAppending = true) }
+            UsedAppIntent.AppendComplete -> _state.update { it.copy(isAppending = false) }
         }
     }
 
-    private fun getEventList(option: UsedAppEvent.GetUsageEvent) {
-        viewModelScope.launch {
-            when (option) {
-                is UsedAppEvent.GetUsageEvent.AppForegroundUsageEvent -> {
-                    _state.update {
-                        it.copy(
-                            appInfoList = getPagingForegroundListUseCase().cachedIn(viewModelScope),
-                            sortOption = option
-                        )
-                    }
-                }
-
-                is UsedAppEvent.GetUsageEvent.AppLaunchEvent -> {
-                    _state.update {
-                        it.copy(
-                            appInfoList = getPagingLaunchListUseCase().cachedIn(viewModelScope),
-                            sortOption = option
-                        )
-                    }
-                }
-
-                is UsedAppEvent.GetUsageEvent.AppNotifyEvent -> {
-                    _state.update {
-                        it.copy(
-                            appInfoList = getPagingNotifyListUseCase().cachedIn(viewModelScope),
-                            sortOption = option
-                        )
-                    }
-                }
-
-                is UsedAppEvent.GetUsageEvent.AppUsageEvent -> {
-                    _state.update {
-                        it.copy(
-                            appInfoList = getPagingUsedListUseCase().cachedIn(viewModelScope),
-                            sortOption = option
-                        )
-                    }
-                }
-            }
+    private suspend fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        return when (sortType) {
+            SortType.UsageEvent -> getPagingUsedListUseCase()
+            SortType.ForegroundUsageEvent -> getPagingForegroundListUseCase()
+            SortType.NotifyEvent -> getPagingNotifyListUseCase()
+            SortType.LaunchEvent -> getPagingLaunchListUseCase()
         }
     }
 }

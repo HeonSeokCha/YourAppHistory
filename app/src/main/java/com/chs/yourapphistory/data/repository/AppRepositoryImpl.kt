@@ -218,7 +218,10 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         val minDate: LocalDate = getMinDate()
         return Pager(
-            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            ),
         ) {
             GetPagingUsedList(
                 appUsageDao = appUsageDao,
@@ -230,7 +233,10 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         val minDate: LocalDate = getMinDate()
         return Pager(
-            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            )
         ) {
             GetPagingForegroundList(
                 appForegroundUsageDao = appForegroundUsageDao,
@@ -242,7 +248,10 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         val minDate: LocalDate = getMinDate()
         return Pager(
-            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            )
         ) {
             GetPagingNotifyList(
                 appNotifyInfoDao = appNotifyInfoDao,
@@ -254,7 +263,10 @@ class AppRepositoryImpl @Inject constructor(
     override suspend fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         val minDate: LocalDate = getMinDate()
         return Pager(
-            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            )
         ) {
             GetPagingLaunchList(
                 appUsageDao = appUsageDao,

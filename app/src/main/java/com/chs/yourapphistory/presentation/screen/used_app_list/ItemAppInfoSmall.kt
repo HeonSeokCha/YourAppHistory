@@ -1,11 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.used_app_list
 
 import android.graphics.Bitmap
-import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -17,10 +13,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Android
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -37,6 +30,7 @@ import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import com.chs.yourapphistory.presentation.screen.common.shimmer
@@ -45,7 +39,7 @@ import com.chs.yourapphistory.presentation.screen.common.shimmer
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
-    sortOption: UsedAppEvent = UsedAppEvent.GetUsageEvent.AppUsageEvent,
+    sortOption: SortType = SortType.UsageEvent,
     clickAble: (AppInfo) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
@@ -116,9 +110,7 @@ fun ItemAppInfoSmall(
                                 visible = appInfo == null,
                                 highlight = PlaceholderHighlight.shimmer()
                             ),
-                        text = if (sortOption is UsedAppEvent.GetUsageEvent.AppNotifyEvent
-                            || sortOption is UsedAppEvent.GetUsageEvent.AppLaunchEvent
-                        ) {
+                        text = if (sortOption == SortType.NotifyEvent || sortOption == SortType.LaunchEvent) {
                             "${value}회"
                         } else {
                             value?.convertToRealUsageTime() ?: Constants.TEXT_TITLE_PREVIEW
