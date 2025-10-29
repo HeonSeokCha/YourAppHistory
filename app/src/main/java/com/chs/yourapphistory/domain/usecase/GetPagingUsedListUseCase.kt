@@ -8,9 +8,9 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 class GetPagingUsedListUseCase @Inject constructor(
-    private val repository: AppRepository
+    private val repository: AppRepository,
 ) {
-    suspend operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return repository.getDayUsedAppInfoList()
     }
 }

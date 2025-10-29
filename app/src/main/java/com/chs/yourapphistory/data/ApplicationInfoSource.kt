@@ -9,8 +9,6 @@ import android.graphics.Bitmap
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.isNotZero
-import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
@@ -232,7 +230,7 @@ class ApplicationInfoSource @Inject constructor(
                                     },
                                     second = value.second.apply {
                                         if (isScreenOff
-                                            || (value.first.endUseTime.isZero()
+                                            || (value.first.endUseTime == 0L
                                                     && value.second.any { it == usageEvent.className })
                                         ) {
                                             return@apply
@@ -247,7 +245,7 @@ class ApplicationInfoSource @Inject constructor(
 
                     if (usageEvent.packageName != prevPackageName) {
                         if (inCompletedUsageList[prevPackageName] != null
-                            && inCompletedUsageList[prevPackageName]!!.first.endUseTime.isNotZero()
+                            && inCompletedUsageList[prevPackageName]!!.first.endUseTime != 0L
                             && inCompletedUsageList[prevPackageName]!!.second.isEmpty()
                         ) {
                             completedUsageList.add(inCompletedUsageList[prevPackageName]!!.first)
@@ -302,7 +300,7 @@ class ApplicationInfoSource @Inject constructor(
                         inCompletedUsageList.filter {
                             it.key != usageEvent.packageName
                                     && it.key != prevPackageName
-                                    && it.value.first.endUseTime.isNotZero()
+                                    && it.value.first.endUseTime != 0L
                         }.forEach {
                             completedUsageList.add(it.value.first)
                             inCompletedUsageList.remove(it.key)
@@ -311,7 +309,7 @@ class ApplicationInfoSource @Inject constructor(
 
                     val crashApp: Boolean =
                         inCompletedUsageList[usageEvent.packageName]!!.second.size <= 1
-                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime.isZero()
+                                && inCompletedUsageList[usageEvent.packageName]!!.first.endUseTime == 0L
 
                     inCompletedUsageList.computeIfPresent(usageEvent.packageName) { _, value ->
                         value.copy(

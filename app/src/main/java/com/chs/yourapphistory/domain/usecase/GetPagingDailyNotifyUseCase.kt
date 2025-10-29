@@ -9,8 +9,7 @@ import javax.inject.Inject
 class GetPagingDailyNotifyUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-
-    suspend operator fun invoke(
+    operator fun invoke(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {

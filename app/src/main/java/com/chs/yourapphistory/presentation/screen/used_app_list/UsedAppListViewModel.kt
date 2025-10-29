@@ -110,7 +110,7 @@ class UsedAppListViewModel @Inject constructor(
         }
     }
 
-    private suspend fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    private fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return when (sortType) {
             SortType.UsageEvent -> getPagingUsedListUseCase()
             SortType.ForegroundUsageEvent -> getPagingForegroundListUseCase()

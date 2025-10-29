@@ -10,7 +10,7 @@ import javax.inject.Inject
 class GetPagingForegroundListUseCase @Inject constructor(
     private val repository: AppRepository
 ) {
-    suspend operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+    operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
         return repository.getDayForegroundUsedAppList()
     }
 }

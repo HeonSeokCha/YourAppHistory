@@ -12,51 +12,51 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    suspend fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
+    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
+    fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
+    fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getDayLaunchAppList():  Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
+    fun getDayLaunchAppList():  Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
 
-    suspend fun getDailyPagingAppUsedInfo(
+    fun getDailyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
-    suspend fun getDailyPagingAppForegroundInfo(
+    fun getDailyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
 
-    suspend fun getDailyPagingAppLaunchInfo(
+    fun getDailyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
-    suspend fun getDailyPagingAppNotifyInfo(
+    fun getDailyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
 
-    suspend fun getWeeklyPagingAppUsedInfo(
+    fun getWeeklyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
-    suspend fun getWeeklyPagingAppForegroundInfo(
+    fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
-    suspend fun getWeeklyPagingAppLaunchInfo(
+    fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
-    suspend fun getWeeklyPagingAppNotifyInfo(
+    fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>

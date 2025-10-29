@@ -111,7 +111,6 @@ class AppUsageDetailViewModel @Inject constructor(
     }
 
     private fun getPackageUsageInfo(date: LocalDate) {
-        viewModelScope.launch {
             _state.update {
                 it.copy(
                     pagingDailyUsedInfo = getPagingDailyUsedUseCase(
@@ -148,6 +147,5 @@ class AppUsageDetailViewModel @Inject constructor(
                     ).cachedIn(viewModelScope)
                 )
             }
-        }
     }
 }

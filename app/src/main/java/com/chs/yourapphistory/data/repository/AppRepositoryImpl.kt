@@ -38,6 +38,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -215,196 +217,215 @@ class AppRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
-                enablePlaceholders = false
-            ),
-        ) {
-            GetPagingUsedList(
-                appUsageDao = appUsageDao,
-                minDate = minDate
-            )
-        }.flow
-    }
+    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
+        flow {
+            emit(getMinDate())
+        }.flatMapLatest {
+            Pager(
+                PagingConfig(
+                    pageSize = Constants.PAGING_DAY.toInt(),
+                    enablePlaceholders = false
+                ),
+            ) {
+                GetPagingUsedList(
+                    appUsageDao = appUsageDao,
+                    minDate = it
+                )
+            }.flow
+        }
 
-    override suspend fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
-                enablePlaceholders = false
-            )
-        ) {
-            GetPagingForegroundList(
-                appForegroundUsageDao = appForegroundUsageDao,
-                minDate = minDate
-            )
-        }.flow
-    }
+    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
+        flow {
+            emit(getMinDate())
+        }.flatMapLatest {
+            Pager(
+                PagingConfig(
+                    pageSize = Constants.PAGING_DAY.toInt(),
+                    enablePlaceholders = false
+                )
+            ) {
+                GetPagingForegroundList(
+                    appForegroundUsageDao = appForegroundUsageDao,
+                    minDate = it
+                )
+            }.flow
+        }
 
-    override suspend fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
-                enablePlaceholders = false
-            )
-        ) {
-            GetPagingNotifyList(
-                appNotifyInfoDao = appNotifyInfoDao,
-                minDate = minDate
-            )
-        }.flow
-    }
+    override fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
+        flow {
+            emit(getMinDate())
+        }.flatMapLatest {
+            Pager(
+                PagingConfig(
+                    pageSize = Constants.PAGING_DAY.toInt(),
+                    enablePlaceholders = false
+                )
+            ) {
+                GetPagingNotifyList(
+                    appNotifyInfoDao = appNotifyInfoDao,
+                    minDate = it
+                )
+            }.flow
+        }
 
-    override suspend fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
-                enablePlaceholders = false
-            )
-        ) {
-            GetPagingLaunchList(
-                appUsageDao = appUsageDao,
-                minDate = minDate
-            )
-        }.flow
-    }
+    override fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
+        flow {
+            emit(getMinDate())
+        }.flatMapLatest {
+            Pager(
+                PagingConfig(
+                    pageSize = Constants.PAGING_DAY.toInt(),
+                    enablePlaceholders = false
+                )
+            ) {
+                GetPagingLaunchList(
+                    appUsageDao = appUsageDao,
+                    minDate = it
+                )
+            }.flow
+        }
 
-    override suspend fun getDailyPagingAppUsedInfo(
+    override fun getDailyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingDailyAppUsedInfo(
                 dao = appUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getDailyPagingAppForegroundInfo(
+    override fun getDailyPagingAppForegroundInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingDailyAppForegroundInfo(
                 dao = appForegroundUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getDailyPagingAppLaunchInfo(
+    override fun getDailyPagingAppLaunchInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingDailyAppLaunchInfo(
                 dao = appUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getDailyPagingAppNotifyInfo(
+    override fun getDailyPagingAppNotifyInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingDailyAppNotifyInfo(
                 dao = appNotifyInfoDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getWeeklyPagingAppUsedInfo(
+    override fun getWeeklyPagingAppUsedInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingWeekAppUsedInfo(
                 dao = appUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getWeeklyPagingAppForegroundInfo(
+    override fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+        packageName: String,
+
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingWeekAppForegroundInfo(
                 dao = appForegroundUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getWeeklyPagingAppLaunchInfo(
+    override fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+        packageName: String,
+
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingWeekAppLaunchInfo(
                 dao = appUsageDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
         }.flow
     }
 
-    override suspend fun getWeeklyPagingAppNotifyInfo(
+    override fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> {
-        val minDate: LocalDate = getMinDate()
-        return Pager(
+        packageName: String,
+
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
             PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingWeekAppNotifyInfo(
                 dao = appNotifyInfoDao,
-                minDate = minDate,
+                minDate = it,
                 targetDate = targetDate,
                 packageName = packageName
             )
