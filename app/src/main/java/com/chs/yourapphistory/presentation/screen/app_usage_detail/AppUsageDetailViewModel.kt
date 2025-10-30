@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.navigation.toRoute
 import androidx.paging.cachedIn
-import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
@@ -17,7 +16,7 @@ import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyForegroundUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyUsedUseCase
-import com.chs.yourapphistory.presentation.Screen
+import com.chs.yourapphistory.presentation.ScreenAppUsageDetail
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -56,9 +55,9 @@ class AppUsageDetailViewModel @Inject constructor(
         )
 
     private val targetPackageName: String =
-        savedStateHandle.toRoute<Screen.ScreenAppUsageDetail>().targetPackageName
+        savedStateHandle.toRoute<ScreenAppUsageDetail>().targetPackageName
     private val targetDate: LocalDate =
-        savedStateHandle.toRoute<Screen.ScreenAppUsageDetail>().targetDate.toLocalDate()
+        savedStateHandle.toRoute<ScreenAppUsageDetail>().targetDate.toLocalDate()
 
     fun changeEvent(event: AppUsageDetailEvent) {
         when (event) {

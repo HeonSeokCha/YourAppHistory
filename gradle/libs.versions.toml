@@ -12,10 +12,15 @@ compose-ui = "1.9.4"
 lifecycle = "2.9.4"
 room = "2.8.3"
 hilt = "2.57.2"
-kotlin = "2.2.20"
-ksp = "2.2.20-2.0.2"
+kotlin = "2.2.21"
+ksp = "2.2.21-2.0.4"
 kotlin-coroutine = "1.10.2"
 desugar_jdk_libs = "2.1.5"
+nav3Core = "1.0.0-beta01"
+lifecycleViewmodelNav3 = "2.10.0-beta01"
+kotlinSerialization = "2.1.21"
+kotlinxSerializationCore = "1.9.0"
+material3AdaptiveNav3 = "1.3.0-alpha02"
 
 [libraries]
 # AndroidX
@@ -26,11 +31,15 @@ androidX-compose-material-icon-extend = "androidx.compose.material:material-icon
 androidX-compose-material3 = "androidx.compose.material3:material3:1.4.0"
 androidX-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
-androidX-navigation-compose = "androidx.navigation:navigation-compose:2.9.5"
 androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
 androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
-androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.1.7"
+androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
+androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
+androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
+kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
+androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 
+androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.1.7"
 androidX-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
@@ -61,10 +70,14 @@ compose = [
     "androidX-compose-material3",
     "androidX-compose-ui-tooling-preview",
     "androidX-compose-ui-tooling",
-    "androidX-navigation-compose",
     "androidX-lifecycle-viewmodel-compose",
     "androidX-lifecycle-runtime-compose",
-    "androidX-paging-paging-compose"
+    "androidX-paging-paging-compose",
+    "androidx-lifecycle-viewmodel-navigation3",
+    "androidx-material3-adaptive-navigation3",
+    "androidx-navigation3-runtime",
+    "androidx-navigation3-ui",
+    "kotlinx-serialization-core"
 ]
 
 kotlin = [
