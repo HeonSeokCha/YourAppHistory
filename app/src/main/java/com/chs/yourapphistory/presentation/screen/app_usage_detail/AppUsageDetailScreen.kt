@@ -71,7 +71,7 @@ fun AppUsageDetailScreenRoot(
 
                 else -> Unit
             }
-            viewModel.changeEvent(event)
+//            viewModel.changeEvent(event)
         }
     )
 }

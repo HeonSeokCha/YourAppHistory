@@ -17,13 +17,17 @@ class MainViewModel @Inject constructor(
     private val workManager: WorkManager
 ) : ViewModel() {
 
+    init {
+        executeWorker()
+    }
+
     val selectPackageLabel: MutableStateFlow<String?> = MutableStateFlow(null)
 
     fun changeSelectPackageName(label: String?) {
         selectPackageLabel.update { label }
     }
 
-    fun executeWorker() {
+    private fun executeWorker() {
         val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
             .setInitialDelay(1, TimeUnit.MINUTES)
             .build()

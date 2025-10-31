@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -19,14 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
 import com.chs.yourapphistory.presentation.screen.NavigationRoot
@@ -42,10 +36,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
-        viewModel.executeWorker()
-
         setContent {
-            val navController: NavHostController = rememberNavController()
             val selectPackageLabel: String? by viewModel.selectPackageLabel.collectAsStateWithLifecycle()
 
             Scaffold(
@@ -72,7 +63,6 @@ class MainActivity : ComponentActivity() {
                             navigationIcon = {
                                 IconButton(
                                     onClick = {
-                                        navController.navigateUp()
                                         viewModel.changeSelectPackageName(null)
                                     }
                                 ) {
@@ -89,7 +79,9 @@ class MainActivity : ComponentActivity() {
                             ),
                         )
                     }
-                }
+                },
+                modifier = Modifier
+                    .fillMaxSize()
             ) {
                 NavigationRoot(
                     modifier = Modifier

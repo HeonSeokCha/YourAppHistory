@@ -45,7 +45,7 @@ androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref =
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 androidX-paging-paging-compose = "androidx.paging:paging-compose:3.3.6"
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
-lottie = "com.airbnb.android:lottie-compose:6.6.10"
+lottie = "com.airbnb.android:lottie-compose:6.7.0"
 
 ## Hilt
 hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hilt" }
