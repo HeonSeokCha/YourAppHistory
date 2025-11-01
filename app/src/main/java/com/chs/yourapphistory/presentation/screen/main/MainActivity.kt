@@ -24,12 +24,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
 import com.chs.yourapphistory.presentation.screen.NavigationRoot
-import dagger.hilt.android.AndroidEntryPoint
+import org.koin.android.ext.android.inject
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
+    private val viewModel: MainViewModel by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {

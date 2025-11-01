@@ -31,7 +31,6 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
-import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
@@ -43,10 +42,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Single
 import java.time.LocalDate
-import javax.inject.Inject
 
-class AppRepositoryImpl @Inject constructor(
+@Single
+class AppRepositoryImpl(
     private val applicationInfoSource: ApplicationInfoSource,
     private val appUsageDao: AppUsageDao,
     private val appInfoDao: AppInfoDao,

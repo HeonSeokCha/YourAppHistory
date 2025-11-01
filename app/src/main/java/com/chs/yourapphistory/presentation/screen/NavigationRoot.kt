@@ -2,7 +2,6 @@ package com.chs.yourapphistory.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberNavBackStack
 import androidx.navigation3.ui.NavDisplay
@@ -15,6 +14,8 @@ import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetai
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreenRoot
+import org.koin.androidx.compose.koinViewModel
+import org.koin.core.parameter.parametersOf
 import java.time.LocalDate
 
 
@@ -39,7 +40,7 @@ fun NavigationRoot(
         entryProvider = entryProvider {
             entry<ScreenWelcome> {
                 WelcomeScreenRoot(
-                    viewModel = hiltViewModel(),
+                    viewModel = koinViewModel(),
                     onNavigateHome = {
                         backstack.removeLastOrNull()
                         backstack.add(ScreenUsedAppList)
@@ -49,7 +50,7 @@ fun NavigationRoot(
 
             entry<ScreenUsedAppList> {
                 UsedAppListScreenScreenRoot(
-                    viewModel = hiltViewModel(),
+                    viewModel = koinViewModel(),
                     onClickApp = { info, date ->
                         selectPackage(info.label)
                         backstack.add(
@@ -63,11 +64,9 @@ fun NavigationRoot(
             }
 
             entry<ScreenAppUsageDetail> { key ->
-                val viewModel = hiltViewModel<AppUsageDetailViewModel, AppUsageDetailViewModel.Factory>(
-                    creationCallback = { factory ->
-                        factory.create(key.targetPackageName, key.targetDate.toLocalDate())
-                    }
-                )
+                val viewModel = koinViewModel<AppUsageDetailViewModel> {
+                    parametersOf(key.targetPackageName, key.targetDate)
+                }
                 AppUsageDetailScreenRoot(
                     viewModel = viewModel,
                     onBack = { backstack.removeLastOrNull() }

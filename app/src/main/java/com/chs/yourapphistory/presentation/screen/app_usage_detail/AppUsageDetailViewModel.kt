@@ -1,9 +1,7 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
@@ -16,22 +14,19 @@ import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyForegroundUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyLaunchUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyNotifyUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyUsedUseCase
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
 
-@HiltViewModel(assistedFactory = AppUsageDetailViewModel.Factory::class)
-class AppUsageDetailViewModel @AssistedInject constructor(
-    @Assisted val targetPackageName: String,
-    @Assisted val targetDate: LocalDate,
+@KoinViewModel
+class AppUsageDetailViewModel(
+    private val targetPackageName: String,
+    targetDateMilli: Long,
     private val getPagingDailyUsedUseCase: GetPagingDailyUsedUseCase,
     private val getPagingDailyForegroundUseCase: GetPagingDailyForegroundUseCase,
     private val getPagingDailyNotifyUseCase: GetPagingDailyNotifyUseCase,
@@ -43,13 +38,7 @@ class AppUsageDetailViewModel @AssistedInject constructor(
     private val getMinimumTimeUseCase: GetMinimumTimeUseCase
 ) : ViewModel() {
 
-    @AssistedFactory
-    interface Factory {
-        fun create(
-            packageName: String,
-            targetDate: LocalDate
-        ): AppUsageDetailViewModel
-    }
+    private val targetDate = targetDateMilli.toLocalDate()
 
     private val _state = MutableStateFlow(AppUsageDetailState())
     val state = _state.onStart {
@@ -63,11 +52,6 @@ class AppUsageDetailViewModel @AssistedInject constructor(
             SharingStarted.Lazily,
             _state.value
         )
-
-//    private val targetPackageName: String =
-//        savedStateHandle.toRoute<ScreenAppUsageDetail>().targetPackageName
-//    private val targetDate: LocalDate =
-//        savedStateHandle.toRoute<ScreenAppUsageDetail>().targetDate.toLocalDate()
 
     fun changeEvent(event: AppUsageDetailEvent) {
         when (event) {

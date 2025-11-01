@@ -1,18 +1,16 @@
 package com.chs.yourapphistory.data.workmanager
 
 import android.content.Context
-import androidx.hilt.work.HiltWorker
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.domain.usecase.DeleteUsageInfoUseCase
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedInject
+import org.koin.android.annotation.KoinWorker
 
-@HiltWorker
-class AppRemoveWorker @AssistedInject constructor(
-    @Assisted private val context: Context,
-    @Assisted private val parameters: WorkerParameters,
+@KoinWorker
+class AppRemoveWorker(
+    context: Context,
+    private val parameters: WorkerParameters,
     private val deleteUsageInfoUseCase: DeleteUsageInfoUseCase
 ) : CoroutineWorker(context, parameters) {
 

@@ -1,9 +1,10 @@
 package com.chs.yourapphistory.domain.usecase
 
 import com.chs.yourapphistory.domain.repository.AppRepository
-import jakarta.inject.Inject
+import org.koin.core.annotation.Single
 
-class DeleteUsageInfoUseCase @Inject constructor(
+@Single
+class DeleteUsageInfoUseCase(
     private val repository: AppRepository
 ) {
     suspend operator fun invoke(packageName: String) {

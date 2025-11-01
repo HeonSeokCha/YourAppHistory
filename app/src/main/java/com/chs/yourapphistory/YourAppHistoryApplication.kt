@@ -1,18 +1,37 @@
 package com.chs.yourapphistory
 
 import android.app.Application
-import androidx.hilt.work.HiltWorkerFactory
+import com.chs.yourapphistory.di.AppModule
+import org.koin.android.ext.koin.androidContext
+import org.koin.android.ext.koin.androidLogger
+import org.koin.androidx.workmanager.koin.workManagerFactory
+import org.koin.core.context.startKoin
+import org.koin.ksp.generated.module
 import androidx.work.Configuration
-import dagger.hilt.android.HiltAndroidApp
-import javax.inject.Inject
+import org.koin.android.ext.android.inject
+import org.koin.androidx.workmanager.factory.KoinWorkerFactory
+import org.koin.ksp.generated.defaultModule
 
-@HiltAndroidApp
 class YourAppHistoryApplication : Application(), Configuration.Provider {
-    @Inject
-    lateinit var workFactory: HiltWorkerFactory
+
+    private val koinWorkerFactory: KoinWorkerFactory by inject()
+
+    override fun onCreate() {
+        super.onCreate()
+
+        startKoin {
+            androidLogger()
+            androidContext(this@YourAppHistoryApplication)
+            modules(
+                AppModule().module,
+                defaultModule
+            )
+            workManagerFactory()
+        }
+    }
 
     override val workManagerConfiguration: Configuration
         get() = Configuration.Builder()
-            .setWorkerFactory(workFactory)
+            .setWorkerFactory(koinWorkerFactory)
             .build()
 }

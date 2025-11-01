@@ -14,7 +14,6 @@ import com.chs.yourapphistory.domain.usecase.GetPagingNotifyListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingUsedListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -27,13 +26,12 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
-import javax.inject.Inject
 
-@HiltViewModel
-class UsedAppListViewModel @Inject constructor(
+@KoinViewModel
+class UsedAppListViewModel (
     private val getPagingUsedListUseCase: GetPagingUsedListUseCase,
     private val getPagingForegroundListUseCase: GetPagingForegroundListUseCase,
     private val getPagingNotifyListUseCase: GetPagingNotifyListUseCase,

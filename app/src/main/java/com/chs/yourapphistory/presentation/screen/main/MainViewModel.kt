@@ -6,14 +6,13 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.data.workmanager.AppWorker
-import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
+import org.koin.android.annotation.KoinViewModel
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
-@HiltViewModel
-class MainViewModel @Inject constructor(
+@KoinViewModel
+class MainViewModel (
     private val workManager: WorkManager
 ) : ViewModel() {
 

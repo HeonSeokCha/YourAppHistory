@@ -3,10 +3,11 @@ import androidx.paging.PagingData
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.flow.Flow
+import org.koin.core.annotation.Single
 import java.time.LocalDate
-import javax.inject.Inject
 
-class GetPagingLaunchListUseCase @Inject constructor(
+@Single
+class GetPagingLaunchListUseCase (
     private val repository: AppRepository
 ) {
     operator fun invoke(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {

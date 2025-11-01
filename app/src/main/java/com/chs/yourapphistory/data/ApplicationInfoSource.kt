@@ -18,10 +18,11 @@ import com.chs.yourapphistory.data.db.entity.IncompleteAppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import org.koin.core.annotation.Single
 import java.time.LocalDate
-import javax.inject.Inject
 
-class ApplicationInfoSource @Inject constructor(
+@Single
+class ApplicationInfoSource(
     private val context: Context
 ) {
 

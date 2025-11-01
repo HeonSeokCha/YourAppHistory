@@ -2,9 +2,10 @@ package com.chs.yourapphistory.domain.usecase
 
 import android.graphics.Bitmap
 import com.chs.yourapphistory.domain.repository.AppRepository
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 
-class GetAppIconMapUseCase @Inject constructor(
+@Single
+class GetAppIconMapUseCase(
     private val repository: AppRepository
 ) {
     suspend operator fun invoke(): HashMap<String, Bitmap?> {

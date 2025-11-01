@@ -1,6 +1,5 @@
 plugins {
     kotlin("android")
-    alias(libs.plugins.hilt)
     alias(libs.plugins.android.application)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -10,6 +9,11 @@ plugins {
 
 room {
     schemaDirectory("$projectDir/schemas")
+}
+
+ksp {
+    arg("KOIN_CONFIG_CHECK","true")
+    arg("KOIN_DEFAULT_MODULE","true")
 }
 
 android {
@@ -60,22 +64,28 @@ android {
             excludes += "/META-INF/{AL2.0,LGPL2.1}"
         }
     }
+
+    applicationVariants.forEach { variant ->
+        variant.sourceSets.forEach {
+            it.javaDirectories += files("build/generated/ksp/${variant.name}/kotlin")
+        }
+    }
+
 }
 
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.bundles.compose)
     implementation(libs.bundles.room)
-    implementation(libs.bundles.hilt)
+    implementation(libs.bundles.koin)
     implementation(libs.bundles.kotlin)
-    implementation(libs.bundles.worker)
+    implementation(libs.workmanager)
 
     implementation(libs.lottie)
     implementation(libs.kotlin.serialization)
 
     implementation(libs.androidX.datastore.preferences)
 
-    ksp(libs.hilt.compiler)
+    ksp(libs.koin.ksp)
     ksp(libs.androidX.room.compiler)
-    ksp(libs.hilt.worker.compiler)
 }

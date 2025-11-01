@@ -1,9 +1,10 @@
 package com.chs.yourapphistory.domain.usecase
 
 import com.chs.yourapphistory.domain.repository.AppRepository
-import javax.inject.Inject
+import org.koin.core.annotation.Single
 
-class InsertAppUsageInfoUseCase @Inject constructor(
+@Single
+class InsertAppUsageInfoUseCase (
     private val repository: AppRepository
 ) {
     suspend operator fun invoke() {

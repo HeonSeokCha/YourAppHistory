@@ -7,8 +7,10 @@ import androidx.datastore.preferences.core.emptyPreferences
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
+import org.koin.core.annotation.Single
 import java.io.IOException
 
+@Single
 class DataStoreSource(
     private val dataStore: DataStore<Preferences>
 ) {

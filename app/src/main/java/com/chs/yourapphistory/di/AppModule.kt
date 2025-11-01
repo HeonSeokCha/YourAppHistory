@@ -16,78 +16,69 @@ import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
-import dagger.Module
-import dagger.Provides
-import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
-import dagger.hilt.components.SingletonComponent
-import javax.inject.Singleton
+import org.koin.core.annotation.Factory
+import org.koin.core.annotation.Module
+import org.koin.core.annotation.Single
 
 @Module
-@InstallIn(SingletonComponent::class)
-object Module {
+class AppModule {
 
-    @Singleton
-    @Provides
-    fun provideAppUtilSource(@ApplicationContext context: Context): ApplicationInfoSource {
+    @Single
+    fun provideAppUtilSource(context: Context): ApplicationInfoSource {
         return ApplicationInfoSource(context)
     }
 
-    @Singleton
-    @Provides
-    fun provideDatabase(@ApplicationContext context: Context): YourAppHistoryDatabase {
+    @Single
+    fun provideDatabase(context: Context): YourAppHistoryDatabase {
         return YourAppHistoryDatabase.getInstance(context)
     }
 
-    @Singleton
-    @Provides
-    fun provideDataStorePref(@ApplicationContext context: Context): DataStore<Preferences> {
+    @Single
+    fun provideDataStorePref(context: Context): DataStore<Preferences> {
         return PreferenceDataStoreFactory.create {
             context.preferencesDataStoreFile(Constants.PREF_NAME)
         }
     }
 
-    @Singleton
-    @Provides
+    @Single
+    fun provideWorkManager(context: Context): WorkManager {
+        return WorkManager.getInstance(context)
+    }
+
+    @Factory
     fun provideDataStoreSource(dataStorePref: DataStore<Preferences>): DataStoreSource {
         return DataStoreSource(dataStorePref)
     }
 
-    @Provides
+
+    @Factory
     fun provideAppUsageDao(db: YourAppHistoryDatabase): AppUsageDao {
         return db.appUsageDao
     }
 
-    @Provides
+    @Factory
     fun provideAppInfoDao(db: YourAppHistoryDatabase): AppInfoDao {
         return db.appInfoDao
     }
 
-    @Provides
+    @Factory
     fun provideAppForegroundUsageDao(db: YourAppHistoryDatabase): AppForegroundUsageDao {
         return db.appForegroundUsageDao
     }
 
-    @Provides
+    @Factory
     fun provideAppNotifyInfoDao(db: YourAppHistoryDatabase): AppNotifyInfoDao {
         return db.appNotifyInfoDao
     }
 
-    @Provides
+    @Factory
     fun provideUsageStateDao(db: YourAppHistoryDatabase): UsageStateEventDao {
         return db.usageStateEventDao
     }
 
-    @Provides
+    @Factory
     fun provideIncompleteInfoDao(db: YourAppHistoryDatabase): InCompleteAppUsageDao {
         return db.inCompleteAppUsageDao
     }
 
-    @Singleton
-    @Provides
-    fun provideWorkManager(
-        @ApplicationContext context: Context,
-    ): WorkManager {
-        return WorkManager.getInstance(context)
-    }
 }
