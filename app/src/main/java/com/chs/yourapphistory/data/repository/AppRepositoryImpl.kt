@@ -33,12 +33,14 @@ import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.repository.AppRepository
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
@@ -60,6 +62,13 @@ class AppRepositoryImpl(
 
     private val mutex: Mutex by lazy { Mutex() }
 
+//    init {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            insertInstallAppInfo()
+//            insertAppUsageInfo()
+//        }
+//    }
+
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
             awaitAll(
@@ -76,6 +85,7 @@ class AppRepositoryImpl(
     }
 
     override suspend fun insertInstallAppInfo() {
+        chsLog("START insertInstallAppInfo")
         val localList: List<AppInfoEntity> = appInfoDao.getAllPackage()
         val currentLauncherList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
@@ -101,6 +111,8 @@ class AppRepositoryImpl(
             currentLauncherList.any { it == packageInfo.packageName }
         }.map { it.packageName }
 
+        chsLog("END insertInstallAppInfo")
+
         if (removePackageList.isEmpty()) return
 
         deleteUsageInfoFromPackageNames(removePackageList)
@@ -108,7 +120,7 @@ class AppRepositoryImpl(
 
     override suspend fun insertAppUsageInfo() {
         mutex.withLock {
-            chsLog("START")
+            chsLog("START insertAppUsageInfo")
 //            withContext(Dispatchers.IO) {
 //                appUsageDao.deleteAll()
 //                appForegroundUsageDao.deleteAll()
@@ -215,12 +227,13 @@ class AppRepositoryImpl(
                     appNotifyInfoUpsert
                 )
             }
+            chsLog("END insertAppUsageInfo")
         }
     }
 
     override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
         flow {
-            emit(getMinDate())
+            emit(getMinDate() to getAppIconMap())
         }.flatMapLatest {
             Pager(
                 PagingConfig(
@@ -230,14 +243,15 @@ class AppRepositoryImpl(
             ) {
                 GetPagingUsedList(
                     appUsageDao = appUsageDao,
-                    minDate = it
+                    minDate = it.first,
+                    iconMap = it.second
                 )
             }.flow
         }
 
     override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
         flow {
-            emit(getMinDate())
+            emit(getMinDate() to getAppIconMap())
         }.flatMapLatest {
             Pager(
                 PagingConfig(
@@ -247,14 +261,15 @@ class AppRepositoryImpl(
             ) {
                 GetPagingForegroundList(
                     appForegroundUsageDao = appForegroundUsageDao,
-                    minDate = it
+                    minDate = it.first,
+                    iconMap = it.second
                 )
             }.flow
         }
 
     override fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
         flow {
-            emit(getMinDate())
+            emit(getMinDate() to getAppIconMap())
         }.flatMapLatest {
             Pager(
                 PagingConfig(
@@ -264,14 +279,15 @@ class AppRepositoryImpl(
             ) {
                 GetPagingNotifyList(
                     appNotifyInfoDao = appNotifyInfoDao,
-                    minDate = it
+                    minDate = it.first,
+                    iconMap = it.second
                 )
             }.flow
         }
 
     override fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
         flow {
-            emit(getMinDate())
+            emit(getMinDate() to getAppIconMap())
         }.flatMapLatest {
             Pager(
                 PagingConfig(
@@ -281,7 +297,8 @@ class AppRepositoryImpl(
             ) {
                 GetPagingLaunchList(
                     appUsageDao = appUsageDao,
-                    minDate = it
+                    minDate = it.first,
+                    iconMap = it.second
                 )
             }.flow
         }
@@ -380,7 +397,7 @@ class AppRepositoryImpl(
         targetDate: LocalDate,
         packageName: String,
 
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
@@ -399,7 +416,7 @@ class AppRepositoryImpl(
         targetDate: LocalDate,
         packageName: String,
 
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
@@ -416,8 +433,7 @@ class AppRepositoryImpl(
 
     override fun getWeeklyPagingAppNotifyInfo(
         targetDate: LocalDate,
-        packageName: String,
-
+        packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
@@ -433,13 +449,14 @@ class AppRepositoryImpl(
         }.flow
     }
 
-    override suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
+    private suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
         return applicationInfoSource.getApplicationIconMap(
             applicationInfoSource.getInstalledLauncherPackageNameList()
         )
     }
 
     override suspend fun getMinDate(): LocalDate {
+        chsLog("getMinDate")
         return dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE)?.toLocalDate()
             ?: LocalDate.now()
     }

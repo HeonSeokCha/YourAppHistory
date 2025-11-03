@@ -7,36 +7,28 @@ import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
-import com.chs.yourapphistory.domain.usecase.GetAppIconMapUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingForegroundListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingLaunchListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingNotifyListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingUsedListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
 
 @KoinViewModel
-class UsedAppListViewModel (
+class UsedAppListViewModel(
     private val getPagingUsedListUseCase: GetPagingUsedListUseCase,
     private val getPagingForegroundListUseCase: GetPagingForegroundListUseCase,
     private val getPagingNotifyListUseCase: GetPagingNotifyListUseCase,
     private val getPagingLaunchListUseCase: GetPagingLaunchListUseCase,
-    private val getAppIconMapUseCase: GetAppIconMapUseCase,
     private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
     private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
@@ -46,36 +38,12 @@ class UsedAppListViewModel (
     private val sortOptionState = MutableStateFlow(SortType.UsageEvent)
 
     private val _state = MutableStateFlow(UsedAppListState())
-    val state = _state
-        .onStart { getApplicationsInfo() }
-        .stateIn(
-            viewModelScope,
-            SharingStarted.Lazily,
-            _state.value
-        )
+    val state = _state.asStateFlow()
 
     val pagingList = sortOptionState
         .flatMapLatest {
             getEventList(it)
         }.cachedIn(viewModelScope)
-
-    private suspend fun getApplicationsInfo() {
-        withContext(Dispatchers.IO) {
-            awaitAll(
-                async { getInstallAppInfoUseCase() },
-                async { insertAppUsageInfoUseCase() },
-                async {
-                    _state.update {
-                        it.copy(
-                            isRefreshing = false,
-                            appIconList = getAppIconMapUseCase(),
-                            sortOption = _state.value.sortOption
-                        )
-                    }
-                }
-            )
-        }
-    }
 
     fun handleIntent(intent: UsedAppIntent) {
         when (intent) {

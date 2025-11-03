@@ -61,8 +61,6 @@ interface AppRepository {
         packageName: String
     ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
-    suspend fun getAppIconMap(): HashMap<String, Bitmap?>
-
     suspend fun getMinDate(): LocalDate
 
     suspend fun deleteUsageInfo(packageName: String)

@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.data.paging
 
+import android.graphics.Bitmap
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
@@ -12,7 +13,8 @@ import java.time.LocalDate
 
 class GetPagingNotifyList(
     private val appNotifyInfoDao: AppNotifyInfoDao,
-    private val minDate: LocalDate
+    private val minDate: LocalDate,
+    private val iconMap: HashMap<String, Bitmap?>
 ) : PagingSource<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>() {
     override fun getRefreshKey(state: PagingState<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
@@ -31,7 +33,7 @@ class GetPagingNotifyList(
             .reverseDateUntil(pageDate)
             .map { date ->
                 date to appNotifyInfoDao.getDayNotifyList(date.toMillis()).map {
-                    it.key.toAppInfo() to it.value
+                    it.key.toAppInfo(icon = iconMap[it.key.packageName]) to it.value
                 }.sortedWith(
                     compareBy(
                         { -it.second },

@@ -10,6 +10,5 @@ data class UsedAppListState(
     val isRefreshing: Boolean = false,
     val isShowFilterDialog: Boolean = false,
     val displayDate: String = "오늘",
-    val appIconList: HashMap<String, Bitmap?> = hashMapOf(),
     val sortOption: SortType = SortType.UsageEvent
 )

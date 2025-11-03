@@ -151,48 +151,54 @@ fun UsedAppListScreenScreen(
             fontSize = 18.sp
         )
 
-        HorizontalPager(
-            modifier = Modifier.fillMaxSize(),
-            state = pagerState,
-            reverseLayout = true,
-            userScrollEnabled = true,
-            key = pagingItems.itemKey { it.first }
-        ) { page ->
-            val item = pagingItems[page]
+        when {
+            state.isLoading -> {
+                ItemLoading()
+            }
 
-            when {
-                state.isLoading -> ItemLoading()
+            isEmpty -> {
+                ItemEmpty()
+            }
 
-                isEmpty -> ItemEmpty()
+            else -> {
+                HorizontalPager(
+                    modifier = Modifier.fillMaxSize(),
+                    state = pagerState,
+                    reverseLayout = true,
+                    userScrollEnabled = true,
+                    key = pagingItems.itemKey { it.first }
+                ) { page ->
+                    val item = pagingItems[page] ?: return@HorizontalPager
 
-                item != null -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        val packageList = item.second
-                        items(
-                            count = packageList.count(),
-                            key = { packageList[it].first.packageName }
-                        ) { idx ->
-                            val appInfo = packageList[idx]
-                            ItemAppInfoSmall(
-                                usedAppInfo = appInfo,
-                                icon = state.appIconList[appInfo.first.packageName],
-                                sortOption = state.sortOption
-                            ) { appInfo ->
-                                onIntent(
-                                    UsedAppIntent.ClickAppInfo(
-                                        appInfo = appInfo,
-                                        targetDate = item.first
+                    if (state.isAppending) {
+                        ItemLoading()
+                    } else {
+                        LazyColumn(
+                            modifier = Modifier.fillMaxSize(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val packageList = item.second
+                            items(
+                                count = packageList.count(),
+                                key = { packageList[it].first.packageName }
+                            ) { idx ->
+                                val appInfo = packageList[idx]
+                                ItemAppInfoSmall(
+                                    usedAppInfo = appInfo,
+                                    icon = appInfo.first.icon,
+                                    sortOption = state.sortOption
+                                ) { appInfo ->
+                                    onIntent(
+                                        UsedAppIntent.ClickAppInfo(
+                                            appInfo = appInfo,
+                                            targetDate = item.first
+                                        )
                                     )
-                                )
+                                }
                             }
                         }
                     }
                 }
-
-                state.isAppending -> ItemLoading()
             }
         }
     }

@@ -70,9 +70,7 @@ class ApplicationInfoSource(
         return withContext(Dispatchers.IO) {
             installPackageNames.associateWithTo(HashMap()) {
                 try {
-                    context.packageManager.getApplicationIcon(it).toBitmap(
-                        width = 144, height = 144
-                    )
+                    context.packageManager.getApplicationIcon(it).toBitmap()
                 } catch (e: PackageManager.NameNotFoundException) {
                     chsLog(e.message.toString())
                     null
