@@ -53,21 +53,23 @@ class AppUsageDetailViewModel(
             _state.value
         )
 
-    fun changeEvent(event: AppUsageDetailEvent) {
-        when (event) {
-            is AppUsageDetailEvent.OnChangeTargetDate -> {
-                changeDate(event.date)
+    fun handleIntent(intent: AppUsageDetailIntent) {
+        when (intent) {
+            is AppUsageDetailIntent.OnChangeTargetDate -> {
+                changeDate(intent.date)
             }
 
-            is AppUsageDetailEvent.OnChangeTargetWeek -> {
-                changeWeek(event.date)
+            is AppUsageDetailIntent.OnChangeTargetWeek -> {
+                changeWeek(intent.date)
             }
 
-            is AppUsageDetailEvent.OnChangeViewType -> {
+            is AppUsageDetailIntent.OnChangeViewType -> {
                 _state.update { it.copy(isDailyMode = !_state.value.isDailyMode) }
             }
 
-            else -> Unit
+            AppUsageDetailIntent.OnBackClick -> {
+
+            }
         }
     }
 

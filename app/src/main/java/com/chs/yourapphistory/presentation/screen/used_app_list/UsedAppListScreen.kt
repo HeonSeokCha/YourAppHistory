@@ -30,6 +30,7 @@ import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
@@ -79,7 +80,7 @@ fun UsedAppListScreenScreen(
 ) {
     val pagerState = rememberPagerState(
         pageCount = {
-            pagingItems.itemCount + if (state.isAppending) Constants.NUMBER_LOADING_COUNT else 0
+            pagingItems.itemCount
         }
     )
 
@@ -93,7 +94,11 @@ fun UsedAppListScreenScreen(
 
     LaunchedEffect(pagingItems.loadState.refresh) {
         when (pagingItems.loadState.refresh) {
-            is LoadState.Loading -> onIntent(UsedAppIntent.Loading)
+            is LoadState.Loading -> {
+                chsLog("START LOADING")
+                pagerState.scrollToPage(0)
+                onIntent(UsedAppIntent.Loading)
+            }
 
             is LoadState.Error -> onIntent(UsedAppIntent.Error)
 
@@ -118,7 +123,6 @@ fun UsedAppListScreenScreen(
         onIntent(UsedAppIntent.ChangeDate(pagingItems[pagerState.currentPage]!!.first))
     }
 
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -141,7 +145,10 @@ fun UsedAppListScreenScreen(
 
         Text(
             modifier = Modifier
-                .clickable { onIntent(UsedAppIntent.OnShowSortDialog(true)) }
+                .clickable {
+                    if (state.isLoading) return@clickable
+                    onIntent(UsedAppIntent.OnShowSortDialog(true))
+                }
                 .placeholder(
                     visible = state.isLoading,
                     highlight = PlaceholderHighlight.shimmer()

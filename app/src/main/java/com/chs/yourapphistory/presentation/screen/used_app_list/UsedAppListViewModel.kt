@@ -42,6 +42,7 @@ class UsedAppListViewModel(
 
     val pagingList = sortOptionState
         .flatMapLatest {
+            insertUsageInfo()
             getEventList(it)
         }.cachedIn(viewModelScope)
 
@@ -74,6 +75,12 @@ class UsedAppListViewModel(
             UsedAppIntent.Appending -> _state.update { it.copy(isAppending = true) }
             UsedAppIntent.AppendComplete -> _state.update { it.copy(isAppending = false) }
         }
+    }
+
+    private suspend fun insertUsageInfo() {
+        _state.update { it.copy(isLoading = true) }
+        getInstallAppInfoUseCase()
+        insertAppUsageInfoUseCase()
     }
 
     private fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {

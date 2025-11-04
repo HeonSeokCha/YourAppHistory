@@ -19,7 +19,6 @@ import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
-import java.time.LocalDate
 
 @Single
 class ApplicationInfoSource(
@@ -107,11 +106,11 @@ class ApplicationInfoSource(
             )
         }
 
-        resultArr.forEach {
-            if (it.eventTime.toLocalDate() == LocalDate.now().minusDays(12L)) {
-                chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
-            }
-        }
+//        resultArr.forEach {
+//            if (it.eventTime.toLocalDate() == LocalDate.now().minusDays(12L)) {
+//                chsLog("${it.packageName} | ${it.eventTime.toLocalDateTime()} - ${it.eventType} - ${it.className}")
+//            }
+//        }
 
         return resultArr
     }
@@ -400,7 +399,7 @@ class ApplicationInfoSource(
         if (inCompletedUsageList.isEmpty()) return completedUsageList to emptyList()
 
         val incompUsageEntityList = inCompletedUsageList.map {
-            chsLog("${it.key} - ${it.value.first.beginUseTime} : ${it.value.second}")
+//            chsLog("${it.key} - ${it.value.first.beginUseTime} : ${it.value.second}")
             IncompleteAppUsageEntity(
                 packageName = it.key,
                 beginUseTime = it.value.first.beginUseTime,

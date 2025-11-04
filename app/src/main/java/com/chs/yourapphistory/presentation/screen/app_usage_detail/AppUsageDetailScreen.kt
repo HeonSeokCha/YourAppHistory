@@ -63,23 +63,14 @@ fun AppUsageDetailScreenRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     AppUsageDetailScreen(
         state = state,
-        onEvent = { event ->
-            when (event) {
-                AppUsageDetailEvent.OnBackClick -> {
-                    onBack()
-                }
-
-                else -> Unit
-            }
-//            viewModel.changeEvent(event)
-        }
+        onIntent = viewModel::handleIntent
     )
 }
 
 @Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
-    onEvent: (AppUsageDetailEvent) -> Unit
+    onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     var isRefreshing by remember { mutableStateOf(false) }
     val coroutineScope = rememberCoroutineScope()
@@ -222,8 +213,8 @@ fun AppUsageDetailScreen(
 
         if (appUsedPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDate(
                 appUsedPagingData[appUsedPagerState.currentPage]?.first ?: LocalDate.now()
             )
         )
@@ -237,8 +228,8 @@ fun AppUsageDetailScreen(
 
         if (appForegroundPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDate(
                 appForegroundUsedPagingData[appForegroundPagerState.currentPage]?.first
                     ?: LocalDate.now()
             )
@@ -253,8 +244,8 @@ fun AppUsageDetailScreen(
 
         if (appNotifyPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDate(
                 appNotifyPagingData[appNotifyPagerState.currentPage]?.first ?: LocalDate.now()
             )
         )
@@ -268,8 +259,8 @@ fun AppUsageDetailScreen(
 
         if (appLaunchPagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDate(
                 appLaunchPagingData[appLaunchPagerState.currentPage]?.first ?: LocalDate.now()
             )
         )
@@ -343,22 +334,22 @@ fun AppUsageDetailScreen(
             return@LaunchedEffect
 
         if (state.dateList[datePagerState.currentPage][6 - selectDateIdx] > LocalDate.now()) {
-            onEvent(
-                AppUsageDetailEvent.OnChangeTargetDate(LocalDate.now())
+            onIntent(
+                AppUsageDetailIntent.OnChangeTargetDate(LocalDate.now())
             )
             return@LaunchedEffect
         }
 
 
         if (state.dateList[datePagerState.currentPage][6 - selectDateIdx] < state.minDate) {
-            onEvent(
-                AppUsageDetailEvent.OnChangeTargetDate(state.minDate)
+            onIntent(
+                AppUsageDetailIntent.OnChangeTargetDate(state.minDate)
             )
             return@LaunchedEffect
         }
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetDate(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDate(
                 state.dateList[datePagerState.currentPage][6 - selectDateIdx]
             )
         )
@@ -371,8 +362,8 @@ fun AppUsageDetailScreen(
 
         if (appUsedWeekPagingData.itemCount == 0) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetWeek(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetWeek(
                 appUsedWeekPagingData[appUsedWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -386,8 +377,8 @@ fun AppUsageDetailScreen(
 
         if (appForegroundWeekPagingData.itemCount == 0) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetWeek(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetWeek(
                 appForegroundWeekPagingData[appForegroundWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -401,8 +392,8 @@ fun AppUsageDetailScreen(
 
         if (appNotifyWeekPagingData.itemCount == 0) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetWeek(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetWeek(
                 appNotifyWeekPagingData[appNotifyWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -416,8 +407,8 @@ fun AppUsageDetailScreen(
 
         if (appLaunchWeekPagingData.itemCount == 0) return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetWeek(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetWeek(
                 appLaunchWeekPagingData[appLaunchWeekPagerState.currentPage]?.first?.max()
                     ?: LocalDate.now()
             )
@@ -494,14 +485,14 @@ fun AppUsageDetailScreen(
         if (state.displayWeek.max() == state.weekList[weekPagerState.currentPage][idx])
             return@LaunchedEffect
 
-        onEvent(
-            AppUsageDetailEvent.OnChangeTargetWeek(
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetWeek(
                 state.weekList[weekPagerState.currentPage][idx]
             )
         )
     }
 
-    BackHandler { onEvent(AppUsageDetailEvent.OnBackClick) }
+    BackHandler { onIntent(AppUsageDetailIntent.OnBackClick) }
 
     ItemPullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -546,7 +537,7 @@ fun AppUsageDetailScreen(
 
                 Text(
                     modifier = Modifier
-                        .clickable { onEvent(AppUsageDetailEvent.OnChangeViewType) },
+                        .clickable { onIntent(AppUsageDetailIntent.OnChangeViewType) },
                     text = if (state.isDailyMode) {
                         "주별 보기"
                     } else {
@@ -582,7 +573,7 @@ fun AppUsageDetailScreen(
                                     modifier = Modifier
                                         .clickable {
                                             if (date >= state.minDate && date <= LocalDate.now()) {
-                                                onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                                onIntent(AppUsageDetailIntent.OnChangeTargetDate(date))
                                             }
                                         }
                                         .drawBehind {
@@ -603,7 +594,7 @@ fun AppUsageDetailScreen(
                                     modifier = Modifier
                                         .clickable {
                                             if (date >= state.minDate && date <= LocalDate.now()) {
-                                                onEvent(AppUsageDetailEvent.OnChangeTargetDate(date))
+                                                onIntent(AppUsageDetailIntent.OnChangeTargetDate(date))
                                             }
                                         }
                                         .drawBehind {
@@ -748,7 +739,7 @@ fun AppUsageDetailScreen(
                             Text(
                                 modifier = Modifier
                                     .clickable {
-                                        onEvent(AppUsageDetailEvent.OnChangeTargetWeek(maxDate))
+                                        onIntent(AppUsageDetailIntent.OnChangeTargetWeek(maxDate))
                                     }
                                     .drawBehind {
                                         drawRoundRect(
