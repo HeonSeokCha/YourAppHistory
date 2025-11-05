@@ -456,7 +456,6 @@ class AppRepositoryImpl(
     }
 
     override suspend fun getMinDate(): LocalDate {
-        chsLog("getMinDate")
         return dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE)?.toLocalDate()
             ?: LocalDate.now()
     }
