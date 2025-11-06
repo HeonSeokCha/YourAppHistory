@@ -31,7 +31,10 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
+import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +50,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
 import java.time.LocalDate
+import kotlin.math.min
 
 @Single
 class AppRepositoryImpl(
@@ -61,13 +65,6 @@ class AppRepositoryImpl(
 ) : AppRepository {
 
     private val mutex: Mutex by lazy { Mutex() }
-
-//    init {
-//        CoroutineScope(Dispatchers.IO).launch {
-//            insertInstallAppInfo()
-//            insertAppUsageInfo()
-//        }
-//    }
 
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
@@ -302,6 +299,52 @@ class AppRepositoryImpl(
                 )
             }.flow
         }
+
+    override fun getWeeklyPagingAppInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            )
+        ) {
+            GetPagingWeeklyAppInfos(
+                minDate = it,
+                targetDate = targetDate,
+                packageName = packageName,
+                appUsageDao = appUsageDao,
+                appForegroundDao = appForegroundUsageDao,
+                appNotifyInfoDao = appNotifyInfoDao
+            )
+        }.flow
+    }
+
+    override fun getDailyPagingAppInfo(
+        targetDate: LocalDate,
+        packageName: String
+    ): Flow<PagingData<Map<SortType, List<Pair<Int, Int>>>>> = flow {
+        emit(getMinDate())
+    }.flatMapLatest {
+        Pager(
+            PagingConfig(
+                pageSize = Constants.PAGING_DAY.toInt(),
+                enablePlaceholders = false
+            )
+        ) {
+            GetPagingDailyAppInfos(
+                minDate = it,
+                targetDate = targetDate,
+                packageName = packageName,
+                appUsageDao = appUsageDao,
+                appForegroundDao = appForegroundUsageDao,
+                appNotifyInfoDao = appNotifyInfoDao
+            )
+        }.flow
+    }
 
     override fun getDailyPagingAppUsedInfo(
         targetDate: LocalDate,

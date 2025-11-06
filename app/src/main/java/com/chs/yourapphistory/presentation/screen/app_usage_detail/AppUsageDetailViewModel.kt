@@ -6,14 +6,8 @@ import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingDailyForegroundUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingDailyLaunchUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingDailyNotifyUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingDailyUsedUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyForegroundUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyLaunchUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyNotifyUseCase
-import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyUsedUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingDailyUseCase
+import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyUseCase
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.onStart
@@ -25,33 +19,33 @@ import java.time.LocalDate
 
 @KoinViewModel
 class AppUsageDetailViewModel(
-    private val targetPackageName: String,
+    targetPackageName: String,
     targetDateMilli: Long,
-    private val getPagingDailyUsedUseCase: GetPagingDailyUsedUseCase,
-    private val getPagingDailyForegroundUseCase: GetPagingDailyForegroundUseCase,
-    private val getPagingDailyNotifyUseCase: GetPagingDailyNotifyUseCase,
-    private val getPagingDailyLaunchUseCase: GetPagingDailyLaunchUseCase,
-    private val getPagingWeeklyUsedUseCase: GetPagingWeeklyUsedUseCase,
-    private val getPagingWeeklyForegroundUseCase: GetPagingWeeklyForegroundUseCase,
-    private val getPagingWeeklyNotifyUseCase: GetPagingWeeklyNotifyUseCase,
-    private val getPagingWeeklyLaunchUseCase: GetPagingWeeklyLaunchUseCase,
+    getPagingDailyUseCase: GetPagingDailyUseCase,
+    getPagingWeeklyUseCase: GetPagingWeeklyUseCase,
     private val getMinimumTimeUseCase: GetMinimumTimeUseCase
 ) : ViewModel() {
 
     private val targetDate = targetDateMilli.toLocalDate()
 
     private val _state = MutableStateFlow(AppUsageDetailState())
-    val state = _state.onStart {
-            getDateRangeList()
-            getPackageUsageInfo(targetDate)
-            changeDate(targetDate)
-            changeWeek(targetDate)
-        }
+    val state = _state
+        .onStart { getDateRangeList() }
         .stateIn(
             viewModelScope,
-            SharingStarted.Lazily,
+            SharingStarted.WhileSubscribed(5000L),
             _state.value
         )
+
+    val getDailyPagingData = getPagingDailyUseCase(
+        targetDate = targetDate,
+        packageName = targetPackageName
+    ).cachedIn(viewModelScope)
+
+    val getWeeklyPagingData = getPagingWeeklyUseCase(
+        targetDate = targetDate,
+        packageName = targetPackageName
+    ).cachedIn(viewModelScope)
 
     fun handleIntent(intent: AppUsageDetailIntent) {
         when (intent) {
@@ -65,10 +59,6 @@ class AppUsageDetailViewModel(
 
             is AppUsageDetailIntent.OnChangeViewType -> {
                 _state.update { it.copy(isDailyMode = !_state.value.isDailyMode) }
-            }
-
-            AppUsageDetailIntent.OnBackClick -> {
-
             }
         }
     }
@@ -85,7 +75,9 @@ class AppUsageDetailViewModel(
                         .reverseDateUntilWeek(LocalDate.now())
                         .chunked(7)
                         .map { it.max() }
-                        .chunked(5)
+                        .chunked(5),
+                    displayDate = targetDate,
+                    displayWeek = targetDate.reverseDateUntilWeek(targetDate)
                 )
             }
         }
@@ -103,44 +95,5 @@ class AppUsageDetailViewModel(
                 displayWeek = date.reverseDateUntilWeek(date)
             )
         }
-    }
-
-    private fun getPackageUsageInfo(date: LocalDate) {
-            _state.update {
-                it.copy(
-                    pagingDailyUsedInfo = getPagingDailyUsedUseCase(
-                        targetDate = date,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingDailyForegroundUsedInfo = getPagingDailyForegroundUseCase(
-                        targetDate = date,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingDailyNotifyInfo = getPagingDailyNotifyUseCase(
-                        targetDate = date,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingDailyLaunchInfo = getPagingDailyLaunchUseCase(
-                        targetDate = date,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingWeeklyUsedInfo = getPagingWeeklyUsedUseCase(
-                        targetDate = targetDate,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingWeeklyForegroundInfo = getPagingWeeklyForegroundUseCase(
-                        targetDate = targetDate,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingWeeklyNotifyInfo = getPagingWeeklyNotifyUseCase(
-                        targetDate = targetDate,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope),
-                    pagingWeeklyLaunchInfo = getPagingWeeklyLaunchUseCase(
-                        targetDate = targetDate,
-                        packageName = targetPackageName
-                    ).cachedIn(viewModelScope)
-                )
-            }
     }
 }

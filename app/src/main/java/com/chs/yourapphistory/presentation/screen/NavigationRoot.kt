@@ -14,9 +14,8 @@ import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetai
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreenRoot
-import org.koin.androidx.compose.koinViewModel
 import org.koin.core.parameter.parametersOf
-import java.time.LocalDate
+import org.koin.androidx.compose.koinViewModel
 
 
 @Composable
@@ -64,7 +63,9 @@ fun NavigationRoot(
             }
 
             entry<ScreenAppUsageDetail> { key ->
-                val viewModel = koinViewModel<AppUsageDetailViewModel> {
+                val viewModel = koinViewModel<AppUsageDetailViewModel>(
+                    key = (key.targetPackageName to key.targetDate).toString()
+                ) {
                     parametersOf(key.targetPackageName, key.targetDate)
                 }
                 AppUsageDetailScreenRoot(
