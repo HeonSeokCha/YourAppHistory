@@ -65,6 +65,7 @@ fun AppUsageDetailScreenRoot(
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dailyPagingItems = viewModel.getDailyPagingData.collectAsLazyPagingItems()
     val weeklyPagingItems = viewModel.getWeeklyPagingData.collectAsLazyPagingItems()
+
     AppUsageDetailScreen(
         state = state,
         dailyPagingItems = dailyPagingItems,
@@ -80,7 +81,6 @@ fun AppUsageDetailScreen(
     weeklyPagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, Int>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
-
     val coroutineScope = rememberCoroutineScope()
     val datePagerState = if (state.dateList.isNotEmpty()) {
         rememberPagerState(
@@ -89,6 +89,17 @@ fun AppUsageDetailScreen(
         )
     } else {
         rememberPagerState(pageCount = { 0 })
+    }
+
+    LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
+        if (state.dateList.isEmpty()) return@LaunchedEffect
+        if (!datePagerState.isScrollInProgress) {
+            onIntent(
+                AppUsageDetailIntent.OnChangeTargetDate(
+                    state.dateList[state.dateIdx.first][state.dateIdx.second]
+                )
+            )
+        }
     }
 
     val dailyUsagePager =
@@ -182,7 +193,7 @@ fun AppUsageDetailScreen(
                 .padding(vertical = 16.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (state.isDailyMode) {
+            if (state.isWeeklyMode) {
                 Text(
                     text = if (state.displayDate == LocalDate.now()) {
                         "오늘"
@@ -203,7 +214,7 @@ fun AppUsageDetailScreen(
             Text(
                 modifier = Modifier
                     .clickable { onIntent(AppUsageDetailIntent.OnChangeViewType) },
-                text = if (state.isDailyMode) {
+                text = if (state.isWeeklyMode) {
                     "주별 보기"
                 } else {
                     "일별 보기"
@@ -229,6 +240,12 @@ fun AppUsageDetailScreen(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 item.reversed().forEachIndexed { idx, date ->
+                    onIntent(
+                        AppUsageDetailIntent.OnChangeTargetDate(
+                            state.dateList[datePagerState.currentPage][idx]
+                        )
+                    )
+
                     if (date.dayOfMonth == 1) {
                         Text(
                             modifier = Modifier
