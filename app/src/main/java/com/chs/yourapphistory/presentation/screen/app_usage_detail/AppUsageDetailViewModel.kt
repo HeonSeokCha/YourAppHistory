@@ -3,6 +3,7 @@ package com.chs.yourapphistory.presentation.screen.app_usage_detail
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
@@ -49,16 +50,15 @@ class AppUsageDetailViewModel(
 
     fun handleIntent(intent: AppUsageDetailIntent) {
         when (intent) {
-            is AppUsageDetailIntent.OnChangeTargetDate -> {
-                changeDate(intent.date)
+            is AppUsageDetailIntent.OnChangeTargetDateIdx -> {
+                changeDate(intent.idx)
             }
 
-            is AppUsageDetailIntent.OnChangeTargetWeek -> {
-                changeWeek(intent.date)
+            is AppUsageDetailIntent.OnChangeTargetWeekIdx -> {
+                changeWeek(intent.idx)
             }
 
             is AppUsageDetailIntent.OnChangeViewType -> {
-                _state.update { it.copy(isDailyMode = !_state.value.isDailyMode) }
             }
         }
     }
@@ -66,31 +66,60 @@ class AppUsageDetailViewModel(
     private fun getDateRangeList() {
         viewModelScope.launch {
             _state.update {
+                val minDate = getMinimumTimeUseCase()
+                val dateList = getMinimumTimeUseCase()
+                    .reverseDateUntilWeek(LocalDate.now())
+                    .chunked(7)
+                val weekList = getMinimumTimeUseCase()
+                    .reverseDateUntilWeek(LocalDate.now())
+                    .chunked(7)
+                    .map { it.max() }
+                    .chunked(5)
                 it.copy(
-                    minDate = getMinimumTimeUseCase(),
-                    dateList = getMinimumTimeUseCase()
-                        .reverseDateUntilWeek(LocalDate.now())
-                        .chunked(7),
-                    weekList = getMinimumTimeUseCase()
-                        .reverseDateUntilWeek(LocalDate.now())
-                        .chunked(7)
-                        .map { it.max() }
-                        .chunked(5),
+                    minDate = minDate,
+                    dateList = dateList,
+                    weekList = weekList,
                     displayDate = targetDate,
+                    dateIdx = (dateList.flatten().indexOf(targetDate) / 7).run {
+                        this to dateList[this].indexOf(targetDate)
+                    },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate)
                 )
             }
         }
     }
 
-    private fun changeDate(date: LocalDate) {
+    private fun changeDate(idx: Pair<Int, Int>) {
         _state.update {
-            it.copy(displayDate = date)
+            val date = it.dateList[idx.first][idx.second]
+            when {
+                date > LocalDate.now() -> {
+                    chsLog((idx.first to it.dateList[0].indexOf(LocalDate.now())).toString())
+                    it.copy(
+                        displayDate = LocalDate.now(),
+                        dateIdx = idx.first to it.dateList[0].indexOf(LocalDate.now())
+                    )
+                }
+
+                date < it.minDate -> {
+                    chsLog((idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)).toString())
+                    it.copy(
+                        displayDate = it.minDate,
+                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
+                    )
+                }
+
+                else -> {
+                    chsLog(idx.toString())
+                    it.copy(displayDate = date)
+                }
+            }
         }
     }
 
-    private fun changeWeek(date: LocalDate) {
+    private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update {
+            val date = it.weekList[idx.first][idx.second]
             it.copy(
                 displayWeek = date.reverseDateUntilWeek(date)
             )

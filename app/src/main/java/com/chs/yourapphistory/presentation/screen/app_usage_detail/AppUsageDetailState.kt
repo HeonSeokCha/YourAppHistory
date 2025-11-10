@@ -10,5 +10,5 @@ data class AppUsageDetailState(
     val dateList: List<List<LocalDate>> = listOf(),
     val dateIdx: Pair<Int, Int> =  (0 to 0),
     val weekList: List<List<LocalDate>> = listOf(),
-    val weekIdx: Int = 0
+    val weekIdx: Pair<Int, Int> =  (0 to 0),
 )

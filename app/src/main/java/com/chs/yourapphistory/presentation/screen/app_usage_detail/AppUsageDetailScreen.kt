@@ -83,10 +83,7 @@ fun AppUsageDetailScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val datePagerState = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(
-            pageCount = { state.dateList.count() },
-            initialPage = state.dateList.flatten().indexOf(state.displayDate) / 7
-        )
+        rememberPagerState(pageCount = { state.dateList.count() })
     } else {
         rememberPagerState(pageCount = { 0 })
     }
@@ -95,9 +92,7 @@ fun AppUsageDetailScreen(
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (!datePagerState.isScrollInProgress) {
             onIntent(
-                AppUsageDetailIntent.OnChangeTargetDate(
-                    state.dateList[state.dateIdx.first][state.dateIdx.second]
-                )
+                AppUsageDetailIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
             )
         }
     }
@@ -174,13 +169,11 @@ fun AppUsageDetailScreen(
     }
 
     val weekPagerState = if (state.weekList.isNotEmpty()) {
-        rememberPagerState(
-            pageCount = { state.weekList.count() },
-            initialPage = state.weekList.indexOf(state.displayWeek) / 5
-        )
+        rememberPagerState(pageCount = { state.weekList.count() })
     } else {
         rememberPagerState(pageCount = { 0 })
     }
+
     val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
@@ -195,17 +188,17 @@ fun AppUsageDetailScreen(
         ) {
             if (state.isWeeklyMode) {
                 Text(
-                    text = if (state.displayDate == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        state.displayDate.toConvertDisplayYearDate()
-                    },
+                    text = state.displayWeek.toDisplayYearDate(),
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
             } else {
                 Text(
-                    text = state.displayWeek.toDisplayYearDate(),
+                    text = if (state.displayDate == LocalDate.now()) {
+                        "오늘"
+                    } else {
+                        state.displayDate.toConvertDisplayYearDate()
+                    },
                     textAlign = TextAlign.Center,
                     fontSize = 18.sp
                 )
@@ -240,58 +233,34 @@ fun AppUsageDetailScreen(
                 horizontalArrangement = Arrangement.SpaceAround
             ) {
                 item.reversed().forEachIndexed { idx, date ->
-                    onIntent(
-                        AppUsageDetailIntent.OnChangeTargetDate(
-                            state.dateList[datePagerState.currentPage][idx]
-                        )
+                    Text(
+                        modifier = Modifier
+                            .clickable {
+                                if (date >= state.minDate && date <= LocalDate.now()) {
+                                    onIntent(
+                                        AppUsageDetailIntent.OnChangeTargetDateIdx(
+                                            datePagerState.currentPage to item.size - 1 - idx
+                                        )
+                                    )
+                                }
+                            }
+                            .drawBehind {
+                                drawRoundRect(
+                                    color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
+                                    cornerRadius = CornerRadius(15)
+                                )
+                            }
+                            .padding(
+                                horizontal = if (date.dayOfMonth == 1) 0.dp else 12.dp,
+                                vertical = if (date.dayOfMonth == 1) 0.dp else 8.dp
+                            ),
+                        text = if (date.dayOfMonth == 1) {
+                            "${date.monthValue} / ${date.dayOfMonth}"
+                        } else {
+                            date.dayOfMonth.toString()
+                        },
+                        color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
                     )
-
-                    if (date.dayOfMonth == 1) {
-                        Text(
-                            modifier = Modifier
-                                .clickable {
-                                    if (date >= state.minDate && date <= LocalDate.now()) {
-                                        onIntent(AppUsageDetailIntent.OnChangeTargetDate(date))
-                                    }
-                                }
-                                .drawBehind {
-                                    drawRoundRect(
-                                        color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
-                                        cornerRadius = CornerRadius(
-                                            15.dp.toPx(),
-                                            15.dp.toPx()
-                                        )
-                                    )
-                                }
-                                .padding(8.dp),
-                            text = "${date.monthValue} / ${date.dayOfMonth}",
-                            color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
-                        )
-                    } else {
-                        Text(
-                            modifier = Modifier
-                                .clickable {
-                                    if (date >= state.minDate && date <= LocalDate.now()) {
-                                        onIntent(AppUsageDetailIntent.OnChangeTargetDate(date))
-                                    }
-                                }
-                                .drawBehind {
-                                    drawRoundRect(
-                                        color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
-                                        cornerRadius = CornerRadius(
-                                            15.dp.toPx(),
-                                            15.dp.toPx()
-                                        )
-                                    )
-                                }
-                                .padding(
-                                    horizontal = 12.dp,
-                                    vertical = 8.dp
-                                ),
-                            text = date.dayOfMonth.toString(),
-                            color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
-                        )
-                    }
                 }
             }
         }
