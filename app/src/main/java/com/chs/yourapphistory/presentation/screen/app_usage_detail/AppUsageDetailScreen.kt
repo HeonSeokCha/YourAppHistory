@@ -36,9 +36,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -51,6 +53,7 @@ import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
 import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppIntent
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.delay
@@ -83,9 +86,22 @@ fun AppUsageDetailScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val datePagerState = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(pageCount = { state.dateList.count() })
+        rememberPagerState(
+            pageCount = { state.dateList.count() },
+            initialPage = state.dateList.flatten().indexOf(state.displayDate) / 7
+        )
     } else {
         rememberPagerState(pageCount = { 0 })
+    }
+
+    LaunchedEffect(dailyPagingItems.loadState.refresh) {
+        when (dailyPagingItems.loadState.refresh) {
+            is LoadState.Loading -> onIntent(AppUsageDetailIntent.Loading)
+
+            is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
+
+            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.LoadComplete)
+        }
     }
 
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
@@ -97,75 +113,80 @@ fun AppUsageDetailScreen(
         }
     }
 
-    val dailyUsagePager =
+    val dailyUsagePager = if (state.isLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    } else {
+        val initIdx = state.dateList.flatten().run {
+            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
+        }
+        rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
+    }
 
-    val dailyForegroundUsagePager =
+    val dailyForegroundUsagePager = if (state.isLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    } else {
+        val initIdx = state.dateList.flatten().run {
+            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
+        }
+        rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
+    }
 
-    val dailyNotifyPager =
+    val dailyNotifyPager = if (state.isLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    } else {
+        val initIdx = state.dateList.flatten().run {
+            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
+        }
+        rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
+    }
 
-    val dailyLaunchPager =
+    val dailyLaunchPager = if (state.isLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    } else {
+        val initIdx = state.dateList.flatten().run {
+            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
+        }
+        rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
+    }
+
 
     LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
-        if (!dailyUsagePager.isScrollInProgress) {
-            coroutineScope.launch {
-                dailyForegroundUsagePager.animateScrollToPage(dailyUsagePager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyNotifyPager.animateScrollToPage(dailyUsagePager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyLaunchPager.animateScrollToPage(dailyUsagePager.currentPage)
-            }
-        }
+        if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
+        awaitAll(
+            async { dailyForegroundUsagePager.animateScrollToPage(dailyUsagePager.currentPage) },
+            async { dailyNotifyPager.animateScrollToPage(dailyUsagePager.currentPage) },
+            async { dailyLaunchPager.animateScrollToPage(dailyUsagePager.currentPage) }
+        )
     }
 
     LaunchedEffect(
         dailyForegroundUsagePager.currentPage,
         dailyForegroundUsagePager.isScrollInProgress
     ) {
-        if (!dailyForegroundUsagePager.isScrollInProgress) {
-            coroutineScope.launch {
-                dailyUsagePager.animateScrollToPage(dailyForegroundUsagePager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyNotifyPager.animateScrollToPage(dailyForegroundUsagePager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyLaunchPager.animateScrollToPage(dailyForegroundUsagePager.currentPage)
-            }
-        }
+        if (dailyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
+        awaitAll(
+            async { dailyUsagePager.animateScrollToPage(dailyForegroundUsagePager.currentPage) },
+            async { dailyNotifyPager.animateScrollToPage(dailyForegroundUsagePager.currentPage) },
+            async { dailyLaunchPager.animateScrollToPage(dailyForegroundUsagePager.currentPage) }
+        )
     }
 
     LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
-        if (!dailyNotifyPager.isScrollInProgress) {
-            coroutineScope.launch {
-                dailyUsagePager.animateScrollToPage(dailyNotifyPager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyForegroundUsagePager.animateScrollToPage(dailyNotifyPager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyLaunchPager.animateScrollToPage(dailyNotifyPager.currentPage)
-            }
-        }
+        if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
+        awaitAll(
+            async { dailyUsagePager.animateScrollToPage(dailyNotifyPager.currentPage) },
+            async { dailyForegroundUsagePager.animateScrollToPage(dailyNotifyPager.currentPage) },
+            async { dailyLaunchPager.animateScrollToPage(dailyNotifyPager.currentPage) }
+        )
     }
 
     LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
-        if (!dailyLaunchPager.isScrollInProgress) {
-            coroutineScope.launch {
-                dailyUsagePager.animateScrollToPage(dailyLaunchPager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyForegroundUsagePager.animateScrollToPage(dailyLaunchPager.currentPage)
-            }
-            coroutineScope.launch {
-                dailyNotifyPager.animateScrollToPage(dailyLaunchPager.currentPage)
-            }
-        }
+        if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
+        awaitAll(
+            async { dailyUsagePager.animateScrollToPage(dailyLaunchPager.currentPage) },
+            async { dailyForegroundUsagePager.animateScrollToPage(dailyLaunchPager.currentPage) },
+            async { dailyNotifyPager.animateScrollToPage(dailyLaunchPager.currentPage) }
+        )
     }
 
     val weekPagerState = if (state.weekList.isNotEmpty()) {

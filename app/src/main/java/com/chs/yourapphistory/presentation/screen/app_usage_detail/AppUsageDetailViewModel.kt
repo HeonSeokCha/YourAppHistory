@@ -60,6 +60,11 @@ class AppUsageDetailViewModel(
 
             is AppUsageDetailIntent.OnChangeViewType -> {
             }
+
+            AppUsageDetailIntent.Loading -> _state.update { it.copy(isLoading = true) }
+
+            AppUsageDetailIntent.LoadComplete -> _state.update { it.copy(isLoading = false) }
+            AppUsageDetailIntent.Error -> {}
         }
     }
 
@@ -110,7 +115,6 @@ class AppUsageDetailViewModel(
                 }
 
                 else -> {
-                    chsLog(idx.toString())
                     it.copy(displayDate = date)
                 }
             }
