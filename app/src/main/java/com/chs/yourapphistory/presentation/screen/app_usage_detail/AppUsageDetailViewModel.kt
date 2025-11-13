@@ -86,7 +86,8 @@ class AppUsageDetailViewModel(
                     weekList = weekList,
                     displayDate = targetDate,
                     dateIdx = (dateList.flatten().indexOf(targetDate) / 7).run {
-                        this to dateList[this].indexOf(targetDate)
+                        chsLog("INIT ${this to (dateList[this].indexOf(targetDate) % 7)}")
+                        this to (dateList[this].indexOf(targetDate) % 7)
                     },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate)
                 )
@@ -99,7 +100,6 @@ class AppUsageDetailViewModel(
             val date = it.dateList[idx.first][idx.second]
             when {
                 date > LocalDate.now() -> {
-                    chsLog((idx.first to it.dateList[0].indexOf(LocalDate.now())).toString())
                     it.copy(
                         displayDate = LocalDate.now(),
                         dateIdx = idx.first to it.dateList[0].indexOf(LocalDate.now())
@@ -107,7 +107,6 @@ class AppUsageDetailViewModel(
                 }
 
                 date < it.minDate -> {
-                    chsLog((idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)).toString())
                     it.copy(
                         displayDate = it.minDate,
                         dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
@@ -115,7 +114,10 @@ class AppUsageDetailViewModel(
                 }
 
                 else -> {
-                    it.copy(displayDate = date)
+                    it.copy(
+                        displayDate = date,
+                        dateIdx = idx
+                    )
                 }
             }
         }

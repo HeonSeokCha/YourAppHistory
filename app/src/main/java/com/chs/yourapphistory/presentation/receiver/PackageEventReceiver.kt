@@ -16,8 +16,6 @@ class PackageEventReceiver : BroadcastReceiver() {
         if (intent == null || context == null) return
         val data = intent.data?.schemeSpecificPart ?: return
 
-        chsLog(data)
-
         val uploadWorkRequest: WorkRequest =
             OneTimeWorkRequestBuilder<AppRemoveWorker>()
                 .setInputData(

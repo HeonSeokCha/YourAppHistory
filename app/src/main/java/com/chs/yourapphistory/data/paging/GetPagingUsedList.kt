@@ -27,7 +27,6 @@ class GetPagingUsedList(
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, List<Pair<AppInfo, Int>>>> {
         val pageDate: LocalDate = params.key ?: LocalDate.now()
-        chsLog(pageDate.toString())
 
         val data = pageDate.run {
             if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
