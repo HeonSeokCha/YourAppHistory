@@ -4,6 +4,7 @@ import java.time.LocalDate
 
 data class AppUsageDetailState(
     val isLoading: Boolean = false,
+    val isAppending: Boolean = false,
     val minDate: LocalDate = LocalDate.now(),
     val displayDate: LocalDate = LocalDate.now(),
     val displayWeek: List<LocalDate> = listOf(),

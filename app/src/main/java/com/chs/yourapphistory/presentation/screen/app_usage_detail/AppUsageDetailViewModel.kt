@@ -28,6 +28,7 @@ class AppUsageDetailViewModel(
 ) : ViewModel() {
 
     private val targetDate = targetDateMilli.toLocalDate()
+    private val dateNow = LocalDate.now()
 
     private val _state = MutableStateFlow(AppUsageDetailState())
     val state = _state
@@ -65,6 +66,8 @@ class AppUsageDetailViewModel(
 
             AppUsageDetailIntent.LoadComplete -> _state.update { it.copy(isLoading = false) }
             AppUsageDetailIntent.Error -> {}
+            AppUsageDetailIntent.AppendComplete -> _state.update { it.copy(isAppending = false) }
+            AppUsageDetailIntent.Appending -> _state.update { it.copy(isAppending = true) }
         }
     }
 
@@ -73,10 +76,10 @@ class AppUsageDetailViewModel(
             _state.update {
                 val minDate = getMinimumTimeUseCase()
                 val dateList = getMinimumTimeUseCase()
-                    .reverseDateUntilWeek(LocalDate.now())
+                    .reverseDateUntilWeek(dateNow)
                     .chunked(7)
                 val weekList = getMinimumTimeUseCase()
-                    .reverseDateUntilWeek(LocalDate.now())
+                    .reverseDateUntilWeek(dateNow)
                     .chunked(7)
                     .map { it.max() }
                     .chunked(5)
@@ -99,10 +102,10 @@ class AppUsageDetailViewModel(
         _state.update {
             val date = it.dateList[idx.first][idx.second]
             when {
-                date > LocalDate.now() -> {
+                date > dateNow -> {
                     it.copy(
-                        displayDate = LocalDate.now(),
-                        dateIdx = idx.first to it.dateList[0].indexOf(LocalDate.now())
+                        displayDate = dateNow,
+                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow)
                     )
                 }
 

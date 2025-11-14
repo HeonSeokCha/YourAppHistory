@@ -7,6 +7,8 @@ sealed interface AppUsageDetailIntent {
     data object OnChangeViewType : AppUsageDetailIntent
 
     data object Loading : AppUsageDetailIntent
+    data object Appending : AppUsageDetailIntent
     data object LoadComplete : AppUsageDetailIntent
+    data object AppendComplete : AppUsageDetailIntent
     data object Error : AppUsageDetailIntent
 }
