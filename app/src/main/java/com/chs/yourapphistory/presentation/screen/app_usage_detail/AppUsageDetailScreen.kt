@@ -84,7 +84,8 @@ fun AppUsageDetailScreen(
     weeklyPagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, Int>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
-    val coroutineScope = rememberCoroutineScope()
+    val scrollState = rememberScrollState()
+    /* date related variables */
     val datePagerState = if (state.dateList.isNotEmpty()) {
         rememberPagerState(
             pageCount = { state.dateList.count() },
@@ -96,21 +97,9 @@ fun AppUsageDetailScreen(
 
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
-            is LoadState.Loading -> onIntent(AppUsageDetailIntent.Loading)
-
+            is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
+            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.DateLoadComplete)
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
-
-            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.LoadComplete)
-        }
-    }
-
-    LaunchedEffect(dailyPagingItems.loadState.append) {
-        when (dailyPagingItems.loadState.append) {
-            is LoadState.Loading -> onIntent(AppUsageDetailIntent.Appending)
-
-            is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
-
-            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.AppendComplete)
         }
     }
 
@@ -123,7 +112,7 @@ fun AppUsageDetailScreen(
         }
     }
 
-    val dailyUsagePager = if (state.isLoading || state.isAppending) {
+    val dailyUsagePager = if (state.isDateLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
     } else {
         val initIdx = state.dateList.flatten().run {
@@ -136,7 +125,7 @@ fun AppUsageDetailScreen(
         }
     }
 
-    val dailyForegroundUsagePager = if (state.isLoading) {
+    val dailyForegroundUsagePager = if (state.isDateLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
     } else {
         val initIdx = state.dateList.flatten().run {
@@ -149,7 +138,7 @@ fun AppUsageDetailScreen(
         }
     }
 
-    val dailyNotifyPager = if (state.isLoading) {
+    val dailyNotifyPager = if (state.isDateLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
     } else {
         val initIdx = state.dateList.flatten().run {
@@ -162,7 +151,7 @@ fun AppUsageDetailScreen(
         }
     }
 
-    val dailyLaunchPager = if (state.isLoading) {
+    val dailyLaunchPager = if (state.isDateLoading) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
     } else {
         val initIdx = state.dateList.flatten().run {
@@ -189,9 +178,8 @@ fun AppUsageDetailScreen(
         )
     }
 
-
     LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isLoading) return@LaunchedEffect
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyUsagePager.currentPage.run {
             val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
@@ -204,7 +192,7 @@ fun AppUsageDetailScreen(
         dailyForegroundUsagePager.currentPage,
         dailyForegroundUsagePager.isScrollInProgress
     ) {
-        if (state.dateList.isEmpty() || state.isLoading) return@LaunchedEffect
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyForegroundUsagePager.currentPage.run {
             val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
@@ -214,7 +202,7 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isLoading) return@LaunchedEffect
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyNotifyPager.currentPage.run {
             val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
@@ -224,7 +212,7 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isLoading) return@LaunchedEffect
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyLaunchPager.currentPage.run {
             val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
@@ -232,6 +220,7 @@ fun AppUsageDetailScreen(
         }
         onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
     }
+    /* date related variables end*/
 
     val weekPagerState = if (state.weekList.isNotEmpty()) {
         rememberPagerState(pageCount = { state.weekList.count() })
@@ -239,7 +228,6 @@ fun AppUsageDetailScreen(
         rememberPagerState(pageCount = { 0 })
     }
 
-    val scrollState = rememberScrollState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -282,52 +270,21 @@ fun AppUsageDetailScreen(
             )
         }
 
-
-        HorizontalPager(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp),
-            state = datePagerState,
-            reverseLayout = true,
-            key = { state.dateList[it] }
-        ) {
-            val item = state.dateList[it]
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceAround
-            ) {
-                item.reversed().forEachIndexed { idx, date ->
-                    Text(
-                        modifier = Modifier
-                            .clickable {
-                                if (date >= state.minDate && date <= LocalDate.now()) {
-                                    onIntent(
-                                        AppUsageDetailIntent.OnChangeTargetDateIdx(
-                                            datePagerState.currentPage to item.size - 1 - idx
-                                        )
-                                    )
-                                }
-                            }
-                            .drawBehind {
-                                drawRoundRect(
-                                    color = if (state.displayDate == date) Color.LightGray else Color.Transparent,
-                                    cornerRadius = CornerRadius(15)
-                                )
-                            }
-                            .padding(
-                                horizontal = if (date.dayOfMonth == 1) 0.dp else 12.dp,
-                                vertical = if (date.dayOfMonth == 1) 0.dp else 8.dp
-                            ),
-                        text = if (date.dayOfMonth == 1) {
-                            "${date.monthValue} / ${date.dayOfMonth}"
-                        } else {
-                            date.dayOfMonth.toString()
-                        },
-                        color = if (date >= state.minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
-                    )
-                }
-            }
+        if (state.isWeeklyMode) {
+            ItemWeekList(
+                state = weekPagerState,
+                targetWeek = state.displayWeek,
+                item = state.weekList,
+                onIntent = onIntent
+            )
+        } else {
+            ItemDateList(
+                state = datePagerState,
+                minDate = state.minDate,
+                targetDate = state.displayDate,
+                item = state.dateList,
+                onIntent = onIntent
+            )
         }
 
         Column(
@@ -416,7 +373,6 @@ fun AppUsageDetailScreen(
             }
 
             Spacer(modifier = Modifier.height(8.dp))
-
         }
     }
 }

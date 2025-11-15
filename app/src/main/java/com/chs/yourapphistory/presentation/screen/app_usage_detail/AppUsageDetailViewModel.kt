@@ -60,14 +60,14 @@ class AppUsageDetailViewModel(
             }
 
             is AppUsageDetailIntent.OnChangeViewType -> {
+                _state.update { it.copy(isWeeklyMode = !it.isWeeklyMode) }
             }
 
-            AppUsageDetailIntent.Loading -> _state.update { it.copy(isLoading = true) }
-
-            AppUsageDetailIntent.LoadComplete -> _state.update { it.copy(isLoading = false) }
+            AppUsageDetailIntent.DateLoading -> _state.update { it.copy(isDateLoading = true) }
+            AppUsageDetailIntent.DateLoadComplete -> _state.update { it.copy(isDateLoading = false) }
+            AppUsageDetailIntent.WeekLoading -> _state.update { it.copy(isWeekLoading = false) }
+            AppUsageDetailIntent.WeekLoadComplete -> _state.update { it.copy(isWeekLoading = true) }
             AppUsageDetailIntent.Error -> {}
-            AppUsageDetailIntent.AppendComplete -> _state.update { it.copy(isAppending = false) }
-            AppUsageDetailIntent.Appending -> _state.update { it.copy(isAppending = true) }
         }
     }
 
@@ -75,24 +75,25 @@ class AppUsageDetailViewModel(
         viewModelScope.launch {
             _state.update {
                 val minDate = getMinimumTimeUseCase()
-                val dateList = getMinimumTimeUseCase()
+                val dateList = minDate
                     .reverseDateUntilWeek(dateNow)
-                    .chunked(7)
-                val weekList = getMinimumTimeUseCase()
-                    .reverseDateUntilWeek(dateNow)
-                    .chunked(7)
-                    .map { it.max() }
-                    .chunked(5)
+
+                val splitList = dateList.chunked(7)
+
+                val weekList = splitList.chunked(5)
+
                 it.copy(
                     minDate = minDate,
-                    dateList = dateList,
-                    weekList = weekList,
+                    dateList = splitList,
                     displayDate = targetDate,
-                    dateIdx = (dateList.flatten().indexOf(targetDate) / 7).run {
-                        chsLog("INIT ${this to (dateList[this].indexOf(targetDate) % 7)}")
-                        this to (dateList[this].indexOf(targetDate) % 7)
+                    dateIdx = (dateList.indexOf(targetDate) / 7).run {
+                        this to (splitList[this].indexOf(targetDate) % 7)
                     },
-                    displayWeek = targetDate.reverseDateUntilWeek(targetDate)
+                    displayWeek = targetDate.reverseDateUntilWeek(targetDate),
+                    weekList = weekList,
+                    weekIdx = (dateList.indexOf(targetDate) / 7).run {
+                        0 to 0
+                    }
                 )
             }
         }
@@ -128,9 +129,9 @@ class AppUsageDetailViewModel(
 
     private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update {
-            val date = it.weekList[idx.first][idx.second]
             it.copy(
-                displayWeek = date.reverseDateUntilWeek(date)
+                weekIdx = idx,
+                displayWeek = it.weekList[idx.first][idx.second]
             )
         }
     }

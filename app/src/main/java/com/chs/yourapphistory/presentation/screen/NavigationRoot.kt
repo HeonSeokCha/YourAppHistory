@@ -64,7 +64,7 @@ fun NavigationRoot(
 
             entry<ScreenAppUsageDetail> { key ->
                 val viewModel = koinViewModel<AppUsageDetailViewModel>(
-                    key = (key.targetPackageName to key.targetDate).toString()
+                    key = (key.targetPackageName to key.targetDate).hashCode().toString()
                 ) {
                     parametersOf(key.targetPackageName, key.targetDate)
                 }

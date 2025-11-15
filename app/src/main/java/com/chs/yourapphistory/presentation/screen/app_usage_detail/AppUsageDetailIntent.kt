@@ -6,9 +6,9 @@ sealed interface AppUsageDetailIntent {
     data class OnChangeTargetWeekIdx(val idx: Pair<Int, Int>) : AppUsageDetailIntent
     data object OnChangeViewType : AppUsageDetailIntent
 
-    data object Loading : AppUsageDetailIntent
-    data object Appending : AppUsageDetailIntent
-    data object LoadComplete : AppUsageDetailIntent
-    data object AppendComplete : AppUsageDetailIntent
+    data object DateLoading : AppUsageDetailIntent
+    data object WeekLoading : AppUsageDetailIntent
+    data object DateLoadComplete : AppUsageDetailIntent
+    data object WeekLoadComplete : AppUsageDetailIntent
     data object Error : AppUsageDetailIntent
 }
