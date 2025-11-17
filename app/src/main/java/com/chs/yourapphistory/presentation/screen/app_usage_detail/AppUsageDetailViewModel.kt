@@ -92,7 +92,7 @@ class AppUsageDetailViewModel(
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
                     weekIdx = (dateList.indexOf(targetDate) / 7).run {
-                        0 to 0
+                        0 to this
                     }
                 )
             }
@@ -102,25 +102,32 @@ class AppUsageDetailViewModel(
     private fun changeDate(idx: Pair<Int, Int>) {
         _state.update {
             val date = it.dateList[idx.first][idx.second]
+            chsLog(idx.toString())
             when {
                 date > dateNow -> {
                     it.copy(
                         displayDate = dateNow,
-                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow)
+                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow),
+                        weekIdx = 0 to idx.first,
+                        displayWeek = it.weekList[0][idx.first]
                     )
                 }
 
                 date < it.minDate -> {
                     it.copy(
                         displayDate = it.minDate,
-                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
+                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate),
+                        weekIdx = 0 to idx.first,
+                        displayWeek = it.weekList[0][idx.first]
                     )
                 }
 
                 else -> {
                     it.copy(
                         displayDate = date,
-                        dateIdx = idx
+                        dateIdx = idx,
+                        weekIdx = 0 to idx.first,
+                        displayWeek = it.weekList[0][idx.first]
                     )
                 }
             }
@@ -129,10 +136,36 @@ class AppUsageDetailViewModel(
 
     private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update {
-            it.copy(
-                weekIdx = idx,
-                displayWeek = it.weekList[idx.first][idx.second]
-            )
+            val date = it.dateList[idx.second][6]
+            chsLog(date.toString())
+            when {
+                date > dateNow -> {
+                    it.copy(
+                        displayDate = dateNow,
+                        dateIdx = idx.second to it.dateList[0].indexOf(dateNow),
+                        weekIdx = idx,
+                        displayWeek = it.weekList[idx.first][idx.second],
+                    )
+                }
+
+                date < it.minDate -> {
+                    it.copy(
+                        displayDate = it.minDate,
+                        dateIdx = idx.second to it.dateList[it.dateList.size - 1].indexOf(it.minDate),
+                        weekIdx = idx,
+                        displayWeek = it.weekList[idx.first][idx.second],
+                    )
+                }
+
+                else -> {
+                    it.copy(
+                        displayDate = date,
+                        dateIdx = idx.second to 6,
+                        weekIdx = idx,
+                        displayWeek = it.weekList[idx.first][idx.second],
+                    )
+                }
+            }
         }
     }
 }

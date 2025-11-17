@@ -169,12 +169,12 @@ fun AppUsageDetailScreen(
             val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
             (this.first * 7 + this.second) - initIdx
         }
-        datePagerState.animateScrollToPage(state.dateIdx.first)
+        datePagerState.scrollToPage(state.dateIdx.first)
         awaitAll(
-            async { dailyForegroundUsagePager.animateScrollToPage(page) },
-            async { dailyUsagePager.animateScrollToPage(page) },
-            async { dailyNotifyPager.animateScrollToPage(page) },
-            async { dailyLaunchPager.animateScrollToPage(page) }
+            async { dailyForegroundUsagePager.scrollToPage(page) },
+            async { dailyUsagePager.scrollToPage(page) },
+            async { dailyNotifyPager.scrollToPage(page) },
+            async { dailyLaunchPager.scrollToPage(page) }
         )
     }
 
