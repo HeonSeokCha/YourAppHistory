@@ -10,7 +10,7 @@ data class AppUsageDetailState(
     val displayWeek: List<LocalDate> = listOf(),
     val isWeeklyMode: Boolean = false,
     val dateList: List<List<LocalDate>> = listOf(),
-    val dateIdx: Pair<Int, Int> =  (0 to 0),
+    val dateIdx: Pair<Int, Int> = (0 to 0),
     val weekList: List<List<List<LocalDate>>> = listOf(),
-    val weekIdx: Pair<Int, Int> =  (0 to 0),
+    val weekIdx: Pair<Int, Int> = (0 to 0),
 )

@@ -65,8 +65,8 @@ class AppUsageDetailViewModel(
 
             AppUsageDetailIntent.DateLoading -> _state.update { it.copy(isDateLoading = true) }
             AppUsageDetailIntent.DateLoadComplete -> _state.update { it.copy(isDateLoading = false) }
-            AppUsageDetailIntent.WeekLoading -> _state.update { it.copy(isWeekLoading = false) }
-            AppUsageDetailIntent.WeekLoadComplete -> _state.update { it.copy(isWeekLoading = true) }
+            AppUsageDetailIntent.WeekLoading -> _state.update { it.copy(isWeekLoading = true) }
+            AppUsageDetailIntent.WeekLoadComplete -> _state.update { it.copy(isWeekLoading = false) }
             AppUsageDetailIntent.Error -> {}
         }
     }
