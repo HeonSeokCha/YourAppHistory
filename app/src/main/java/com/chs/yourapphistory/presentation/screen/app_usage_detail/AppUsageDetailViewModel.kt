@@ -102,7 +102,6 @@ class AppUsageDetailViewModel(
     private fun changeDate(idx: Pair<Int, Int>) {
         _state.update {
             val date = it.dateList[idx.first][idx.second]
-            chsLog(idx.toString())
             when {
                 date > dateNow -> {
                     it.copy(
@@ -137,7 +136,6 @@ class AppUsageDetailViewModel(
     private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update {
             val date = it.dateList[idx.second][6]
-            chsLog(date.toString())
             when {
                 date > dateNow -> {
                     it.copy(
