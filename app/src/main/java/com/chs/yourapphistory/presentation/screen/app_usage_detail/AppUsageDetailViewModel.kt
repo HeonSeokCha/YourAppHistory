@@ -106,27 +106,21 @@ class AppUsageDetailViewModel(
                 date > dateNow -> {
                     it.copy(
                         displayDate = dateNow,
-                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow),
-                        weekIdx = 0 to idx.first,
-                        displayWeek = it.weekList[0][idx.first]
+                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow)
                     )
                 }
 
                 date < it.minDate -> {
                     it.copy(
                         displayDate = it.minDate,
-                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate),
-                        weekIdx = 0 to idx.first,
-                        displayWeek = it.weekList[0][idx.first]
+                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
                     )
                 }
 
                 else -> {
                     it.copy(
                         displayDate = date,
-                        dateIdx = idx,
-                        weekIdx = 0 to idx.first,
-                        displayWeek = it.weekList[0][idx.first]
+                        dateIdx = idx
                     )
                 }
             }
@@ -135,35 +129,11 @@ class AppUsageDetailViewModel(
 
     private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update {
-            val date = it.dateList[idx.second][6]
-            when {
-                date > dateNow -> {
-                    it.copy(
-                        displayDate = dateNow,
-                        dateIdx = idx.second to it.dateList[0].indexOf(dateNow),
-                        weekIdx = idx,
-                        displayWeek = it.weekList[idx.first][idx.second],
-                    )
-                }
-
-                date < it.minDate -> {
-                    it.copy(
-                        displayDate = it.minDate,
-                        dateIdx = idx.second to it.dateList[it.dateList.size - 1].indexOf(it.minDate),
-                        weekIdx = idx,
-                        displayWeek = it.weekList[idx.first][idx.second],
-                    )
-                }
-
-                else -> {
-                    it.copy(
-                        displayDate = date,
-                        dateIdx = idx.second to 6,
-                        weekIdx = idx,
-                        displayWeek = it.weekList[idx.first][idx.second],
-                    )
-                }
-            }
+            chsLog(idx.toString())
+            it.copy(
+                weekIdx = idx,
+                displayWeek = it.weekList[idx.first][idx.second]
+            )
         }
     }
 }

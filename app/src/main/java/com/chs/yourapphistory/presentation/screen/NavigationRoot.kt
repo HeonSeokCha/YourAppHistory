@@ -68,10 +68,7 @@ fun NavigationRoot(
                 ) {
                     parametersOf(key.targetPackageName, key.targetDate)
                 }
-                AppUsageDetailScreenRoot(
-                    viewModel = viewModel,
-                    onBack = { backstack.removeLastOrNull() }
-                )
+                AppUsageDetailScreenRoot(viewModel = viewModel)
             }
         }
     )

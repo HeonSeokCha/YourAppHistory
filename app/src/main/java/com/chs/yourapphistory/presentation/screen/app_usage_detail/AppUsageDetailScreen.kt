@@ -32,7 +32,6 @@ import java.time.LocalDate
 @Composable
 fun AppUsageDetailScreenRoot(
     viewModel: AppUsageDetailViewModel,
-    onBack: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val dailyPagingItems = viewModel.getDailyPagingData.collectAsLazyPagingItems()
@@ -232,17 +231,16 @@ fun AppUsageDetailScreen(
     LaunchedEffect(state.weekIdx) {
         weekPagerState.scrollToPage(state.weekIdx.first)
         awaitAll(
-            async { weeklyUsagePager.scrollToPage(state.dateIdx.first) },
-            async { weeklyForegroundUsagePager.scrollToPage(state.dateIdx.first) },
-            async { weeklyNotifyPager.scrollToPage(state.dateIdx.first) },
-            async { weeklyLaunchPager.scrollToPage(state.dateIdx.first) }
+            async { weeklyUsagePager.scrollToPage(state.weekIdx.second) },
+            async { weeklyForegroundUsagePager.scrollToPage(state.weekIdx.second) },
+            async { weeklyNotifyPager.scrollToPage(state.weekIdx.second) },
+            async { weeklyLaunchPager.scrollToPage(state.weekIdx.second) }
         )
     }
 
     LaunchedEffect(weeklyUsagePager.currentPage, weeklyUsagePager.isScrollInProgress) {
         if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
         if (weeklyUsagePager.isScrollInProgress) return@LaunchedEffect
-
         onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(state.weekIdx.first to weeklyUsagePager.currentPage))
     }
 
@@ -258,14 +256,12 @@ fun AppUsageDetailScreen(
     LaunchedEffect(weeklyNotifyPager.currentPage, weeklyNotifyPager.isScrollInProgress) {
         if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
         if (weeklyNotifyPager.isScrollInProgress) return@LaunchedEffect
-
         onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(state.weekIdx.first to weeklyNotifyPager.currentPage))
     }
 
     LaunchedEffect(weeklyLaunchPager.currentPage, weeklyLaunchPager.isScrollInProgress) {
         if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
         if (weeklyLaunchPager.isScrollInProgress) return@LaunchedEffect
-
         onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(state.weekIdx.first to weeklyLaunchPager.currentPage))
     }
 
