@@ -20,7 +20,7 @@ nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinxSerializationCore = "1.9.0"
 material3AdaptiveNav3 = "1.3.0-alpha04"
-koin = "4.1.1"
+koin = "4.2.0-alpha2"
 koin-annotation = "2.3.1"
 
 [libraries]
@@ -38,7 +38,6 @@ androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runt
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
-androidx-material3-adaptive-navigation3 = { group = "androidx.compose.material3.adaptive", name = "adaptive-navigation3", version.ref = "material3AdaptiveNav3" }
 
 workmanager = "androidx.work:work-runtime-ktx:2.11.0"
 androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.2.0"
@@ -53,6 +52,7 @@ lottie = "com.airbnb.android:lottie-compose:6.7.1"
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-nav3 = { module = "io.insert-koin:koin-compose-navigation3", version.ref = "koin" }
 koin-workmananger = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
 koin-ksp = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotation" }
 koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
@@ -76,7 +76,6 @@ compose = [
     "androidX-lifecycle-runtime-compose",
     "androidX-paging-paging-compose",
     "androidx-lifecycle-viewmodel-navigation3",
-    "androidx-material3-adaptive-navigation3",
     "androidx-navigation3-runtime",
     "androidx-navigation3-ui",
     "kotlinx-serialization-core"
@@ -92,7 +91,8 @@ koin = [
     "koin-androidx-compose",
     "koin-compose-viewmodel",
     "koin-workmananger",
-    "koin-annotation"
+    "koin-annotation",
+    "koin-nav3"
 ]
 
 room = [

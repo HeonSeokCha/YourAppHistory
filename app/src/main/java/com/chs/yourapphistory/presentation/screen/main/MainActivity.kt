@@ -21,8 +21,11 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation3.runtime.rememberNavBackStack
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
+import com.chs.yourapphistory.presentation.ScreenUsedAppList
+import com.chs.yourapphistory.presentation.ScreenWelcome
 import com.chs.yourapphistory.presentation.screen.NavigationRoot
 import org.koin.android.ext.android.inject
 
@@ -37,6 +40,11 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             val selectPackageLabel: String? by viewModel.selectPackageLabel.collectAsStateWithLifecycle()
+            val backstack = rememberNavBackStack().apply {
+                this.clear()
+                if (getUsagePermission(this@MainActivity)) this.add(ScreenUsedAppList)
+                else this.add(ScreenWelcome)
+            }
 
             Scaffold(
                 topBar = {
@@ -62,6 +70,7 @@ class MainActivity : ComponentActivity() {
                             navigationIcon = {
                                 IconButton(
                                     onClick = {
+                                        backstack.removeLastOrNull()
                                         viewModel.changeSelectPackageName(null)
                                     }
                                 ) {
@@ -85,7 +94,7 @@ class MainActivity : ComponentActivity() {
                 NavigationRoot(
                     modifier = Modifier
                         .padding(it),
-                    isGrantPermission = getUsagePermission(this),
+                    backStack = backstack,
                     selectPackage = { viewModel.changeSelectPackageName(it) }
                 )
             }

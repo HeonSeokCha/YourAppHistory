@@ -136,4 +136,9 @@ class AppUsageDetailViewModel(
             )
         }
     }
+
+    override fun onCleared() {
+        super.onCleared()
+        chsLog("ONCLEARED")
+    }
 }

@@ -2,11 +2,12 @@ package com.chs.yourapphistory.presentation.screen
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.lifecycle.viewmodel.navigation3.rememberViewModelStoreNavEntryDecorator
+import androidx.navigation3.runtime.NavBackStack
+import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
-import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.presentation.ScreenAppUsageDetail
 import com.chs.yourapphistory.presentation.ScreenUsedAppList
 import com.chs.yourapphistory.presentation.ScreenWelcome
@@ -21,28 +22,25 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun NavigationRoot(
     modifier: Modifier = Modifier,
-    isGrantPermission: Boolean,
+    backStack: NavBackStack<NavKey>,
     selectPackage: (String?) -> Unit
 ) {
-    val backstack = rememberNavBackStack().apply {
-        this.clear()
-        if (isGrantPermission)
-            this.add(ScreenUsedAppList)
-        else
-            this.add(ScreenWelcome)
-    }
 
     NavDisplay(
         modifier = modifier,
-        backStack = backstack,
-        onBack = { backstack.removeLastOrNull() },
+        backStack = backStack,
+        onBack = { backStack.removeLastOrNull() },
+        entryDecorators = listOf(
+            rememberSaveableStateHolderNavEntryDecorator(),
+            rememberViewModelStoreNavEntryDecorator()
+        ),
         entryProvider = entryProvider {
             entry<ScreenWelcome> {
                 WelcomeScreenRoot(
                     viewModel = koinViewModel(),
                     onNavigateHome = {
-                        backstack.removeLastOrNull()
-                        backstack.add(ScreenUsedAppList)
+                        backStack.removeLastOrNull()
+                        backStack.add(ScreenUsedAppList)
                     }
                 )
             }
@@ -52,7 +50,7 @@ fun NavigationRoot(
                     viewModel = koinViewModel(),
                     onClickApp = { info, date ->
                         selectPackage(info.label)
-                        backstack.add(
+                        backStack.add(
                             ScreenAppUsageDetail(
                                 targetPackageName = info.packageName,
                                 targetDate = date
@@ -63,9 +61,7 @@ fun NavigationRoot(
             }
 
             entry<ScreenAppUsageDetail> { key ->
-                val viewModel = koinViewModel<AppUsageDetailViewModel>(
-                    key = (key.targetPackageName to key.targetDate).hashCode().toString()
-                ) {
+                val viewModel = koinViewModel<AppUsageDetailViewModel> {
                     parametersOf(key.targetPackageName, key.targetDate)
                 }
                 AppUsageDetailScreenRoot(viewModel = viewModel)
