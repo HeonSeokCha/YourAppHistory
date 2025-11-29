@@ -20,12 +20,6 @@ class MainViewModel (
         executeWorker()
     }
 
-    val selectPackageLabel: MutableStateFlow<String?> = MutableStateFlow(null)
-
-    fun changeSelectPackageName(label: String?) {
-        selectPackageLabel.update { label }
-    }
-
     private fun executeWorker() {
         val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
             .setInitialDelay(1, TimeUnit.MINUTES)

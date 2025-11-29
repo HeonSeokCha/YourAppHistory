@@ -8,9 +8,7 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import com.chs.yourapphistory.presentation.ScreenAppUsageDetail
-import com.chs.yourapphistory.presentation.ScreenUsedAppList
-import com.chs.yourapphistory.presentation.ScreenWelcome
+import com.chs.yourapphistory.presentation.MainScreens
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreenRoot
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
@@ -23,9 +21,7 @@ import org.koin.androidx.compose.koinViewModel
 fun NavigationRoot(
     modifier: Modifier = Modifier,
     backStack: NavBackStack<NavKey>,
-    selectPackage: (String?) -> Unit
 ) {
-
     NavDisplay(
         modifier = modifier,
         backStack = backStack,
@@ -35,24 +31,24 @@ fun NavigationRoot(
             rememberViewModelStoreNavEntryDecorator()
         ),
         entryProvider = entryProvider {
-            entry<ScreenWelcome> {
+            entry<MainScreens.ScreenWelcome> {
                 WelcomeScreenRoot(
                     viewModel = koinViewModel(),
                     onNavigateHome = {
                         backStack.removeLastOrNull()
-                        backStack.add(ScreenUsedAppList)
+                        backStack.add(MainScreens.ScreenUsedAppList)
                     }
                 )
             }
 
-            entry<ScreenUsedAppList> {
+            entry<MainScreens.ScreenUsedAppList> {
                 UsedAppListScreenScreenRoot(
                     viewModel = koinViewModel(),
                     onClickApp = { info, date ->
-                        selectPackage(info.label)
                         backStack.add(
-                            ScreenAppUsageDetail(
+                            MainScreens.ScreenAppUsageDetail(
                                 targetPackageName = info.packageName,
+                                targetLabelName = info.label,
                                 targetDate = date
                             )
                         )
@@ -60,7 +56,7 @@ fun NavigationRoot(
                 )
             }
 
-            entry<ScreenAppUsageDetail> { key ->
+            entry<MainScreens.ScreenAppUsageDetail> { key ->
                 val viewModel = koinViewModel<AppUsageDetailViewModel> {
                     parametersOf(key.targetPackageName, key.targetDate)
                 }

@@ -5,13 +5,17 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
-data object ScreenWelcome : NavKey
+sealed interface MainScreens: NavKey {
+    @Serializable
+    data object ScreenWelcome : MainScreens
 
-@Serializable
-data object ScreenUsedAppList : NavKey
+    @Serializable
+    data object ScreenUsedAppList : MainScreens
 
-@Serializable
-data class ScreenAppUsageDetail(
-    val targetPackageName: String,
-    val targetDate: Long
-) : NavKey
+    @Serializable
+    data class ScreenAppUsageDetail(
+        val targetPackageName: String,
+        val targetLabelName: String,
+        val targetDate: Long
+    ) : MainScreens
+}

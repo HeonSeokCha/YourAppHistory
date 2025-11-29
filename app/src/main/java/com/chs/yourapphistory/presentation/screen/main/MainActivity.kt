@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -24,8 +23,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
-import com.chs.yourapphistory.presentation.ScreenUsedAppList
-import com.chs.yourapphistory.presentation.ScreenWelcome
+import com.chs.yourapphistory.presentation.MainScreens
 import com.chs.yourapphistory.presentation.screen.NavigationRoot
 import org.koin.android.ext.android.inject
 
@@ -39,63 +37,64 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
 
         setContent {
-            val selectPackageLabel: String? by viewModel.selectPackageLabel.collectAsStateWithLifecycle()
             val backstack = rememberNavBackStack().apply {
                 this.clear()
-                if (getUsagePermission(this@MainActivity)) this.add(ScreenUsedAppList)
-                else this.add(ScreenWelcome)
+                if (getUsagePermission(this@MainActivity)) this.add(MainScreens.ScreenUsedAppList)
+                else this.add(MainScreens.ScreenWelcome)
             }
 
             Scaffold(
                 topBar = {
-                    if (selectPackageLabel == null) {
-                        TopAppBar(
-                            title = {
-                                Text(text = getString(R.string.app_name))
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                titleContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        )
-                    } else {
-                        TopAppBar(
-                            title = {
-                                Text(
-                                    text = selectPackageLabel!!,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                    when (backstack.last()) {
+                        MainScreens.ScreenWelcome -> Unit
+
+                        MainScreens.ScreenUsedAppList -> {
+                            TopAppBar(
+                                title = {
+                                    Text(text = getString(R.string.app_name))
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    titleContentColor = MaterialTheme.colorScheme.primary,
                                 )
-                            },
-                            navigationIcon = {
-                                IconButton(
-                                    onClick = {
-                                        backstack.removeLastOrNull()
-                                        viewModel.changeSelectPackageName(null)
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        contentDescription = null
+                            )
+                        }
+
+                        is MainScreens.ScreenAppUsageDetail -> {
+                            val a = backstack.last() as MainScreens.ScreenAppUsageDetail
+                            TopAppBar(
+                                title = {
+                                    Text(
+                                        text = a.targetLabelName,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
-                                }
-                            },
-                            colors = TopAppBarDefaults.topAppBarColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                titleContentColor = MaterialTheme.colorScheme.primary,
-                            ),
-                        )
+                                },
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = { backstack.removeLastOrNull() }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            contentDescription = null
+                                        )
+                                    }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    titleContentColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        }
                     }
                 },
                 modifier = Modifier
                     .fillMaxSize()
             ) {
                 NavigationRoot(
-                    modifier = Modifier
-                        .padding(it),
-                    backStack = backstack,
-                    selectPackage = { viewModel.changeSelectPackageName(it) }
+                    modifier = Modifier.padding(it),
+                    backStack = backstack
                 )
             }
         }
