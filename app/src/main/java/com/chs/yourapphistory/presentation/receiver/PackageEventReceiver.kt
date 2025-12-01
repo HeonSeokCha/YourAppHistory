@@ -10,11 +10,18 @@ import androidx.work.workDataOf
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.data.workmanager.AppRemoveWorker
+import org.koin.core.component.KoinComponent
+import org.koin.core.component.inject
+import org.koin.java.KoinJavaComponent.inject
 
-class PackageEventReceiver : BroadcastReceiver() {
+class PackageEventReceiver : BroadcastReceiver(), KoinComponent {
+
+    private val workManager: WorkManager by inject()
+
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent == null || context == null) return
         val data = intent.data?.schemeSpecificPart ?: return
+        chsLog("onReceive : $data")
 
         val uploadWorkRequest: WorkRequest =
             OneTimeWorkRequestBuilder<AppRemoveWorker>()
@@ -23,6 +30,6 @@ class PackageEventReceiver : BroadcastReceiver() {
                 )
                 .build()
 
-        WorkManager.getInstance(context).enqueue(uploadWorkRequest)
+        workManager.enqueue(uploadWorkRequest)
     }
 }

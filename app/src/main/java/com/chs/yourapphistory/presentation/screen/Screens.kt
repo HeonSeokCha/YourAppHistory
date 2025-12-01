@@ -1,7 +1,6 @@
-package com.chs.yourapphistory.presentation
+package com.chs.yourapphistory.presentation.screen
 
 import androidx.navigation3.runtime.NavKey
-import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable

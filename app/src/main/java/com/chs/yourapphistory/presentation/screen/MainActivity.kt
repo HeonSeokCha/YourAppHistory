@@ -1,4 +1,4 @@
-package com.chs.yourapphistory.presentation.screen.main
+package com.chs.yourapphistory.presentation.screen
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -16,20 +16,13 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
-import com.chs.yourapphistory.presentation.MainScreens
-import com.chs.yourapphistory.presentation.screen.NavigationRoot
-import org.koin.android.ext.android.inject
 
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: MainViewModel by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -67,7 +60,7 @@ class MainActivity : ComponentActivity() {
                                     Text(
                                         text = a.targetLabelName,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Companion.Ellipsis
                                     )
                                 },
                                 navigationIcon = {
@@ -89,11 +82,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 },
-                modifier = Modifier
+                modifier = Modifier.Companion
                     .fillMaxSize()
             ) {
                 NavigationRoot(
-                    modifier = Modifier.padding(it),
+                    modifier = Modifier.Companion.padding(it),
                     backStack = backstack
                 )
             }
