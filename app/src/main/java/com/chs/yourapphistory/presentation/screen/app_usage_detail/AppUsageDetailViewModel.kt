@@ -128,12 +128,23 @@ class AppUsageDetailViewModel(
     }
 
     private fun changeWeek(idx: Pair<Int, Int>) {
-        _state.update {
-            chsLog(idx.toString())
-            it.copy(
-                weekIdx = idx,
-                displayWeek = it.weekList[idx.first][idx.second]
-            )
+        _state.update { stateInfo ->
+            when {
+
+                stateInfo.weekList[idx.first].size <= idx.second -> {
+                    stateInfo.copy(
+                        weekIdx = idx,
+                        displayWeek = stateInfo.weekList[idx.first][stateInfo.weekList[idx.first].size - 1]
+                    )
+                }
+
+                else -> {
+                    stateInfo.copy(
+                        weekIdx = idx,
+                        displayWeek = stateInfo.weekList[idx.first][idx.second]
+                    )
+                }
+            }
         }
     }
 

@@ -20,6 +20,7 @@ class PackageEventReceiver : BroadcastReceiver(), KoinComponent {
 
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent == null || context == null) return
+        if (intent.action != Intent.ACTION_PACKAGE_FULLY_REMOVED) return
         val data = intent.data?.schemeSpecificPart ?: return
         chsLog("onReceive : $data")
 
