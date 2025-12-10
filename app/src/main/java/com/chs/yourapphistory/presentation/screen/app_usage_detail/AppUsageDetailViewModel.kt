@@ -91,9 +91,7 @@ class AppUsageDetailViewModel(
                     },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
-                    weekIdx = (dateList.indexOf(targetDate) / 7).run {
-                        0 to this
-                    }
+                    weekIdx = (dateList.indexOf(targetDate) / 7).run { 0 to this }
                 )
             }
         }
@@ -130,10 +128,9 @@ class AppUsageDetailViewModel(
     private fun changeWeek(idx: Pair<Int, Int>) {
         _state.update { stateInfo ->
             when {
-
                 stateInfo.weekList[idx.first].size <= idx.second -> {
                     stateInfo.copy(
-                        weekIdx = idx,
+                        weekIdx = idx.first to stateInfo.weekList[idx.first].size - 1,
                         displayWeek = stateInfo.weekList[idx.first][stateInfo.weekList[idx.first].size - 1]
                     )
                 }
