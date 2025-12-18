@@ -1,3 +1,5 @@
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
 plugins {
     kotlin("android")
     alias(libs.plugins.android.application)
@@ -51,10 +53,6 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_17.toString()
-    }
-
     buildFeatures {
         compose = true
     }
@@ -70,7 +68,12 @@ android {
             it.javaDirectories += files("build/generated/ksp/${variant.name}/kotlin")
         }
     }
+}
 
+kotlin {
+    compilerOptions {
+        jvmTarget = JvmTarget.fromTarget("17")
+    }
 }
 
 dependencies {

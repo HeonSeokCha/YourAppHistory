@@ -438,9 +438,8 @@ class AppRepositoryImpl(
 
     override fun getWeeklyPagingAppForegroundInfo(
         targetDate: LocalDate,
-        packageName: String,
-
-        ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
+        packageName: String
+    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
@@ -457,8 +456,7 @@ class AppRepositoryImpl(
 
     override fun getWeeklyPagingAppLaunchInfo(
         targetDate: LocalDate,
-        packageName: String,
-
+        packageName: String
         ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {

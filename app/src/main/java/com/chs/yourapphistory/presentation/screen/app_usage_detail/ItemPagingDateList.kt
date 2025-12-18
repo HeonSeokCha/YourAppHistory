@@ -7,14 +7,19 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.chs.yourapphistory.common.getYearOfWeek
+import com.chs.yourapphistory.common.reverseDateUntil
 import java.time.LocalDate
 import kotlin.collections.reversed
 
@@ -29,7 +34,7 @@ fun ItemDateList(
     HorizontalPager(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 8.dp),
+            .padding(vertical = 8.dp),
         state = state,
         reverseLayout = true,
         key = { item[it].hashCode() }
@@ -38,7 +43,8 @@ fun ItemDateList(
         Row(
             modifier = Modifier
                 .fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceAround
+            horizontalArrangement = Arrangement.SpaceAround,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             item.reversed().forEachIndexed { idx, date ->
                 Text(
@@ -116,4 +122,20 @@ fun ItemWeekList(
             }
         }
     }
+}
+
+@Composable
+@Preview
+private fun PreviewItemDate() {
+    val state = rememberPagerState(initialPage = 0, pageCount = { 1 })
+    val date = remember { LocalDate.now().minusDays(16) }
+    ItemDateList(
+        state = state,
+        minDate = date.minusDays(7L),
+        targetDate = date.minusDays(3L),
+        item = listOf(
+            date.minusDays(7L).reverseDateUntil(date)
+        ),
+        onIntent = {}
+    )
 }

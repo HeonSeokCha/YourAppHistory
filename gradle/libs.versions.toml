@@ -1,5 +1,5 @@
 [versions]
-androidGradlePlugin = "8.13.1"
+androidGradlePlugin = "8.13.2"
 
 compileSdkVersion = "36"
 minSdkVersion = "29"
@@ -7,31 +7,31 @@ targetSdkVersion = "35"
 versionCode = "1"
 versionName = "1.0"
 
-activity = "1.12.1"
+activity = "1.12.2"
 compose-ui = "1.10.0"
 lifecycle = "2.10.0"
 room = "2.8.4"
-kotlin = "2.2.21"
+kotlin = "2.3.0"
 ksp = "2.2.21-2.0.4"
 kotlin-coroutine = "1.10.2"
 desugar_jdk_libs = "2.1.5"
 nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinxSerializationCore = "1.9.0"
-koin = "4.2.0-alpha3"
+koin = "4.2.0-beta2"
 koin-annotation = "2.3.1"
 
 [libraries]
 # AndroidX
 androidX-core-ktx = "androidx.core:core-ktx:1.17.0"
 androidX-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose-ui" }
-androidX-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity"}
+androidX-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 androidX-compose-material-icon-extend = "androidx.compose.material:material-icons-extended:1.7.8"
 androidX-compose-material3 = "androidx.compose.material3:material3:1.4.0"
 androidX-compose-ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose-ui" }
 androidX-compose-ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", version.ref = "compose-ui" }
-androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle"}
-androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle"}
+androidX-lifecycle-runtime-compose = { module = "androidx.lifecycle:lifecycle-runtime-compose", version.ref = "lifecycle" }
+androidX-lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
 androidx-navigation3-runtime = { module = "androidx.navigation3:navigation3-runtime", version.ref = "nav3Core" }
 androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", version.ref = "nav3Core" }
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }

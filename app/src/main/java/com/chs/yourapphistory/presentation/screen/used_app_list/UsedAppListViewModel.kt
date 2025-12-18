@@ -13,6 +13,7 @@ import com.chs.yourapphistory.domain.usecase.GetPagingNotifyListUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingUsedListUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
 
@@ -79,8 +82,15 @@ class UsedAppListViewModel(
 
     private suspend fun insertUsageInfo() {
         _state.update { it.copy(isLoading = true) }
-        getInstallAppInfoUseCase()
-        insertAppUsageInfoUseCase()
+        withContext(Dispatchers.IO) {
+            launch(Dispatchers.IO) {
+                getInstallAppInfoUseCase()
+            }
+
+            launch(Dispatchers.IO) {
+                insertAppUsageInfoUseCase()
+            }
+        }
     }
 
     private fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
