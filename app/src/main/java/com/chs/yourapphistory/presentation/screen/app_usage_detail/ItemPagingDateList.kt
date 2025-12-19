@@ -1,5 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -48,31 +49,32 @@ fun ItemDateList(
         ) {
             item.reversed().forEachIndexed { idx, date ->
                 Text(
-                    modifier = Modifier
-                        .clickable {
-                            if (date >= minDate && date <= LocalDate.now()) {
-                                onIntent(
-                                    AppUsageDetailIntent.OnChangeTargetDateIdx(
-                                        state.currentPage to item.size - 1 - idx
-                                    )
-                                )
-                            }
-                        }
-                        .drawBehind {
-                            drawRoundRect(
-                                color = if (targetDate == date) Color.LightGray else Color.Transparent,
-                                cornerRadius = CornerRadius(15)
-                            )
-                        }
-                        .padding(
-                            horizontal = if (date.dayOfMonth == 1) 0.dp else 12.dp,
-                            vertical = if (date.dayOfMonth == 1) 0.dp else 8.dp
-                        ),
                     text = if (date.dayOfMonth == 1) {
                         "${date.monthValue} / ${date.dayOfMonth}"
                     } else {
                         date.dayOfMonth.toString()
                     },
+                    modifier = Modifier
+                        .clickable {
+                            if (date < minDate) return@clickable
+                            if (date > LocalDate.now()) return@clickable
+
+                            onIntent(
+                                AppUsageDetailIntent.OnChangeTargetDateIdx(
+                                    state.currentPage to item.size - 1 - idx
+                                )
+                            )
+                        }
+                        .drawBehind {
+                            drawRoundRect(
+                                color = if (targetDate == date) Color.LightGray else Color.Transparent,
+                                cornerRadius = CornerRadius(10.dp.toPx())
+                            )
+                        }
+                        .padding(
+                            horizontal =  if (date.dayOfMonth == 1) 8.dp else 12.dp,
+                            vertical =  8.dp
+                        ),
                     color = if (date >= minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
                 )
             }
@@ -110,7 +112,7 @@ fun ItemWeekList(
                         .drawBehind {
                             drawRoundRect(
                                 color = if (targetWeek == dateList) Color.LightGray else Color.Transparent,
-                                cornerRadius = CornerRadius(15L)
+                                cornerRadius = CornerRadius(10.dp.toPx())
                             )
                         }
                         .padding(

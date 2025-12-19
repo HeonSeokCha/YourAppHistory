@@ -46,7 +46,7 @@ class YourAppHistoryApplication : Application(), Configuration.Provider {
 
     private fun scheduleWorker() {
         val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
-            .setInitialDelay(1, TimeUnit.MINUTES)
+            .setInitialDelay(30, TimeUnit.MINUTES)
             .build()
 
         workManager.enqueueUniquePeriodicWork(
