@@ -38,7 +38,7 @@ fun ItemDateList(
             .padding(vertical = 8.dp),
         state = state,
         reverseLayout = true,
-        key = { item[it].hashCode() }
+        key = { item[it].first() }
     ) {
         val item = item[it]
         Row(
@@ -95,7 +95,7 @@ fun ItemWeekList(
             .padding(bottom = 8.dp),
         state = state,
         reverseLayout = true,
-        key = { item[it].hashCode() }
+        key = { item[it].first().first() }
     ) {
         val item = item[it]
         Row(
@@ -107,7 +107,9 @@ fun ItemWeekList(
                 Text(
                     modifier = Modifier
                         .clickable {
-                            onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(0 to item.size - 1 - idx))
+                            onIntent(
+                                AppUsageDetailIntent.OnChangeTargetWeekIdx(state.currentPage to item.size - 1 - idx)
+                            )
                         }
                         .drawBehind {
                             drawRoundRect(

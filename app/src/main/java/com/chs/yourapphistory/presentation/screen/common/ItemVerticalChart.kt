@@ -203,6 +203,7 @@ fun ItemDailyChart(
 @Composable
 fun DailyUsageChart(
     title: String,
+    subTitle: String? = null,
     list: List<Pair<Int, Int>>,
     convertText: (Int) -> String
 ) {
@@ -221,6 +222,20 @@ fun DailyUsageChart(
             fontSize = 16.sp,
             fontWeight = FontWeight.Bold
         )
+
+        if (subTitle != null) {
+
+            Text(
+                modifier = Modifier
+                    .padding(
+                        top = 8.dp,
+                        start = 8.dp
+                    ),
+                text = subTitle,
+                fontSize = 12.sp,
+                color = Color.DarkGray
+            )
+        }
 
         Spacer(modifier = Modifier.height(8.dp))
 

@@ -20,7 +20,7 @@ import java.time.LocalDate
 
 @KoinViewModel
 class AppUsageDetailViewModel(
-    targetPackageName: String,
+    targetPackageNameInfo: Pair<String, String>,
     targetDateMilli: Long,
     getPagingDailyUseCase: GetPagingDailyUseCase,
     getPagingWeeklyUseCase: GetPagingWeeklyUseCase,
@@ -29,10 +29,15 @@ class AppUsageDetailViewModel(
 
     private val targetDate = targetDateMilli.toLocalDate()
     private val dateNow = LocalDate.now()
+    private val targetPackageName = targetPackageNameInfo.first
+    private val targetPackageLabel = targetPackageNameInfo.second
 
     private val _state = MutableStateFlow(AppUsageDetailState())
     val state = _state
-        .onStart { getDateRangeList() }
+        .onStart {
+            getDateRangeList()
+            _state.update { it.copy(packageLabel = targetPackageLabel) }
+        }
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000L),

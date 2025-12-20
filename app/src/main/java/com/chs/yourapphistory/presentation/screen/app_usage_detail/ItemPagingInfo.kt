@@ -30,6 +30,7 @@ import kotlin.collections.sumOf
 
 @Composable
 fun ItemDailyPagingInfo(
+    packageLabel: String,
     dailyUsagePager: PagerState,
     dailyForegroundUsagePager: PagerState,
     dailyNotifyPager: PagerState,
@@ -54,6 +55,7 @@ fun ItemDailyPagingInfo(
             if (item != null) {
                 DailyUsageChart(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
+                    subTitle = "$packageLabel 사용 시간",
                     list = item,
                     convertText = { it.convertToRealUsageMinutes() }
                 )
@@ -73,9 +75,8 @@ fun ItemDailyPagingInfo(
             val item = dailyPagingItems[it]?.get(SortType.ForegroundUsageEvent)
             if (item != null) {
                 DailyUsageChart(
-                    title = "포그라운드 실행 시간 " +
-                            item.sumOf { it.second }
-                                .convertToRealUsageTime(),
+                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                    subTitle = "포그라운드 실행 시간 ",
                     list = item,
                     convertText = { it.convertToRealUsageMinutes() }
                 )

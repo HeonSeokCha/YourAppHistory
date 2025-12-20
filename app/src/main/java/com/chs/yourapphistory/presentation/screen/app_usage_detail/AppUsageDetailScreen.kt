@@ -342,6 +342,7 @@ fun AppUsageDetailScreen(
             )
         } else {
             ItemDailyPagingInfo(
+                packageLabel = state.packageLabel,
                 dailyUsagePager = dailyUsagePager,
                 dailyForegroundUsagePager = dailyForegroundUsagePager,
                 dailyNotifyPager = dailyNotifyPager,
