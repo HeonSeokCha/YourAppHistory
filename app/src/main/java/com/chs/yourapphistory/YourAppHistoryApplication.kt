@@ -40,7 +40,7 @@ class YourAppHistoryApplication : Application(), Configuration.Provider {
             )
             workManagerFactory()
 
-            scheduleWorker()
+//            scheduleWorker()
         }
     }
 

@@ -204,8 +204,12 @@ internal fun calcHourUsageList(
                     } else {
                         1.hours.inWholeMilliseconds
                     }
-
-                    value + calc
+                    val totalSum: Long = value + calc
+                    if (totalSum >= 1.hours.inWholeMilliseconds) {
+                        1.hours.inWholeMilliseconds
+                    } else {
+                        totalSum
+                    }
                 }
                 targetDateZeroHour.minusHours(i.toLong())
             }
@@ -221,7 +225,13 @@ internal fun calcHourUsageList(
                     } else {
                         1.hours.inWholeMilliseconds
                     }
-                    value + calc
+
+                    val totalSum: Long = value + calc
+                    if (totalSum >= 1.hours.inWholeMilliseconds) {
+                        1.hours.inWholeMilliseconds
+                    } else {
+                        totalSum
+                    }
                 }
                 targetDateZeroHour.minusHours(i.toLong())
             }
@@ -236,7 +246,12 @@ internal fun calcHourUsageList(
                     val targetHour = targetDateZeroHour.plusHours(i.toLong())
                     usageMap.computeIfPresent(i) { _, value1 ->
                         if (i == end.hour) {
-                            value1 + (end.toMillis() - targetHour.toMillis())
+                            val totalSum = value1 + (end.toMillis() - targetHour.toMillis())
+                            if (totalSum >= 1.hours.inWholeMilliseconds) {
+                                1.hours.inWholeMilliseconds
+                            } else {
+                                totalSum
+                            }
                         } else {
                             1.hours.inWholeMilliseconds
                         }
@@ -244,9 +259,19 @@ internal fun calcHourUsageList(
                     targetDateZeroHour.minusHours(i.toLong())
                 }
                 val nextHour = targetDate.atStartOfDay().plusHours((begin.hour + 1).toLong())
-                value + (nextHour.toMillis() - begin.toMillis())
+                val totalSum = value + (nextHour.toMillis() - begin.toMillis())
+                if (totalSum >= 1.hours.inWholeMilliseconds) {
+                    1.hours.inWholeMilliseconds
+                } else {
+                    totalSum
+                }
             } else {
-                value + (end.toMillis() - begin.toMillis())
+                val totalSum = value + (end.toMillis() - begin.toMillis())
+                if (totalSum >= 1.hours.inWholeMilliseconds) {
+                    1.hours.inWholeMilliseconds
+                } else {
+                    totalSum
+                }
             }
         }
     }

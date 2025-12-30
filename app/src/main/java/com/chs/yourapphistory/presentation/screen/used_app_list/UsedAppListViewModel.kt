@@ -51,11 +51,7 @@ class UsedAppListViewModel(
 
     fun handleIntent(intent: UsedAppIntent) {
         when (intent) {
-            is UsedAppIntent.ChangeDate -> {
-                _state.update {
-                    it.copy(displayDate = if (intent.date == LocalDate.now()) "오늘" else intent.date.toString())
-                }
-            }
+            is UsedAppIntent.ChangeDate -> changeDate(intent.date)
 
             is UsedAppIntent.ClickAppInfo -> {
                 _effect.trySend(
@@ -94,11 +90,18 @@ class UsedAppListViewModel(
     }
 
     private fun getEventList(sortType: SortType): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> {
+        changeDate(LocalDate.now())
         return when (sortType) {
             SortType.UsageEvent -> getPagingUsedListUseCase()
             SortType.ForegroundUsageEvent -> getPagingForegroundListUseCase()
             SortType.NotifyEvent -> getPagingNotifyListUseCase()
             SortType.LaunchEvent -> getPagingLaunchListUseCase()
+        }
+    }
+
+    private fun changeDate(date: LocalDate) {
+        _state.update {
+            it.copy(displayDate = if (date == LocalDate.now()) "오늘" else date.toString())
         }
     }
 }
