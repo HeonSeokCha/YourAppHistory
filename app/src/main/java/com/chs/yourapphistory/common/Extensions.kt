@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
 import android.os.Process
 import android.util.Log
+import androidx.compose.runtime.snapshots.toInt
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -317,7 +318,13 @@ internal fun calcDayUsedList(
         val date = mapInfo.key
 
         usageMap.computeIfPresent(date.dayOfWeek.value) { _, value ->
-            value + mapInfo.value.toConvertDayUsedTime(date)
+            val totalSum = value + mapInfo.value.toConvertDayUsedTime(date)
+
+            if (totalSum >= 1.days.inWholeMilliseconds) {
+                1.days.inWholeMilliseconds.toInt()
+            } else {
+                totalSum
+            }
         }
     }
 

@@ -4,9 +4,11 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.Text
@@ -281,37 +283,32 @@ fun AppUsageDetailScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 16.dp),
+                .padding(vertical = 16.dp, horizontal = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            if (state.isWeeklyMode) {
-                Text(
-                    text = state.displayWeek.toDisplayYearDate(),
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            } else {
-                Text(
-                    text = if (state.displayDate == LocalDate.now()) {
-                        "오늘"
-                    } else {
-                        state.displayDate.toConvertDisplayYearDate()
-                    },
-                    textAlign = TextAlign.Center,
-                    fontSize = 18.sp
-                )
-            }
+            Text(
+                modifier = Modifier.weight(0.7f),
+                text = if (state.isWeeklyMode) {
+                    state.displayWeek.toDisplayYearDate()
+                } else {
+                    state.displayDate.toConvertDisplayYearDate()
+                },
+                fontSize = 16.sp,
+                maxLines = 2
+            )
+
+            Spacer(modifier = Modifier.width(8.dp).weight(0.1f))
 
             Text(
                 modifier = Modifier
+                    .weight(0.2f)
                     .clickable { onIntent(AppUsageDetailIntent.OnChangeViewType) },
                 text = if (state.isWeeklyMode) {
                     "일별 보기"
                 } else {
                     "주별 보기"
                 },
-                textAlign = TextAlign.Center,
-                fontSize = 18.sp
+                fontSize = 16.sp
             )
         }
 
