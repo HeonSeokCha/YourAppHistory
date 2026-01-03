@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.domain.repository
 
-import android.graphics.Bitmap
 import androidx.paging.PagingData
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
@@ -30,47 +29,6 @@ interface AppRepository {
         targetDate: LocalDate,
         packageName: String
     ): Flow<PagingData<Map<SortType, List<Pair<Int, Int>>>>>
-
-    fun getDailyPagingAppUsedInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
-
-    fun getDailyPagingAppForegroundInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
-
-
-    fun getDailyPagingAppLaunchInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
-
-    fun getDailyPagingAppNotifyInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<LocalDate, List<Pair<Int, Int>>>>>
-
-    fun getWeeklyPagingAppUsedInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
-
-    fun getWeeklyPagingAppForegroundInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
-
-    fun getWeeklyPagingAppLaunchInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
-
-    fun getWeeklyPagingAppNotifyInfo(
-        targetDate: LocalDate,
-        packageName: String
-    ): Flow<PagingData<Pair<List<LocalDate>, List<Pair<LocalDate, Int>>>>>
 
     suspend fun getMinDate(): LocalDate
 
