@@ -4,6 +4,8 @@ import android.app.usage.UsageEvents
 import android.app.usage.UsageStatsManager
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
@@ -47,21 +49,9 @@ class ApplicationInfoSource(
 
     suspend fun getApplicationLabel(packageName: String): String {
         return withContext(Dispatchers.Default) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                context.packageManager.getApplicationLabel(
-                    context.packageManager.getApplicationInfo(
-                        packageName,
-                        PackageManager.ApplicationInfoFlags.of(0)
-                    )
-                )
-            } else {
-                context.packageManager.getApplicationLabel(
-                    context.packageManager.getApplicationInfo(
-                        packageName,
-                        0
-                    )
-                )
-            }.toString()
+            context.packageManager.getApplicationLabel(
+                getApplicationInfo(packageName)
+            ).toString()
         }
     }
 
@@ -409,5 +399,51 @@ class ApplicationInfoSource(
         }
 
         return completedUsageList to incompUsageEntityList
+    }
+
+    private fun getApplicationInfo(packageName: String): ApplicationInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.packageManager.getApplicationInfo(
+                    packageName,
+                    PackageManager.ApplicationInfoFlags.of(0)
+                )
+        } else {
+            context.packageManager.getApplicationInfo(
+                packageName,
+                0
+            )
+        }
+    }
+
+    private fun getPackageInfo(packageName: String): PackageInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            context.packageManager.getPackageInfo(
+                packageName,
+                PackageManager.PackageInfoFlags.of(PackageManager.GET_SIGNING_CERTIFICATES.toLong())
+            )
+        } else {
+            context.packageManager.getPackageInfo(
+                packageName,
+                PackageManager.GET_SIGNATURES
+            )
+        }
+    }
+
+    fun getLastUpdateTime(packageName: String): Long {
+        return getPackageInfo(packageName).lastUpdateTime
+    }
+
+    fun getInstallProvider(packageName: String): String? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val installSourceInfo = context.packageManager.getInstallSourceInfo(packageName)
+            installSourceInfo.installingPackageName
+        } else {
+            @Suppress("DEPRECATION")
+            context.packageManager.getInstallerPackageName(packageName)
+        }
+    }
+
+    fun getFirstInstallTime(packageName: String): Long {
+        return getPackageInfo(packageName).firstInstallTime
     }
 }

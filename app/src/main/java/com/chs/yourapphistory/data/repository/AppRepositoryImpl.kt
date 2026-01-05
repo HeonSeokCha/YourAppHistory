@@ -31,6 +31,7 @@ import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.model.AppInfoData
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
 import com.chs.yourapphistory.domain.model.AppInfo
@@ -83,7 +84,7 @@ class AppRepositoryImpl(
 
     override suspend fun insertInstallAppInfo() {
         chsLog("START insertInstallAppInfo")
-        val localList: List<AppInfoEntity> = appInfoDao.getAllPackage()
+        val localList: List<AppInfoEntity> = appInfoDao.getPackageDetailInfo()
         val currentLauncherList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
 
@@ -100,6 +101,11 @@ class AppRepositoryImpl(
                     AppInfoEntity(
                         packageName = packageName,
                         label = applicationInfoSource.getApplicationLabel(packageName),
+                        firstInstallTime = applicationInfoSource.getFirstInstallTime(packageName),
+                        lastUpdateTime = applicationInfoSource.getLastUpdateTime(packageName),
+                        installProvider = applicationInfoSource.getInstallProvider(packageName),
+                        lastUsedTime = null,
+                        lastForegroundUsedTime = null
                     )
                 }.toTypedArray()
         )

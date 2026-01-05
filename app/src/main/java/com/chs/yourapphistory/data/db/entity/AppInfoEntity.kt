@@ -7,5 +7,10 @@ import androidx.room.PrimaryKey
 data class AppInfoEntity(
     @PrimaryKey
     val packageName: String,
-    val label: String
+    val label: String,
+    val firstInstallTime: Long,
+    val lastUpdateTime: Long,
+    val installProvider: String?,
+    val lastUsedTime: Long?,
+    val lastForegroundUsedTime: Long?
 )
