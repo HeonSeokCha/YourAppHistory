@@ -34,4 +34,19 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
     @Query("SELECT * FROM appInfo ORDER BY label")
     abstract suspend fun getAllInstallPackageDetailInfo(): List<AppInfoEntity>
+
+    @Update
+    abstract suspend fun update(vararg info: AppInfoEntity)
+
+    @Query("UPDATE appInfo SET lastUsedTime = :time WHERE packageName = :packageName")
+    abstract suspend fun updateLastUsedTime(
+        packageName: String,
+        time: Long
+    )
+
+    @Query("UPDATE appInfo SET lastForegroundUsedTime = :time WHERE packageName = :packageName")
+    abstract suspend fun updateLastForegroundUsedTime(
+        packageName: String,
+        time: Long
+    )
 }

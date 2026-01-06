@@ -433,14 +433,18 @@ class ApplicationInfoSource(
         return getPackageInfo(packageName).lastUpdateTime
     }
 
-    fun getInstallProvider(packageName: String): String? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+    suspend fun getInstallProvider(packageName: String): String? {
+        val packageName: String? = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val installSourceInfo = context.packageManager.getInstallSourceInfo(packageName)
             installSourceInfo.installingPackageName
         } else {
             @Suppress("DEPRECATION")
             context.packageManager.getInstallerPackageName(packageName)
         }
+
+        if (packageName == null) return null
+
+        return getApplicationLabel(packageName)
     }
 
     fun getFirstInstallTime(packageName: String): Long {

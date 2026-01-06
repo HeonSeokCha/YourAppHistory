@@ -85,18 +85,13 @@ class AppRepositoryImpl(
     override suspend fun insertInstallAppInfo() {
         chsLog("START insertInstallAppInfo")
         val localList: List<AppInfoEntity> = appInfoDao.getPackageDetailInfo()
-        val currentLauncherList: List<String> =
+        val currentPackageNameList: List<String> =
             applicationInfoSource.getInstalledLauncherPackageNameList()
 
         appInfoDao.upsert(
-            *currentLauncherList
+            *currentPackageNameList
                 .filterNot { launcherPackageName ->
-                    localList.any {
-                        it.packageName == launcherPackageName
-                                && it.label == applicationInfoSource.getApplicationLabel(
-                            launcherPackageName
-                        )
-                    }
+                    localList.any { it.packageName == launcherPackageName }
                 }.map { packageName ->
                     AppInfoEntity(
                         packageName = packageName,
@@ -110,15 +105,34 @@ class AppRepositoryImpl(
                 }.toTypedArray()
         )
 
+        val currentPackageInfo = currentPackageNameList.map { packageName ->
+            AppInfoEntity(
+                packageName = packageName,
+                label = applicationInfoSource.getApplicationLabel(packageName),
+                firstInstallTime = applicationInfoSource.getFirstInstallTime(packageName),
+                lastUpdateTime = applicationInfoSource.getLastUpdateTime(packageName),
+                installProvider = applicationInfoSource.getInstallProvider(packageName),
+                lastUsedTime = null,
+                lastForegroundUsedTime = null
+            )
+        }
+
+        appInfoDao.update(
+            *currentPackageInfo.filterNot { currentPackageInfo ->
+                localList.any { localPackageInfo ->
+                    currentPackageInfo.packageName == localPackageInfo.packageName
+                            && currentPackageInfo.lastUpdateTime == localPackageInfo.lastUpdateTime
+                            && currentPackageInfo.installProvider == localPackageInfo.installProvider
+                }
+            }.toTypedArray()
+        )
+
         val removePackageList = localList.filterNot { packageInfo ->
-            currentLauncherList.any { it == packageInfo.packageName }
-        }.map { it.packageName }
-
-        chsLog("END insertInstallAppInfo")
-
-        if (removePackageList.isEmpty()) return
+            currentPackageNameList.any { it == packageInfo.packageName }
+        }.map { it.packageName }.ifEmpty { return }
 
         deleteUsageInfoFromPackageNames(removePackageList)
+        chsLog("END insertInstallAppInfo")
     }
 
     override suspend fun insertAppUsageInfo() {
@@ -182,6 +196,13 @@ class AppRepositoryImpl(
                             }.toTypedArray()
                         )
 
+                        val a = usageList.groupBy { it.packageName }
+                            .map { it.key to it.value.maxOf { it.endUseTime } }
+
+                            a.forEach {
+                                appInfoDao.updateLastUsedTime(it.first, it.second)
+                            }
+
                         appUsageDao.upsert(*usageList.toTypedArray())
                     }
                 }
@@ -195,6 +216,15 @@ class AppRepositoryImpl(
                     ).run {
                         val foregroundUsageList = this.first
                         appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
+
+
+                        val a = foregroundUsageList.groupBy { it.packageName }
+                            .map { it.key to it.value.maxOf { it.endUseTime } }
+
+
+                            a.forEach {
+                                appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
+                            }
 
                         if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
 
