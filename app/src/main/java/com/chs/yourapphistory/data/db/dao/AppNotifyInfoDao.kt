@@ -24,6 +24,13 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     ): Map<AppInfoEntity, @MapColumn("cnt") Int>
 
     @Query(
+        "SELECT COUNT(packageName) " +
+                 "FROM appNotifyInfo " +
+                "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999"
+    )
+    abstract suspend fun getDayAppNotify(targetDate: Long): Long
+
+    @Query(
         "SELECT notifyTime " +
           "FROM appNotifyInfo " +
          "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +

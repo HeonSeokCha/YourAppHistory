@@ -18,8 +18,7 @@ abstract class AppInfoDao : BaseDao<AppInfoEntity> {
 
 
     @Query("""
-        SELECT packageName,
-               label
+        SELECT packageName, label
           FROM appInfo
          ORDER BY label
     """)

@@ -3,9 +3,8 @@ package com.chs.yourapphistory.data.db.dao
 import androidx.room.Dao
 import androidx.room.MapColumn
 import androidx.room.Query
-import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
-import kotlinx.coroutines.flow.Flow
+import com.chs.yourapphistory.data.model.AppInfoData
 
 @Dao
 abstract class AppUsageDao : BaseDao<AppUsageEntity> {
@@ -14,7 +13,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
     @Query(
-        "SELECT appInfo.*, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
+        "SELECT appInfo.packageName, appInfo.label, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
                     "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
@@ -22,10 +21,10 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     )
     abstract suspend fun getDayAppUsedInfo(
         targetDate: Long
-    ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
+    ): Map<AppInfoData, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT appInfo.* , COUNT(appUsage.packageName) as cnt " +
+        "SELECT appInfo.packageName, appInfo.label , COUNT(appUsage.packageName) as cnt " +
           "FROM appInfo " +
           "LEFT JOIN appUsage ON beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
            "AND appInfo.packageName = appUsage.packageName " +
@@ -34,7 +33,22 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     )
     abstract suspend fun getDayAppLaunchInfo(
         targetDate: Long
-    ): Map<AppInfoEntity, @MapColumn("cnt") Int>
+    ): Map<AppInfoData, @MapColumn("cnt") Int>
+
+    @Query(
+        "SELECT SUM(endUseTime - beginUseTime) " +
+                 "FROM appUsage " +
+                "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
+                  "AND date(endUseTime / 1000, 'unixepoch', 'localtime') "
+    )
+    abstract suspend fun getDayTotalAppUsedTime(targetDate: Long): Long
+
+    @Query(
+        "SELECT COUNT(packageName) " +
+                "FROM appUsage " +
+                "WHERE beginUseTime BETWEEN :targetDate AND :targetDate + 86399999"
+    )
+    abstract suspend fun getDayTotalAppLaunchCount(targetDate: Long): Long
 
     @Query(
         "SELECT beginUseTime, endUseTime " +
