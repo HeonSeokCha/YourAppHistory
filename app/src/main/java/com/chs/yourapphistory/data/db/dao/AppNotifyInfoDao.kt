@@ -32,9 +32,9 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
 
     @Query(
         "SELECT notifyTime " +
-          "FROM appNotifyInfo " +
-         "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-           "AND packageName = :packageName"
+                 "FROM appNotifyInfo " +
+                "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +
+                  "AND packageName = :packageName"
     )
     abstract suspend fun getDayNotifyCount(
         packageName: String,

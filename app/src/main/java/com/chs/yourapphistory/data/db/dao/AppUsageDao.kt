@@ -36,12 +36,12 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     ): Map<AppInfoData, @MapColumn("cnt") Int>
 
     @Query(
-        "SELECT SUM(endUseTime - beginUseTime) " +
+        "SELECT beginUseTime, endUseTime " +
                  "FROM appUsage " +
                 "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
                   "AND date(endUseTime / 1000, 'unixepoch', 'localtime') "
     )
-    abstract suspend fun getDayTotalAppUsedTime(targetDate: Long): Long
+    abstract suspend fun getDayTotalAppUsedTime(targetDate: Long): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
 
     @Query(
         "SELECT COUNT(packageName) " +

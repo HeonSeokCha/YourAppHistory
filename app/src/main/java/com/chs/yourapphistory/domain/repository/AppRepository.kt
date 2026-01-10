@@ -30,6 +30,8 @@ interface AppRepository {
         packageName: String
     ): Flow<PagingData<Map<SortType, List<Pair<Int, Int>>>>>
 
+    fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>>
+
     suspend fun getMinDate(): LocalDate
 
     suspend fun deleteUsageInfo(packageName: String)

@@ -27,12 +27,12 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
-        "SELECT SUM(endUseTime - beginUseTime) " +
+        "SELECT beginUseTime, endUseTime " +
                 "FROM appUsage " +
                 "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
                 "AND date(endUseTime / 1000, 'unixepoch', 'localtime') "
     )
-    abstract suspend fun getDayTotalForegroundUsedTime(targetDate: Long): Long
+    abstract suspend fun getDayTotalForegroundUsedTime(targetDate: Long): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
 
     @Query(
         "SELECT beginUseTime, endUseTime " +

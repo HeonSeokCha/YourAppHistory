@@ -20,20 +20,13 @@ import com.chs.yourapphistory.data.paging.GetPagingForegroundList
 import com.chs.yourapphistory.data.paging.GetPagingLaunchList
 import com.chs.yourapphistory.data.paging.GetPagingNotifyList
 import com.chs.yourapphistory.data.paging.GetPagingUsedList
-import com.chs.yourapphistory.data.paging.GetPagingDailyAppForegroundInfo
-import com.chs.yourapphistory.data.paging.GetPagingDailyAppLaunchInfo
-import com.chs.yourapphistory.data.paging.GetPagingDailyAppNotifyInfo
-import com.chs.yourapphistory.data.paging.GetPagingDailyAppUsedInfo
-import com.chs.yourapphistory.data.paging.GetPagingWeekAppForegroundInfo
-import com.chs.yourapphistory.data.paging.GetPagingWeekAppLaunchInfo
-import com.chs.yourapphistory.data.paging.GetPagingWeekAppNotifyInfo
-import com.chs.yourapphistory.data.paging.GetPagingWeekAppUsedInfo
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppInfoData
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
+import com.chs.yourapphistory.data.paging.GetPagingWeeklyTotalAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.domain.repository.AppRepository
@@ -380,6 +373,24 @@ class AppRepositoryImpl(
                 appNotifyInfoDao = appNotifyInfoDao
             )
         }.flow
+    }
+
+    override fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>> = flow {
+            emit(getMinDate())
+        }.flatMapLatest {
+            Pager(
+                PagingConfig(
+                    pageSize = Constants.PAGING_DAY.toInt(),
+                    enablePlaceholders = false
+                )
+            ) {
+                GetPagingWeeklyTotalAppInfo(
+                    minDate = it,
+                    appUsageDao = appUsageDao,
+                    appForegroundDao = appForegroundUsageDao,
+                    appNotifyInfoDao = appNotifyInfoDao
+                )
+            }.flow
     }
 
     private suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
