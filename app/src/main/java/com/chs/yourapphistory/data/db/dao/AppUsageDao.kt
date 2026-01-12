@@ -48,7 +48,7 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
                 "FROM appUsage " +
                 "WHERE beginUseTime BETWEEN :targetDate AND :targetDate + 86399999"
     )
-    abstract suspend fun getDayTotalAppLaunchCount(targetDate: Long): Long
+    abstract suspend fun getDayTotalAppLaunchCount(targetDate: Long): Int
 
     @Query(
         "SELECT beginUseTime, endUseTime " +

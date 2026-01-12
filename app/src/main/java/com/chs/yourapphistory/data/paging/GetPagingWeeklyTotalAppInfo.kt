@@ -51,6 +51,7 @@ class GetPagingWeeklyTotalAppInfo(
                             }
                         )
                     }
+
                     val appForeground = async(Dispatchers.IO) {
                         SortType.ForegroundUsageEvent to calcDayUsedList(
                             dateRangeList = it,
@@ -59,26 +60,20 @@ class GetPagingWeeklyTotalAppInfo(
                             }
                         )
                     }
-//                    val appNotify = async(Dispatchers.IO) {
-//                        SortType.NotifyEvent to calcDayUsedList(
-//                            dateRangeList = it,
-//                            list = appNotifyInfoDao.getWeeklyNotifyCount(
-//                                beginDate = it.min().toMillis(),
-//                                endDate = it.max().atEndOfDayToMillis(),
-//                                packageName = packageName
-//                            )
-//                        )
-//                    }
-//                    val appLaunch = async(Dispatchers.IO) {
-//                        SortType.LaunchEvent to calcDayUsedList(
-//                            dateRangeList = it,
-//                            list = it.associateWith { date ->
-//                                appUsageDao.getDayTotalAppLaunchCount(date.toMillis())
-//                            }
-//                        )
-//                    }
 
-                    awaitAll(appUsage, appForeground)
+                    val appNotify = async(Dispatchers.IO) {
+                        SortType.NotifyEvent to it.map { date ->
+                            date to appNotifyInfoDao.getDayAppNotify(date.toMillis())
+                        }
+                    }
+
+                    val appLaunch = async(Dispatchers.IO) {
+                        SortType.LaunchEvent to it.map { date ->
+                            date to appUsageDao.getDayTotalAppLaunchCount(date.toMillis())
+                        }
+                    }
+
+                    awaitAll(appUsage, appForeground, appLaunch, appNotify)
                 }.toMap()
             }
 

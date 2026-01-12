@@ -28,7 +28,7 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
                  "FROM appNotifyInfo " +
                 "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999"
     )
-    abstract suspend fun getDayAppNotify(targetDate: Long): Long
+    abstract suspend fun getDayAppNotify(targetDate: Long): Int
 
     @Query(
         "SELECT notifyTime " +
