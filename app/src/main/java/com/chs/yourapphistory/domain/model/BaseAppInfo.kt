@@ -4,6 +4,5 @@ import android.graphics.Bitmap
 
 interface BaseAppInfo {
     val packageName: String
-    val icon: Bitmap?
     val label: String
 }

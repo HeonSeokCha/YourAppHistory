@@ -359,6 +359,25 @@ internal fun calcDayUsedList(
     }
 }
 
+internal fun calcDailyTotalTime(
+    list: Map<Long, Long>,
+    targetDate: LocalDate
+): Long {
+    return list.toList().sumOf {
+        val (begin, end) = it.first.toLocalDateTime() to it.second.toLocalDateTime()
+
+        if (begin.toLocalDate() < targetDate) {
+            return@sumOf it.second - targetDate.atStartOfDayToMillis()
+        }
+
+        if (end.toLocalDate() > targetDate) {
+            return@sumOf targetDate.atEndOfDayToMillis() - it.first
+        }
+
+        it.second - it.first
+    }
+}
+
 fun chsLog(value: String) {
     Log.e("CHS_456", value)
 }

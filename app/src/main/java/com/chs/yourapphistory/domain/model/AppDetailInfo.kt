@@ -5,8 +5,8 @@ import java.time.LocalDateTime
 
 data class AppDetailInfo(
     override val packageName: String,
-    override val icon: Bitmap?,
     override val label: String,
+    val icon: Bitmap?,
     val firstInstallTime: LocalDateTime,
     val lastUpdateTime: LocalDateTime,
     val installProvider: String?,

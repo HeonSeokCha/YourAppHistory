@@ -5,6 +5,7 @@ import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
+import com.chs.yourapphistory.data.model.AppInfoData
 
 @Dao
 abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
@@ -15,24 +16,19 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query("DELETE FROM appForegroundUsage WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
-    @Query(
-        "SELECT appInfo.*, appForegroundUsage.beginUseTime as beginUseTime, appForegroundUsage.endUseTime as endUseTime " +
-          "FROM appInfo " +
-          "LEFT JOIN appForegroundUsage ON (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
-            "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
-           "AND appInfo.packageName = appForegroundUsage.packageName "
-    )
+    @Query("""
+        SELECT appInfo.packageName,
+               appInfo.label,
+               appForegroundUsage.beginUseTime as beginUseTime,
+               appForegroundUsage.endUseTime as endUseTime
+          FROM appInfo
+          LEFT JOIN appForegroundUsage ON date(:targetDate / 1000, 'unixepoch', 'localtime') 
+       BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')
+           AND appInfo.packageName = appForegroundUsage.packageName
+    """)
     abstract suspend fun getDayForegroundUsedList(
         targetDate: Long
-    ): Map<AppInfoEntity, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
-
-    @Query(
-        "SELECT beginUseTime, endUseTime " +
-                "FROM appUsage " +
-                "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
-                "AND date(endUseTime / 1000, 'unixepoch', 'localtime') "
-    )
-    abstract suspend fun getDayTotalForegroundUsedTime(targetDate: Long): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
+    ): Map<AppInfoData, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
     @Query(
         "SELECT beginUseTime, endUseTime " +

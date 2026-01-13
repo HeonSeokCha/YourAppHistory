@@ -5,6 +5,7 @@ import androidx.room.MapColumn
 import androidx.room.Query
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
+import com.chs.yourapphistory.data.model.AppInfoData
 
 @Dao
 abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
@@ -12,23 +13,17 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
     @Query("DELETE FROM appNotifyInfo WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
-    @Query(
-        "SELECT appInfo.*, COUNT(appNotifyInfo.packageName) as cnt " +
-          "FROM appInfo " +
-          "LEFT JOIN appNotifyInfo ON notifyTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-           "AND appInfo.packageName = appNotifyInfo.packageName " +
-         "GROUP BY appInfo.packageName "
-    )
+    @Query("""
+        SELECT appInfo.packageName,
+               appInfo.label
+          FROM appInfo
+          LEFT JOIN appNotifyInfo ON notifyTime BETWEEN :targetDate AND :targetDate + 86399999
+           AND appInfo.packageName = appNotifyInfo.packageName
+    """)
     abstract suspend fun getDayNotifyList(
         targetDate: Long
-    ): Map<AppInfoEntity, @MapColumn("cnt") Int>
+    ): Map<AppInfoData, @MapColumn("cnt") Int>
 
-    @Query(
-        "SELECT COUNT(packageName) " +
-                 "FROM appNotifyInfo " +
-                "WHERE notifyTime BETWEEN :targetDate AND :targetDate + 86399999"
-    )
-    abstract suspend fun getDayAppNotify(targetDate: Long): Int
 
     @Query(
         "SELECT notifyTime " +

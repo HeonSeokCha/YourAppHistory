@@ -12,43 +12,33 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query("DELETE FROM appUsage WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
-    @Query(
-        "SELECT appInfo.packageName, appInfo.label, appUsage.beginUseTime as beginUseTime, appUsage.endUseTime as endUseTime " +
-          "FROM appInfo " +
-          "LEFT JOIN appUsage ON (date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN " +
-                    "date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')) " +
-           "AND appInfo.packageName = appUsage.packageName "
-    )
+    @Query("""
+           SELECT appInfo.packageName,
+                  appInfo.label,
+                  appUsage.beginUseTime as beginUseTime,
+                  appUsage.endUseTime as endUseTime
+             FROM appInfo
+             LEFT JOIN appUsage ON date(:targetDate / 1000, 'unixepoch', 'localtime') 
+          BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') AND date(endUseTime / 1000, 'unixepoch', 'localtime')
+             AND appInfo.packageName = appUsage.packageName
+        """)
     abstract suspend fun getDayAppUsedInfo(
         targetDate: Long
     ): Map<AppInfoData, Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>>
 
-    @Query(
-        "SELECT appInfo.packageName, appInfo.label , COUNT(appUsage.packageName) as cnt " +
-          "FROM appInfo " +
-          "LEFT JOIN appUsage ON beginUseTime BETWEEN :targetDate AND :targetDate + 86399999 " +
-           "AND appInfo.packageName = appUsage.packageName " +
-         "GROUP BY appInfo.packageName " +
-         "ORDER BY cnt DESC, appInfo.label ASC"
-    )
+    @Query("""
+        SELECT appInfo.packageName,
+               appInfo.label,
+               COUNT(appUsage.packageName) as cnt
+          FROM appInfo
+          LEFT JOIN appUsage ON beginUseTime BETWEEN :targetDate AND :targetDate + 86399999
+           AND appInfo.packageName = appUsage.packageName
+         GROUP BY appInfo.packageName, appInfo.label
+         ORDER BY cnt DESC, appInfo.label ASC
+    """)
     abstract suspend fun getDayAppLaunchInfo(
         targetDate: Long
     ): Map<AppInfoData, @MapColumn("cnt") Int>
-
-    @Query(
-        "SELECT beginUseTime, endUseTime " +
-                 "FROM appUsage " +
-                "WHERE date(:targetDate / 1000, 'unixepoch', 'localtime') BETWEEN date(beginUseTime / 1000, 'unixepoch', 'localtime') " +
-                  "AND date(endUseTime / 1000, 'unixepoch', 'localtime') "
-    )
-    abstract suspend fun getDayTotalAppUsedTime(targetDate: Long): Map<@MapColumn("beginUseTime") Long, @MapColumn("endUseTime") Long>
-
-    @Query(
-        "SELECT COUNT(packageName) " +
-                "FROM appUsage " +
-                "WHERE beginUseTime BETWEEN :targetDate AND :targetDate + 86399999"
-    )
-    abstract suspend fun getDayTotalAppLaunchCount(targetDate: Long): Int
 
     @Query(
         "SELECT beginUseTime, endUseTime " +

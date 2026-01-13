@@ -1,9 +1,7 @@
 package com.chs.yourapphistory.domain.model
 
-import android.graphics.Bitmap
-
-data class AppInfo(
+data class AppTotalUsageInfo(
     override val packageName: String,
     override val label: String,
-    val icon: Bitmap?
+    val totalUsedInfo: Long
 ) : BaseAppInfo
