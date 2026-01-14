@@ -10,6 +10,7 @@ import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreenRoot
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
+import com.chs.yourapphistory.presentation.screen.total_summary.TotalSummaryScreenRoot
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreenRoot
 import org.koin.core.parameter.parametersOf
@@ -35,7 +36,7 @@ fun NavigationRoot(
                     viewModel = koinViewModel(),
                     onNavigateHome = {
                         backStack.removeLastOrNull()
-                        backStack.add(MainScreens.ScreenUsedAppList)
+                        backStack.add(MainScreens.ScreenTotalSummary)
                     }
                 )
             }
@@ -63,6 +64,18 @@ fun NavigationRoot(
                     )
                 }
                 AppUsageDetailScreenRoot(viewModel = viewModel)
+            }
+
+            entry<MainScreens.ScreenTotalSummary> {
+                TotalSummaryScreenRoot(
+                    viewModel = koinViewModel(),
+                    onNavigateUsageDetail = {
+//                        backStack.add(MainScreens.ScreenAppUsageDetail(it))
+                    },
+                    onNavigateUsedAppList = {
+                        backStack.add(MainScreens.ScreenUsedAppList(it))
+                    }
+                )
             }
         }
     )

@@ -23,28 +23,24 @@ import com.chs.yourapphistory.data.paging.GetPagingUsedList
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
-import com.chs.yourapphistory.data.model.AppInfoData
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyTotalAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
+import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.domain.repository.AppRepository
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Single
 import java.time.LocalDate
-import kotlin.math.min
 
 @Single
 class AppRepositoryImpl(
@@ -192,9 +188,9 @@ class AppRepositoryImpl(
                         val a = usageList.groupBy { it.packageName }
                             .map { it.key to it.value.maxOf { it.endUseTime } }
 
-                            a.forEach {
-                                appInfoDao.updateLastUsedTime(it.first, it.second)
-                            }
+                        a.forEach {
+                            appInfoDao.updateLastUsedTime(it.first, it.second)
+                        }
 
                         appUsageDao.upsert(*usageList.toTypedArray())
                     }
@@ -215,9 +211,9 @@ class AppRepositoryImpl(
                             .map { it.key to it.value.maxOf { it.endUseTime } }
 
 
-                            a.forEach {
-                                appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
-                            }
+                        a.forEach {
+                            appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
+                        }
 
                         if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
 
@@ -375,7 +371,8 @@ class AppRepositoryImpl(
         }.flow
     }
 
-    override fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>> = flow {
+    override fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>> =
+        flow {
             emit(getMinDate())
         }.flatMapLatest {
             Pager(
@@ -391,7 +388,7 @@ class AppRepositoryImpl(
                     appNotifyInfoDao = appNotifyInfoDao
                 )
             }.flow
-    }
+        }
 
     private suspend fun getAppIconMap(): HashMap<String, Bitmap?> {
         return applicationInfoSource.getApplicationIconMap(
