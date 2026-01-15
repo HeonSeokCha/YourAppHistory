@@ -7,7 +7,7 @@ sealed interface TotalSummaryIntent {
     data class OnChangeDateCurrentPage(val page: Int) : TotalSummaryIntent
     data class ClickPackageName(val packageName: String) : TotalSummaryIntent
 
-    data object DateLoading : TotalSummaryIntent
-    data object DateLoadComplete : TotalSummaryIntent
+    data object Loading : TotalSummaryIntent
+    data object LoadComplete : TotalSummaryIntent
     data object Error : TotalSummaryIntent
 }

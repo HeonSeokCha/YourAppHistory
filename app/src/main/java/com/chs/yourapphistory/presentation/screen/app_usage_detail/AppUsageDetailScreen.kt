@@ -169,7 +169,7 @@ fun AppUsageDetailScreen(
                 state = weekPagerState,
                 targetWeek = state.displayWeek,
                 item = state.weekList,
-                onIntent = onIntent
+                onClick = { AppUsageDetailIntent.OnChangeTargetDateIdx(it) }
             )
         } else {
             ItemDateList(
@@ -177,7 +177,7 @@ fun AppUsageDetailScreen(
                 minDate = state.minDate,
                 targetDate = state.displayDate,
                 item = state.dateList,
-                onIntent = onIntent
+                onClick = { AppUsageDetailIntent.OnChangeTargetWeekIdx(it) },
             )
         }
 

@@ -32,7 +32,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val backstack = rememberNavBackStack().apply {
                 this.clear()
-                if (getUsagePermission(this@MainActivity)) this.add(MainScreens.ScreenUsedAppList)
+                if (getUsagePermission(this@MainActivity)) this.add(MainScreens.ScreenTotalSummary)
                 else this.add(MainScreens.ScreenWelcome)
             }
 
@@ -41,7 +41,7 @@ class MainActivity : ComponentActivity() {
                     when (backstack.last()) {
                         MainScreens.ScreenWelcome -> Unit
 
-                        MainScreens.ScreenUsedAppList -> {
+                        is MainScreens.ScreenUsedAppList -> {
                             TopAppBar(
                                 title = {
                                     Text(text = getString(R.string.app_name))

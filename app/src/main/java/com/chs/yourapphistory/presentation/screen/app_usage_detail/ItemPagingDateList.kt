@@ -30,7 +30,7 @@ fun ItemDateList(
     minDate: LocalDate,
     targetDate: LocalDate,
     item: List<List<LocalDate>>,
-    onIntent: (AppUsageDetailIntent) -> Unit
+    onClick: (Pair<Int, Int>) -> Unit
 ) {
     HorizontalPager(
         modifier = Modifier
@@ -58,12 +58,7 @@ fun ItemDateList(
                         .clickable {
                             if (date < minDate) return@clickable
                             if (date > LocalDate.now()) return@clickable
-
-                            onIntent(
-                                AppUsageDetailIntent.OnChangeTargetDateIdx(
-                                    state.currentPage to item.size - 1 - idx
-                                )
-                            )
+                            onClick(state.currentPage to item.size - 1 - idx)
                         }
                         .drawBehind {
                             drawRoundRect(
@@ -87,7 +82,7 @@ fun ItemWeekList(
     state: PagerState,
     targetWeek: List<LocalDate>,
     item: List<List<List<LocalDate>>>,
-    onIntent: (AppUsageDetailIntent) -> Unit
+    onClick: (Pair<Int, Int>) -> Unit
 ) {
     HorizontalPager(
         modifier = Modifier
@@ -106,11 +101,7 @@ fun ItemWeekList(
             item.reversed().forEachIndexed { idx, dateList ->
                 Text(
                     modifier = Modifier
-                        .clickable {
-                            onIntent(
-                                AppUsageDetailIntent.OnChangeTargetWeekIdx(state.currentPage to item.size - 1 - idx)
-                            )
-                        }
+                        .clickable { onClick(state.currentPage to item.size - 1 - idx) }
                         .drawBehind {
                             drawRoundRect(
                                 color = if (targetWeek == dateList) Color.LightGray else Color.Transparent,
@@ -140,6 +131,6 @@ private fun PreviewItemDate() {
         item = listOf(
             date.minusDays(7L).reverseDateUntil(date)
         ),
-        onIntent = {}
+        onClick = {}
     )
 }

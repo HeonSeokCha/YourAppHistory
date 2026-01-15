@@ -4,9 +4,12 @@ import android.annotation.SuppressLint
 import android.app.AppOpsManager
 import android.content.Context
 import android.content.Context.APP_OPS_SERVICE
+import android.os.Build
 import android.os.Process
 import android.util.Log
 import androidx.compose.runtime.snapshots.toInt
+import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.getSystemService
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -153,12 +156,19 @@ fun getUsagePermission(context: Context): Boolean {
     val appOps: AppOpsManager =
         context.getSystemService(APP_OPS_SERVICE) as AppOpsManager
     return try {
-        val mode: Int =
-            appOps.unsafeCheckOpNoThrow(
+        val mode = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.BAKLAVA) {
+            appOps.checkOpNoThrow(
                 AppOpsManager.OPSTR_GET_USAGE_STATS,
                 Process.myUid(),
-                context.packageName
+                context.packageName,
             )
+        } else {
+            @Suppress("DEPRECATION")
+            appOps.unsafeCheckOpNoThrow(
+                AppOpsManager.OPSTR_GET_USAGE_STATS,
+                Process.myUid(), context.packageName
+            )
+        }
         mode == AppOpsManager.MODE_ALLOWED
     } catch (e: Exception) {
         false

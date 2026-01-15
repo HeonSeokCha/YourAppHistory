@@ -29,8 +29,8 @@ class TotalSummaryViewModel(
             is TotalSummaryIntent.ClickPackageName -> {
                 _effect.trySend(TotalSummaryEffect.NavigateUsageDetail(intent.packageName))
             }
-            TotalSummaryIntent.DateLoadComplete -> _state.update { it.copy(loading = false) }
-            TotalSummaryIntent.DateLoading -> _state.update { it.copy(loading = true) }
+            TotalSummaryIntent.Loading -> _state.update { it.copy(loading = true) }
+            TotalSummaryIntent.LoadComplete -> _state.update { it.copy(loading = false) }
             is TotalSummaryIntent.OnChangeDateCurrentPage -> _state.update { it.copy(dateCurrentPage = intent.page) }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> _state.update { it.copy(dateIdx = intent.idx) }
             TotalSummaryIntent.Error -> TODO()

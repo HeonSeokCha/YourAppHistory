@@ -15,7 +15,8 @@ abstract class AppNotifyInfoDao : BaseDao<AppNotifyInfoEntity> {
 
     @Query("""
         SELECT appInfo.packageName,
-               appInfo.label
+               appInfo.label,
+               COUNT(appNotifyInfo.packageName) as cnt
           FROM appInfo
           LEFT JOIN appNotifyInfo ON notifyTime BETWEEN :targetDate AND :targetDate + 86399999
            AND appInfo.packageName = appNotifyInfo.packageName

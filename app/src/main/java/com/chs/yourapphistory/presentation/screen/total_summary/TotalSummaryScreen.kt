@@ -1,10 +1,34 @@
 package com.chs.yourapphistory.presentation.screen.total_summary
 
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.paging.LoadState
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.collectAsLazyPagingItems
+import com.chs.yourapphistory.common.toConvertDisplayYearDate
+import com.chs.yourapphistory.common.toDisplayYearDate
+import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailIntent
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDailyPagingInfo
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDateList
+import java.time.LocalDate
 
 @Composable
 fun TotalSummaryScreenRoot(
@@ -13,6 +37,7 @@ fun TotalSummaryScreenRoot(
     onNavigateUsedAppList: (SortType) -> Unit
 ) {
     val state: TotalSummaryState by viewModel.state.collectAsStateWithLifecycle()
+    val pagingItems = viewModel.pagingList.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -25,6 +50,7 @@ fun TotalSummaryScreenRoot(
 
     TotalSummaryScreen(
         state = state,
+        pagingItems = pagingItems,
         onIntent = viewModel::handleIntent
     )
 }
@@ -32,7 +58,73 @@ fun TotalSummaryScreenRoot(
 @Composable
 fun TotalSummaryScreen(
     state: TotalSummaryState,
+    pagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
     onIntent: (TotalSummaryIntent) -> Unit
 ) {
+    val datePagerState = if (state.dateList.isNotEmpty()) {
+        rememberPagerState(
+            pageCount = { state.dateList.count() },
+            initialPage = state.dateIdx.first
+        )
+    } else {
+        rememberPagerState(pageCount = { 0 })
+    }
 
+    LaunchedEffect(pagingItems.loadState.refresh) {
+        when (pagingItems.loadState.refresh) {
+            is LoadState.Loading -> onIntent(TotalSummaryIntent.Loading)
+            is LoadState.NotLoading -> onIntent(TotalSummaryIntent.LoadComplete)
+            is LoadState.Error -> onIntent(TotalSummaryIntent.Error)
+        }
+    }
+
+    LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
+        if (state.dateList.isEmpty()) return@LaunchedEffect
+        if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
+        if (datePagerState.isScrollInProgress) return@LaunchedEffect
+
+        onIntent(
+            TotalSummaryIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
+        )
+    }
+
+    LaunchedEffect(state.dateIdx) {
+        val page = state.dateIdx.run {
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+            (this.first * 7 + this.second) - initIdx
+        }
+        if (datePagerState.currentPage != state.dateIdx.first) {
+            datePagerState.scrollToPage(state.dateIdx.first)
+        }
+
+        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(page))
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 16.dp, horizontal = 8.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Text(
+                modifier = Modifier.weight(0.7f),
+                text = state.displayDate.toConvertDisplayYearDate(),
+                fontSize = 16.sp,
+                maxLines = 2
+            )
+        }
+
+        ItemDateList(
+            state = datePagerState,
+            minDate = state.minDate,
+            targetDate = state.displayDate,
+            item = state.dateList,
+            onClick = { TotalSummaryIntent.OnChangeTargetDateIdx(it) }
+        )
+    }
 }
