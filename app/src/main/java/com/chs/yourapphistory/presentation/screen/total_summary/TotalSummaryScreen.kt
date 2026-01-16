@@ -1,14 +1,11 @@
 package com.chs.yourapphistory.presentation.screen.total_summary
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -22,11 +19,8 @@ import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
-import com.chs.yourapphistory.common.toDisplayYearDate
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
-import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailIntent
-import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDailyPagingInfo
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDateList
 import java.time.LocalDate
 
@@ -124,7 +118,7 @@ fun TotalSummaryScreen(
             minDate = state.minDate,
             targetDate = state.displayDate,
             item = state.dateList,
-            onClick = { TotalSummaryIntent.OnChangeTargetDateIdx(it) }
+            onClick = { onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(it)) }
         )
     }
 }
