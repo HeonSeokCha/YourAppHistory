@@ -160,7 +160,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-//            val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
+            val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
 //            if (item != null) {
 //                WeeklyUsageChart(
 //                    title = "${item}",
@@ -181,7 +181,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-//            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
+            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
 //            if (item != null) {
 //                WeeklyUsageChart(
 //                    title = "알림 ${item.toCalcDailyCount()}개/일",
@@ -208,7 +208,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-//            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
+            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
 //            if (item != null) {
 //                WeeklyUsageChart(
 //                    title = "앱 실행 ${item.toCalcDailyCount()}회/일",
