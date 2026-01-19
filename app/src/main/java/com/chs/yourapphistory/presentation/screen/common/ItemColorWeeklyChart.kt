@@ -49,7 +49,9 @@ fun ItemColorWeeklyChart(
     onClick: (Int) -> Unit
 ) {
     val density = LocalDensity.current
+    val textSize = with(density) { 10.sp.toPx() }
     val smallPadding = with(density) { 4.dp.toPx() }
+    val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
     val barWidth = with(density) { 16.dp.toPx() }
     val distance = with(density) {
@@ -76,15 +78,15 @@ fun ItemColorWeeklyChart(
         .toFloat()
 
     val barAreas = list.mapIndexed { idx, pair ->
-        BarArea(
+        BarAreas(
             idx = idx,
-            value = pair.second.sumOf { it.totalUsedInfo.toInt() },
+            values = pair.second.map { it.totalUsedInfo.toInt() },
             xStart = distance.times(idx) + barWidth + smallPadding.times(1),
             xEnd = distance.times(idx) + barWidth + smallPadding.times(1) + barWidth
         )
     }
 
-    var selectedBar: BarArea? by remember { mutableStateOf(null) }
+    var selectedBar: BarAreas? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
 
 
@@ -94,7 +96,7 @@ fun ItemColorWeeklyChart(
 
     LaunchedEffect(selectedPos) {
         val findBar = barAreas.find { selectedPos in it.xStart..it.xEnd }
-        selectedBar = if (findBar?.value.isZero()) {
+        selectedBar = if (findBar?.values.isNullOrEmpty()) {
             null
         } else findBar
     }
@@ -130,39 +132,37 @@ fun ItemColorWeeklyChart(
         )
         val chartAreaBottom = size.height
 
-        val sortedList = barAreas.sortedByDescending { it.value }
 
-        val topTotalPadding = sortedList.take(3).sumOf { it.value }.times(scale).toFloat()
         val colorList = listOf(
             Color.Blue,
             Color.Cyan,
             Color.Green
         )
 
-        sortedList.forEachIndexed { idx, info ->
-            val barHeight = info.value.times(scale).toFloat()
+        barAreas.forEachIndexed { idx, info ->
             val convertDateFormat = list[idx].first.toConvertDisplayDay()
-
+            var temp = 0f
+            val totalBarHeight = info.values.drop(3).sum().times(scale).toFloat()
             repeat(3) {
+                val barHeight = info.values[it].times(scale).toFloat()
                 drawRoundRect(
                     color = colorList[it],
                     topLeft = Offset(
                         x = distance.times(idx) + barWidth + smallPadding.times(1),
-                        y = size.height - barHeight - smallPadding
+                        y = size.height - barHeight - smallPadding - labelSectionHeight - temp - totalBarHeight
                     ),
-                    size = Size(barWidth, barHeight),
-                    cornerRadius = CornerRadius(4.dp.toPx())
+                    size = Size(barWidth, barHeight)
                 )
+                temp += barHeight
             }
 
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
                     x = distance.times(idx) + barWidth + smallPadding.times(1),
-                    y =  barHeight - smallPadding
+                    y = size.height - totalBarHeight - smallPadding - labelSectionHeight
                 ),
-                size = Size(barWidth, barHeight),
-                cornerRadius = CornerRadius(4.dp.toPx())
+                size = Size(barWidth, totalBarHeight)
             )
 
             val textResult = textMeasurer.measure(
@@ -243,17 +243,17 @@ private fun PreViewUsageChart3() {
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",
                             label = "123",
-                            totalUsedInfo = 1.hours.inWholeMilliseconds
+                            totalUsedInfo = 4.hours.inWholeMilliseconds
                         ),
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",
                             label = "123",
-                            totalUsedInfo = 1.hours.inWholeMilliseconds
+                            totalUsedInfo = 6.hours.inWholeMilliseconds
                         ),
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",
                             label = "123",
-                            totalUsedInfo = 1.hours.inWholeMilliseconds
+                            totalUsedInfo = 2.hours.inWholeMilliseconds
                         ),
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",

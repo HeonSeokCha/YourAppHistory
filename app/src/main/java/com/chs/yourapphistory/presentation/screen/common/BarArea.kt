@@ -6,3 +6,10 @@ data class BarArea(
     val xStart: Float,
     val xEnd: Float
 )
+
+data class BarAreas(
+    val idx: Int,
+    val values: List<Int>,
+    val xStart: Float,
+    val xEnd: Float
+)
