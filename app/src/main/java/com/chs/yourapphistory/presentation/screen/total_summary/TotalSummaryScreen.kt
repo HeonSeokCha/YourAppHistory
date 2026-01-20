@@ -120,5 +120,11 @@ fun TotalSummaryScreen(
             item = state.dateList,
             onClick = { onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(it)) }
         )
+
+        ItemTotalPaging(
+            state = state,
+            dailyPagingItems = pagingItems,
+            onIntent = onIntent
+        )
     }
 }

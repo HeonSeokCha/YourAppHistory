@@ -32,8 +32,6 @@ class UsedAppListViewModel(
     private val getPagingForegroundListUseCase: GetPagingForegroundListUseCase,
     private val getPagingNotifyListUseCase: GetPagingNotifyListUseCase,
     private val getPagingLaunchListUseCase: GetPagingLaunchListUseCase,
-    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
-    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ) : ViewModel() {
 
     private val _effect: Channel<UsedAppEffect> = Channel(Channel.BUFFERED)
@@ -45,7 +43,6 @@ class UsedAppListViewModel(
 
     val pagingList = sortOptionState
         .flatMapLatest {
-            insertUsageInfo()
             getEventList(it)
         }.cachedIn(viewModelScope)
 
@@ -73,19 +70,6 @@ class UsedAppListViewModel(
             UsedAppIntent.LoadComplete -> _state.update { it.copy(isLoading = false) }
             UsedAppIntent.Appending -> _state.update { it.copy(isAppending = true) }
             UsedAppIntent.AppendComplete -> _state.update { it.copy(isAppending = false) }
-        }
-    }
-
-    private suspend fun insertUsageInfo() {
-        _state.update { it.copy(isLoading = true) }
-        withContext(Dispatchers.IO) {
-            launch(Dispatchers.IO) {
-                getInstallAppInfoUseCase()
-            }
-
-            launch(Dispatchers.IO) {
-                insertAppUsageInfoUseCase()
-            }
         }
     }
 

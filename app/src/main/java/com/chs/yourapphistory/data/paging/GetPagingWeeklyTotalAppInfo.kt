@@ -53,18 +53,18 @@ class GetPagingWeeklyTotalAppInfo(
                         }
                     }
 
-                    val appForeground = async(Dispatchers.IO) {
-                        SortType.ForegroundUsageEvent to it.map { date ->
-                            date to appForegroundDao.getDayForegroundUsedList(date.toMillis()).map {
-                                it.key.toAppSimpleInfo(
-                                    calcDailyTotalTime(
-                                        list = it.value,
-                                        targetDate = date
-                                    )
-                                )
-                            }.filter { it.totalUsedInfo > 0L }
-                        }
-                    }
+//                    val appForeground = async(Dispatchers.IO) {
+//                        SortType.ForegroundUsageEvent to it.map { date ->
+//                            date to appForegroundDao.getDayForegroundUsedList(date.toMillis()).map {
+//                                it.key.toAppSimpleInfo(
+//                                    calcDailyTotalTime(
+//                                        list = it.value,
+//                                        targetDate = date
+//                                    )
+//                                )
+//                            }.filter { it.totalUsedInfo > 0L }
+//                        }
+//                    }
 
                     val appNotify = async(Dispatchers.IO) {
                         SortType.NotifyEvent to it.map { date ->
@@ -82,7 +82,7 @@ class GetPagingWeeklyTotalAppInfo(
                         }
                     }
 
-                    awaitAll(appUsage, appForeground, appLaunch, appNotify)
+                    awaitAll(appUsage, appLaunch, appNotify)
                 }.toMap()
             }
 

@@ -2,19 +2,25 @@ package com.chs.yourapphistory.presentation.screen.total_summary
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyTotalInfoUseCase
+import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
+import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.koin.android.annotation.KoinViewModel
 import java.time.LocalDate
 import kotlin.collections.chunked
@@ -22,7 +28,9 @@ import kotlin.collections.chunked
 @KoinViewModel
 class TotalSummaryViewModel(
     getPagingWeeklyTotalInfoUseCase: GetPagingWeeklyTotalInfoUseCase,
-    private val getMinimumTimeUseCase: GetMinimumTimeUseCase
+    private val getMinimumTimeUseCase: GetMinimumTimeUseCase,
+    private val insertAppUsageInfoUseCase: InsertAppUsageInfoUseCase,
+    private val getInstallAppInfoUseCase: InsertInstallAppInfoUseCase
 ): ViewModel() {
 
     private val dateNow = LocalDate.now()
@@ -38,7 +46,14 @@ class TotalSummaryViewModel(
     private val _effect: Channel<TotalSummaryEffect> = Channel(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
 
-    val pagingList = getPagingWeeklyTotalInfoUseCase().cachedIn(viewModelScope)
+    val pagingList = getPagingWeeklyTotalInfoUseCase()
+        .cachedIn(viewModelScope)
+        .onStart { insertUsageInfo() }
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000L),
+            PagingData.empty()
+        )
 
     private fun getDateRangeList() {
         viewModelScope.launch {
@@ -94,6 +109,19 @@ class TotalSummaryViewModel(
                         dateIdx = idx
                     )
                 }
+            }
+        }
+    }
+
+    private suspend fun insertUsageInfo() {
+        _state.update { it.copy(loading = true) }
+        withContext(Dispatchers.IO) {
+            launch(Dispatchers.IO) {
+                getInstallAppInfoUseCase()
+            }
+
+            launch(Dispatchers.IO) {
+                insertAppUsageInfoUseCase()
             }
         }
     }

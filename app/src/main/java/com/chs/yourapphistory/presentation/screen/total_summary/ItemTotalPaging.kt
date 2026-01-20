@@ -12,27 +12,14 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import com.chs.yourapphistory.common.convertToRealUsageHour
-import com.chs.yourapphistory.common.convertToRealUsageMinutes
-import com.chs.yourapphistory.common.convertToRealUsageTime
-import com.chs.yourapphistory.common.toCalcDailyCount
-import com.chs.yourapphistory.common.toCalcDailyUsage
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
-import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailIntent
-import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailState
-import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
-import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
+import com.chs.yourapphistory.presentation.screen.common.WeeklyColorUsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import java.time.LocalDate
-import kotlin.collections.sumOf
 
 @Composable
 fun ItemTotalPaging(
@@ -161,14 +148,14 @@ fun ItemTotalPaging(
             key = { it }
         ) {
             val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
-//            if (item != null) {
-//                WeeklyUsageChart(
-//                    title = "${item}",
-//                    subTitle = "총 실제 실행 시간",
-//                    list = item,
-//                    convertText = { it.convertToRealUsageHour() }
-//                )
-//            }
+            if (item != null) {
+                WeeklyColorUsageChart(
+                    title = "",
+                    subTitle = "총 실제 실행 시간",
+                    list = item,
+                    onClick = {}
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -182,20 +169,14 @@ fun ItemTotalPaging(
             key = { it }
         ) {
             val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
-//            if (item != null) {
-//                WeeklyUsageChart(
-//                    title = "알림 ${item.toCalcDailyCount()}개/일",
-//                    subTitle = buildAnnotatedString {
-//                        append("이번 주 총 알림 ")
-//                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-//                            append(item.sumOf { it.second }.toString())
-//                        }
-//                        append("개")
-//                    },
-//                    list = item,
-//                    convertText = { "${it}개" }
-//                )
-//            }
+            if (item != null) {
+                WeeklyColorUsageChart(
+                    title = "",
+                    subTitle = "총 알림 횟수",
+                    list = item,
+                    onClick = {}
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
@@ -209,20 +190,14 @@ fun ItemTotalPaging(
             key = { it }
         ) {
             val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
-//            if (item != null) {
-//                WeeklyUsageChart(
-//                    title = "앱 실행 ${item.toCalcDailyCount()}회/일",
-//                    subTitle = buildAnnotatedString {
-//                        append("이번 주 총 앱 실행 ")
-//                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
-//                            append(item.sumOf { it.second }.toString())
-//                        }
-//                        append("회")
-//                    },
-//                    list = item,
-//                    convertText = { "${it}번" }
-//                )
-//            }
+            if (item != null) {
+                WeeklyColorUsageChart(
+                    title = "",
+                    subTitle = "총 실행 횟수",
+                    list = item,
+                    onClick = {}
+                )
+            }
         }
 
         Spacer(modifier = Modifier.height(8.dp))

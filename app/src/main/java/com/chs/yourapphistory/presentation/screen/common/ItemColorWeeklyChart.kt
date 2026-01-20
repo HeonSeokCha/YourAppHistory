@@ -33,7 +33,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
-import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import kotlinx.coroutines.launch
@@ -130,8 +129,8 @@ fun ItemColorWeeklyChart(
             (size.height - smallPadding - topBasePadding).roundToInt(),
             list.map { it.second.sumOf { it.totalUsedInfo.toInt() } }
         )
-        val chartAreaBottom = size.height
 
+        val chartAreaBottom = size.height - labelSectionHeight
 
         val colorList = listOf(
             Color.Blue,
@@ -141,29 +140,35 @@ fun ItemColorWeeklyChart(
 
         barAreas.forEachIndexed { idx, info ->
             val convertDateFormat = list[idx].first.toConvertDisplayDay()
-            var temp = 0f
-            val totalBarHeight = info.values.drop(3).sum().times(scale).toFloat()
-            repeat(3) {
-                val barHeight = info.values[it].times(scale).toFloat()
+            val sortedInfo = info.values.sortedDescending()
+            if (info.values.isNotEmpty()) {
+                var temp = 0f
+                val totalBarHeight = sortedInfo.drop(3).sum().times(scale).toFloat()
+
+                if (info.values.size > 3) {
+                    repeat(3) {
+                        val barHeight = sortedInfo[it].times(scale).toFloat()
+                        drawRoundRect(
+                            color = colorList[it],
+                            topLeft = Offset(
+                                x = distance.times(idx) + barWidth + smallPadding.times(1),
+                                y = size.height - barHeight - smallPadding - labelSectionHeight - temp
+                            ),
+                            size = Size(barWidth, barHeight)
+                        )
+                        temp += barHeight
+                    }
+                }
+
                 drawRoundRect(
-                    color = colorList[it],
+                    color = barColor,
                     topLeft = Offset(
                         x = distance.times(idx) + barWidth + smallPadding.times(1),
-                        y = size.height - barHeight - smallPadding - labelSectionHeight - temp - totalBarHeight
+                        y = size.height - totalBarHeight - smallPadding - labelSectionHeight - temp
                     ),
-                    size = Size(barWidth, barHeight)
+                    size = Size(barWidth, totalBarHeight)
                 )
-                temp += barHeight
             }
-
-            drawRoundRect(
-                color = barColor,
-                topLeft = Offset(
-                    x = distance.times(idx) + barWidth + smallPadding.times(1),
-                    y = size.height - totalBarHeight - smallPadding - labelSectionHeight
-                ),
-                size = Size(barWidth, totalBarHeight)
-            )
 
             val textResult = textMeasurer.measure(
                 text = convertDateFormat,
@@ -248,17 +253,17 @@ private fun PreViewUsageChart3() {
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",
                             label = "123",
-                            totalUsedInfo = 6.hours.inWholeMilliseconds
+                            totalUsedInfo = 10.hours.inWholeMilliseconds
+                        ),
+                        AppTotalUsageInfo(
+                            packageName = "com.chs.123",
+                            label = "123",
+                            totalUsedInfo = 3.hours.inWholeMilliseconds
                         ),
                         AppTotalUsageInfo(
                             packageName = "com.chs.123",
                             label = "123",
                             totalUsedInfo = 2.hours.inWholeMilliseconds
-                        ),
-                        AppTotalUsageInfo(
-                            packageName = "com.chs.123",
-                            label = "123",
-                            totalUsedInfo = 1.hours.inWholeMilliseconds
                         )
                     )
                 )
