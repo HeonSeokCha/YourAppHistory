@@ -21,6 +21,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.navigation3.runtime.rememberNavBackStack
 import com.chs.yourapphistory.R
 import com.chs.yourapphistory.common.getUsagePermission
+import com.chs.yourapphistory.domain.model.SortType
 
 class MainActivity : ComponentActivity() {
 
@@ -33,6 +34,7 @@ class MainActivity : ComponentActivity() {
             val backstack = rememberNavBackStack().apply {
                 this.clear()
                 if (getUsagePermission(this@MainActivity)) this.add(MainScreens.ScreenTotalSummary)
+//                if (getUsagePermission(this@MainActivity)) this.add(MainScreens.ScreenUsedAppList(SortType.UsageEvent))
                 else this.add(MainScreens.ScreenWelcome)
             }
 
@@ -82,11 +84,11 @@ class MainActivity : ComponentActivity() {
                         }
                     }
                 },
-                modifier = Modifier.Companion
+                modifier = Modifier
                     .fillMaxSize()
             ) {
                 NavigationRoot(
-                    modifier = Modifier.Companion.padding(it),
+                    modifier = Modifier.padding(it),
                     backStack = backstack
                 )
             }

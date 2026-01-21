@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.WeeklyColorUsageChart
@@ -150,7 +151,7 @@ fun ItemTotalPaging(
             val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
             if (item != null) {
                 WeeklyColorUsageChart(
-                    title = "",
+                    title = item[it].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
                     subTitle = "총 실제 실행 시간",
                     list = item,
                     onClick = {}
@@ -171,7 +172,7 @@ fun ItemTotalPaging(
             val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
             if (item != null) {
                 WeeklyColorUsageChart(
-                    title = "",
+                    title = "${item[it].second.sumOf { it.totalUsedInfo}} 회",
                     subTitle = "총 알림 횟수",
                     list = item,
                     onClick = {}
@@ -192,7 +193,7 @@ fun ItemTotalPaging(
             val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
             if (item != null) {
                 WeeklyColorUsageChart(
-                    title = "",
+                    title = "${item[it].second.sumOf { it.totalUsedInfo}} 번",
                     subTitle = "총 실행 횟수",
                     list = item,
                     onClick = {}

@@ -22,7 +22,6 @@ import kotlin.collections.chunked
 class GetPagingWeeklyTotalAppInfo(
     private val minDate: LocalDate,
     private val appUsageDao: AppUsageDao,
-    private val appForegroundDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
 ) : PagingSource<LocalDate, Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>() {
 
@@ -50,28 +49,15 @@ class GetPagingWeeklyTotalAppInfo(
                                     )
                                 )
                             }.filter { it.totalUsedInfo > 0L }
-                        }
+                        }.reversed()
                     }
-
-//                    val appForeground = async(Dispatchers.IO) {
-//                        SortType.ForegroundUsageEvent to it.map { date ->
-//                            date to appForegroundDao.getDayForegroundUsedList(date.toMillis()).map {
-//                                it.key.toAppSimpleInfo(
-//                                    calcDailyTotalTime(
-//                                        list = it.value,
-//                                        targetDate = date
-//                                    )
-//                                )
-//                            }.filter { it.totalUsedInfo > 0L }
-//                        }
-//                    }
 
                     val appNotify = async(Dispatchers.IO) {
                         SortType.NotifyEvent to it.map { date ->
                             date to appNotifyInfoDao.getDayNotifyList(date.toMillis()).map {
                                 it.key.toAppSimpleInfo(totalUsedInfo = it.value.toLong())
                             }.filter { it.totalUsedInfo > 0L }
-                        }
+                        }.reversed()
                     }
 
                     val appLaunch = async(Dispatchers.IO) {
@@ -79,7 +65,7 @@ class GetPagingWeeklyTotalAppInfo(
                             date to appUsageDao.getDayAppLaunchInfo(date.toMillis()).map {
                                 it.key.toAppSimpleInfo(totalUsedInfo = it.value.toLong())
                             }.filter { it.totalUsedInfo > 0L }
-                        }
+                        }.reversed()
                     }
 
                     awaitAll(appUsage, appLaunch, appNotify)

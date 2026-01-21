@@ -384,7 +384,6 @@ class AppRepositoryImpl(
                 GetPagingWeeklyTotalAppInfo(
                     minDate = it,
                     appUsageDao = appUsageDao,
-                    appForegroundDao = appForegroundUsageDao,
                     appNotifyInfoDao = appNotifyInfoDao
                 )
             }.flow
