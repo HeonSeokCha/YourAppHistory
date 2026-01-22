@@ -14,6 +14,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
@@ -31,19 +32,6 @@ fun ItemTotalPaging(
     val scrollState = rememberScrollState()
 
     val dailyUsagePager = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
-
-    val dailyForegroundUsagePager = if (state.dateList.isNotEmpty()) {
         rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
     } else {
         val initIdx = state.dateList.flatten().run {
@@ -85,49 +73,23 @@ fun ItemTotalPaging(
     LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(idx))
-    }
-
-    LaunchedEffect(
-        dailyForegroundUsagePager.currentPage,
-        dailyForegroundUsagePager.isScrollInProgress
-    ) {
-        if (state.dateList.isEmpty()) return@LaunchedEffect
-        if (dailyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyForegroundUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(idx))
+        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyUsagePager.currentPage to state.dateIdx.second))
     }
 
     LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyNotifyPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(idx))
+        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyNotifyPager.currentPage to state.dateIdx.second))
     }
 
     LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyLaunchPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(idx))
+        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyLaunchPager.currentPage to state.dateIdx.second))
     }
 
     LaunchedEffect(state.dateCurrentPage) {
         awaitAll(
-            async { dailyForegroundUsagePager.scrollToPage(state.dateCurrentPage) },
             async { dailyUsagePager.scrollToPage(state.dateCurrentPage) },
             async { dailyNotifyPager.scrollToPage(state.dateCurrentPage) },
             async { dailyLaunchPager.scrollToPage(state.dateCurrentPage) }
@@ -150,11 +112,16 @@ fun ItemTotalPaging(
         ) {
             val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
             if (item != null) {
+                chsLog("IDX : ${state.dateIdx.second}")
+                val a = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = item[it].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
+                    title = item[a].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
                     subTitle = "총 실제 실행 시간",
                     list = item,
-                    onClick = {}
+                    onClick = {
+                        chsLog("ONCLICK : $it")
+                        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(0 to item.size - 1 - it))
+                    }
                 )
             }
         }

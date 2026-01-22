@@ -18,6 +18,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
@@ -56,10 +57,7 @@ fun TotalSummaryScreen(
     onIntent: (TotalSummaryIntent) -> Unit
 ) {
     val datePagerState = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(
-            pageCount = { state.dateList.count() },
-            initialPage = state.dateIdx.first
-        )
+        rememberPagerState(pageCount = { state.dateList.count() })
     } else {
         rememberPagerState(pageCount = { 0 })
     }
@@ -77,21 +75,6 @@ fun TotalSummaryScreen(
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
 
-        onIntent(
-            TotalSummaryIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
-        )
-    }
-
-    LaunchedEffect(state.dateIdx) {
-        val page = state.dateIdx.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            (this.first * 7 + this.second) - initIdx
-        }
-        if (datePagerState.currentPage != state.dateIdx.first) {
-            datePagerState.scrollToPage(state.dateIdx.first)
-        }
-
-        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(page))
     }
 
     Column(
@@ -118,7 +101,10 @@ fun TotalSummaryScreen(
             minDate = state.minDate,
             targetDate = state.displayDate,
             item = state.dateList,
-            onClick = { onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(it)) }
+            onClick = {
+                chsLog("ONCLICK_DATE $it")
+                onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(it))
+            }
         )
 
         ItemTotalPaging(
