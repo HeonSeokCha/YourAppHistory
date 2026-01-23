@@ -74,7 +74,11 @@ fun TotalSummaryScreen(
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
+        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(datePagerState.currentPage))
+    }
 
+    LaunchedEffect(state.dateCurrentPage) {
+        datePagerState.scrollToPage(state.dateCurrentPage)
     }
 
     Column(
@@ -102,7 +106,6 @@ fun TotalSummaryScreen(
             targetDate = state.displayDate,
             item = state.dateList,
             onClick = {
-                chsLog("ONCLICK_DATE $it")
                 onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(it))
             }
         )

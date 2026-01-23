@@ -73,19 +73,19 @@ fun ItemTotalPaging(
     LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyUsagePager.currentPage to state.dateIdx.second))
+        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyUsagePager.currentPage))
     }
 
     LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyNotifyPager.currentPage to state.dateIdx.second))
+        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyNotifyPager.currentPage))
     }
 
     LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(dailyLaunchPager.currentPage to state.dateIdx.second))
+        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyLaunchPager.currentPage))
     }
 
     LaunchedEffect(state.dateCurrentPage) {

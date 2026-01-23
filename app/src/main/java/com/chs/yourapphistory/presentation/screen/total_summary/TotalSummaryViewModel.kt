@@ -79,7 +79,10 @@ class TotalSummaryViewModel(
             }
             TotalSummaryIntent.Loading -> _state.update { it.copy(loading = true) }
             TotalSummaryIntent.LoadComplete -> _state.update { it.copy(loading = false) }
-            is TotalSummaryIntent.OnChangeDateCurrentPage -> _state.update { it.copy(dateCurrentPage = intent.page) }
+            is TotalSummaryIntent.OnChangeDateCurrentPage -> {
+                _state.update { it.copy(dateCurrentPage = intent.page) }
+                changeDate(intent.page to _state.value.dateIdx.second)
+            }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> changeDate(intent.idx)
             TotalSummaryIntent.Error -> TODO()
         }
