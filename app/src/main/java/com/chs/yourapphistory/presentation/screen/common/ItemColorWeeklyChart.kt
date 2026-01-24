@@ -1,10 +1,17 @@
 package com.chs.yourapphistory.presentation.screen.common
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,16 +19,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.toInt
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.TextStyle
@@ -29,12 +39,18 @@ import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
+import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.presentation.theme.RankBlue
+import com.chs.yourapphistory.presentation.theme.RankGreen
+import com.chs.yourapphistory.presentation.theme.RankGreen2
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -45,6 +61,7 @@ import kotlin.time.Duration.Companion.hours
 @Composable
 fun ItemColorWeeklyChart(
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
+    colorList: List<Color>,
     onClick: (Int) -> Unit
 ) {
     val density = LocalDensity.current
@@ -56,7 +73,7 @@ fun ItemColorWeeklyChart(
     val distance = with(density) {
         (LocalConfiguration.current.screenWidthDp - 25).div(7).dp.toPx()
     }
-    val barColor = MaterialTheme.colorScheme.primary
+    val barColor = Color.Gray
 
     val textMeasurer = rememberTextMeasurer()
 
@@ -132,11 +149,7 @@ fun ItemColorWeeklyChart(
 
         val chartAreaBottom = size.height - labelSectionHeight
 
-        val colorList = listOf(
-            Color.Blue,
-            Color.Cyan,
-            Color.Green
-        )
+
 
         barAreas.forEachIndexed { idx, info ->
             val convertDateFormat = list[idx].first.toConvertDisplayDay()
@@ -196,8 +209,28 @@ fun WeeklyColorUsageChart(
     title: String,
     subTitle: String? = null,
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
+    usageType: SortType,
     onClick: (Int) -> Unit
 ) {
+    val colorList = listOf(
+        RankBlue,
+        RankGreen,
+        RankGreen2
+    )
+
+    var selectPos by remember { mutableIntStateOf(0) }
+    val topValuePackageList = remember {
+        list[selectPos].second.sortedByDescending { it.totalUsedInfo }
+            .take(3)
+            .map {
+                if (usageType == SortType.UsageEvent) {
+                    it.label to it.totalUsedInfo.toInt().convertToRealUsageHour()
+                } else {
+                    it.label to "${it.totalUsedInfo}개"
+                }
+            }
+    }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -212,8 +245,6 @@ fun WeeklyColorUsageChart(
             fontSize = 18.sp,
             fontWeight = FontWeight.Bold
         )
-
-        Spacer(modifier = Modifier.height(8.dp))
 
         if (subTitle != null) {
             Text(
@@ -231,7 +262,59 @@ fun WeeklyColorUsageChart(
 
         ItemColorWeeklyChart(
             list = list,
-            onClick = onClick
+            colorList = colorList,
+            onClick = {
+                selectPos = it
+                onClick(it)
+            }
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        repeat(topValuePackageList.count()) {
+            ItemDailyTotalInfo(
+                color = colorList[it],
+                label = topValuePackageList[it].first,
+                value = topValuePackageList[it].second
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+    }
+}
+
+@Composable
+fun ItemDailyTotalInfo(
+    color: Color,
+    label: String,
+    value: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .background(color)
+        )
+
+        Text(
+            modifier = Modifier
+                .weight(0.7f),
+            text = label
+        )
+
+        Text(
+            modifier = Modifier
+                .weight(0.2f),
+            text = value,
+            textAlign = TextAlign.End
         )
     }
 }
@@ -275,6 +358,7 @@ private fun PreViewUsageChart3() {
     WeeklyColorUsageChart(
         title = "TEST",
         list = usageMap,
+        usageType = SortType.UsageEvent,
         onClick = {}
     )
 }

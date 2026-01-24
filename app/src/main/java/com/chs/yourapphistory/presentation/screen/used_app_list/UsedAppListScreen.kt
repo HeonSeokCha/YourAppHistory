@@ -29,13 +29,10 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.R
-import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
-import com.chs.yourapphistory.presentation.screen.common.ItemPullToRefreshBox
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import com.chs.yourapphistory.presentation.screen.common.shimmer

@@ -118,6 +118,7 @@ fun ItemTotalPaging(
                     title = item[a].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
                     subTitle = "총 실제 실행 시간",
                     list = item,
+                    usageType = SortType.UsageEvent,
                     onClick = {
                         chsLog("ONCLICK : $it")
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(0 to item.size - 1 - it))
@@ -142,6 +143,7 @@ fun ItemTotalPaging(
                     title = "${item[it].second.sumOf { it.totalUsedInfo}} 회",
                     subTitle = "총 알림 횟수",
                     list = item,
+                    usageType = SortType.NotifyEvent,
                     onClick = {}
                 )
             }
@@ -163,6 +165,7 @@ fun ItemTotalPaging(
                     title = "${item[it].second.sumOf { it.totalUsedInfo}} 번",
                     subTitle = "총 실행 횟수",
                     list = item,
+                    usageType = SortType.LaunchEvent,
                     onClick = {}
                 )
             }
