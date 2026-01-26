@@ -31,44 +31,11 @@ fun ItemTotalPaging(
 ) {
     val scrollState = rememberScrollState()
 
-    val dailyUsagePager = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyUsagePager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
-    val dailyNotifyPager = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyNotifyPager =rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
-    val dailyLaunchPager = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyLaunchPager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
     LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
@@ -112,16 +79,15 @@ fun ItemTotalPaging(
         ) {
             val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
             if (item != null) {
-                chsLog("IDX : ${state.dateIdx.second}")
-                val a = item.size - 1 - state.dateIdx.second
+                val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = item[a].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
+                    title = item[currentIdx].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
                     subTitle = "총 실제 실행 시간",
                     list = item,
                     usageType = SortType.UsageEvent,
                     onClick = {
-                        chsLog("ONCLICK : $it")
-                        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(0 to item.size - 1 - it))
+                        chsLog(it.toString())
+                        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
                     }
                 )
             }
@@ -139,12 +105,15 @@ fun ItemTotalPaging(
         ) {
             val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
             if (item != null) {
+                val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = "${item[it].second.sumOf { it.totalUsedInfo}} 회",
+                    title = "${item[currentIdx].second.sumOf { it.totalUsedInfo}} 회",
                     subTitle = "총 알림 횟수",
                     list = item,
                     usageType = SortType.NotifyEvent,
-                    onClick = {}
+                    onClick = {
+                        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
+                    }
                 )
             }
         }
@@ -161,12 +130,15 @@ fun ItemTotalPaging(
         ) {
             val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
             if (item != null) {
+                val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = "${item[it].second.sumOf { it.totalUsedInfo}} 번",
+                    title = "${item[currentIdx].second.sumOf { it.totalUsedInfo}} 번",
                     subTitle = "총 실행 횟수",
                     list = item,
                     usageType = SortType.LaunchEvent,
-                    onClick = {}
+                    onClick = {
+                        onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
+                    }
                 )
             }
         }

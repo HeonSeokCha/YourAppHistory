@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calcDailyTotalTime
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -37,7 +38,6 @@ class GetPagingWeeklyTotalAppInfo(
             .reverseDateUntilWeek(pageDate)
             .chunked(7)
             .map {
-
                 withContext(Dispatchers.IO) {
                     val appUsage = async(Dispatchers.IO) {
                         SortType.UsageEvent to it.map { date ->
@@ -74,10 +74,10 @@ class GetPagingWeeklyTotalAppInfo(
 
         return LoadResult.Page(
             prevKey = null,
-            nextKey = if (pageDate.minusWeeks(Constants.PAGING_WEEK + 1) < minDate) {
+            nextKey = if (pageDate.minusWeeks(Constants.PAGING_WEEK) < minDate) {
                 null
             } else {
-                pageDate.minusWeeks(Constants.PAGING_WEEK + 1)
+                pageDate.minusWeeks(1)
             },
             data = data
         )

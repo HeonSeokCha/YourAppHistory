@@ -66,7 +66,8 @@ class TotalSummaryViewModel(
 
                 it.copy(
                     minDate = minDate,
-                    dateList = splitList
+                    dateList = splitList,
+                    dateIdx = 0 to splitList.first().indexOf(dateNow)
                 )
             }
         }

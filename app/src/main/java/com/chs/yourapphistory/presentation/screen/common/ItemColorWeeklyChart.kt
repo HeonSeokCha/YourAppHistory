@@ -306,13 +306,13 @@ fun ItemDailyTotalInfo(
 
         Text(
             modifier = Modifier
-                .weight(0.7f),
+                .weight(0.6f),
             text = label
         )
 
         Text(
             modifier = Modifier
-                .weight(0.2f),
+                .weight(0.3f),
             text = value,
             textAlign = TextAlign.End
         )
