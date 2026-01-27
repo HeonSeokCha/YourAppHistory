@@ -69,8 +69,14 @@ fun NavigationRoot(
             entry<MainScreens.ScreenTotalSummary> {
                 TotalSummaryScreenRoot(
                     viewModel = koinViewModel(),
-                    onNavigateUsageDetail = {
-//                        backStack.add(MainScreens.ScreenAppUsageDetail(it))
+                    onNavigateUsageDetail = { packageName, label, targetDate ->
+                        backStack.add(
+                            MainScreens.ScreenAppUsageDetail(
+                                targetPackageName = packageName,
+                                targetLabelName = label,
+                                targetDate = targetDate
+                            )
+                        )
                     },
                     onNavigateUsedAppList = {
                         backStack.add(MainScreens.ScreenUsedAppList(it))

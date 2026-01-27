@@ -20,6 +20,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
+import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDateList
@@ -28,7 +29,7 @@ import java.time.LocalDate
 @Composable
 fun TotalSummaryScreenRoot(
     viewModel: TotalSummaryViewModel,
-    onNavigateUsageDetail: (String) -> Unit,
+    onNavigateUsageDetail: (String, String, Long) -> Unit,
     onNavigateUsedAppList: (SortType) -> Unit
 ) {
     val state: TotalSummaryState by viewModel.state.collectAsStateWithLifecycle()
@@ -37,7 +38,13 @@ fun TotalSummaryScreenRoot(
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
             when (effect) {
-                is TotalSummaryEffect.NavigateUsageDetail -> onNavigateUsageDetail(effect.packageName)
+                is TotalSummaryEffect.NavigateUsageDetail -> {
+                    onNavigateUsageDetail(
+                        effect.packageName,
+                        effect.label,
+                        effect.targetDate
+                    )
+                }
                 is TotalSummaryEffect.NavigateUsedAppList -> onNavigateUsedAppList(effect.sortType)
             }
         }

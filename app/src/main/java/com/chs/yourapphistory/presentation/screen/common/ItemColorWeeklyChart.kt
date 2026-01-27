@@ -2,6 +2,7 @@ package com.chs.yourapphistory.presentation.screen.common
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -210,7 +214,10 @@ fun WeeklyColorUsageChart(
     subTitle: String? = null,
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
     usageType: SortType,
-    onClick: (Int) -> Unit
+    selectIdx: Int,
+    onBarClick: (Int) -> Unit,
+    onPackageClick: (String, String) -> Unit,
+    onButtonClick: () -> Unit
 ) {
     val colorList = listOf(
         RankBlue,
@@ -218,18 +225,16 @@ fun WeeklyColorUsageChart(
         RankGreen2
     )
 
-    var selectPos by remember { mutableIntStateOf(0) }
-    val topValuePackageList = remember {
-        list[selectPos].second.sortedByDescending { it.totalUsedInfo }
+    val topValuePackageList =
+        list[selectIdx].second.sortedByDescending { it.totalUsedInfo }
             .take(3)
             .map {
                 if (usageType == SortType.UsageEvent) {
-                    it.label to it.totalUsedInfo.toInt().convertToRealUsageHour()
+                    it to it.totalUsedInfo.toInt().convertToRealUsageHour()
                 } else {
-                    it.label to "${it.totalUsedInfo}개"
+                    it to "${it.totalUsedInfo}개"
                 }
             }
-    }
 
     Card(
         modifier = Modifier
@@ -263,10 +268,7 @@ fun WeeklyColorUsageChart(
         ItemColorWeeklyChart(
             list = list,
             colorList = colorList,
-            onClick = {
-                selectPos = it
-                onClick(it)
-            }
+            onClick = onBarClick
         )
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -274,14 +276,37 @@ fun WeeklyColorUsageChart(
         repeat(topValuePackageList.count()) {
             ItemDailyTotalInfo(
                 color = colorList[it],
-                label = topValuePackageList[it].first,
-                value = topValuePackageList[it].second
+                label = topValuePackageList[it].first.label,
+                value = topValuePackageList[it].second,
+                onClick = {
+                    onPackageClick(
+                        topValuePackageList[it].first.packageName,
+                        topValuePackageList[it].first.label,
+                    )
+                }
             )
 
             Spacer(modifier = Modifier.height(4.dp))
         }
 
         Spacer(modifier = Modifier.height(8.dp))
+
+        HorizontalDivider()
+
+        Button(
+            modifier = Modifier
+                .fillMaxWidth(),
+            onClick = onButtonClick,
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent
+            )
+        ) {
+            Text(
+                text = "모두 보기",
+                color = Color.Black,
+                fontWeight = FontWeight.Bold
+            )
+        }
     }
 }
 
@@ -289,12 +314,14 @@ fun WeeklyColorUsageChart(
 fun ItemDailyTotalInfo(
     color: Color,
     label: String,
-    value: String
+    value: String,
+    onClick: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 16.dp)
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(16.dp)
     ) {
@@ -359,6 +386,9 @@ private fun PreViewUsageChart3() {
         title = "TEST",
         list = usageMap,
         usageType = SortType.UsageEvent,
-        onClick = {}
+        selectIdx = 0,
+        onBarClick = {},
+        onPackageClick = { _, _ ->},
+        onButtonClick = {}
     )
 }

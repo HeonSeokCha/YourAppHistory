@@ -9,6 +9,7 @@ import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyTotalInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertAppUsageInfoUseCase
 import com.chs.yourapphistory.domain.usecase.InsertInstallAppInfoUseCase
+import com.chs.yourapphistory.presentation.screen.total_summary.TotalSummaryEffect.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -76,7 +77,13 @@ class TotalSummaryViewModel(
     fun handleIntent(intent: TotalSummaryIntent) {
         when (intent) {
             is TotalSummaryIntent.ClickPackageName -> {
-                _effect.trySend(TotalSummaryEffect.NavigateUsageDetail(intent.packageName))
+                _effect.trySend(
+                    NavigateUsageDetail(
+                        packageName = intent.packageName,
+                        label = intent.label,
+                        targetDate = intent.targetDate
+                    )
+                )
             }
             TotalSummaryIntent.Loading -> _state.update { it.copy(loading = true) }
             TotalSummaryIntent.LoadComplete -> _state.update { it.copy(loading = false) }
@@ -86,6 +93,7 @@ class TotalSummaryViewModel(
             }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> changeDate(intent.idx)
             TotalSummaryIntent.Error -> TODO()
+            is TotalSummaryIntent.ClickUsedAppList -> TODO()
         }
     }
 

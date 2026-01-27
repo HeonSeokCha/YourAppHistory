@@ -14,8 +14,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.WeeklyColorUsageChart
@@ -33,7 +33,7 @@ fun ItemTotalPaging(
 
     val dailyUsagePager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
-    val dailyNotifyPager =rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    val dailyNotifyPager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
     val dailyLaunchPager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
@@ -85,9 +85,21 @@ fun ItemTotalPaging(
                     subTitle = "총 실제 실행 시간",
                     list = item,
                     usageType = SortType.UsageEvent,
-                    onClick = {
-                        chsLog(it.toString())
+                    selectIdx = currentIdx,
+                    onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
+                    },
+                    onPackageClick = { packageName, label ->
+                        onIntent(
+                            TotalSummaryIntent.ClickPackageName(
+                                packageName = packageName,
+                                label = label,
+                                targetDate = item[currentIdx].first.toMillis()
+                            )
+                        )
+                    },
+                    onButtonClick = {
+
                     }
                 )
             }
@@ -111,8 +123,21 @@ fun ItemTotalPaging(
                     subTitle = "총 알림 횟수",
                     list = item,
                     usageType = SortType.NotifyEvent,
-                    onClick = {
+                    selectIdx = currentIdx,
+                    onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
+                    },
+                    onPackageClick = { packageName, label ->
+                        onIntent(
+                            TotalSummaryIntent.ClickPackageName(
+                                packageName = packageName,
+                                label = label,
+                                targetDate = item[currentIdx].first.toMillis()
+                            )
+                        )
+                    },
+                    onButtonClick = {
+
                     }
                 )
             }
@@ -136,8 +161,21 @@ fun ItemTotalPaging(
                     subTitle = "총 실행 횟수",
                     list = item,
                     usageType = SortType.LaunchEvent,
-                    onClick = {
+                    selectIdx = currentIdx,
+                    onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
+                    },
+                    onPackageClick = { packageName, label ->
+                        onIntent(
+                            TotalSummaryIntent.ClickPackageName(
+                                packageName = packageName,
+                                label = label,
+                                targetDate = item[currentIdx].first.toMillis()
+                            )
+                        )
+                    },
+                    onButtonClick = {
+
                     }
                 )
             }
