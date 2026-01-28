@@ -78,8 +78,10 @@ fun NavigationRoot(
                             )
                         )
                     },
-                    onNavigateUsedAppList = {
-                        backStack.add(MainScreens.ScreenUsedAppList(it))
+                    onNavigateUsedAppList = { targetDate, type ->
+                        backStack.add(
+                            MainScreens.ScreenUsedAppList(type)
+                        )
                     }
                 )
             }

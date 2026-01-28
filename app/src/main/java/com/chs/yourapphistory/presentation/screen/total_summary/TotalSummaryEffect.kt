@@ -8,5 +8,9 @@ sealed interface TotalSummaryEffect {
         val label: String,
         val targetDate: Long
     ) : TotalSummaryEffect
-    data class NavigateUsedAppList(val sortType: SortType) : TotalSummaryEffect
+
+    data class NavigateUsedAppList(
+        val targetDate: Long,
+        val sortType: SortType
+    ) : TotalSummaryEffect
 }

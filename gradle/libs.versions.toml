@@ -17,8 +17,8 @@ kotlin-coroutine = "1.10.2"
 desugar_jdk_libs = "2.1.5"
 nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
-kotlinxSerializationCore = "1.9.0"
-koin = "4.2.0-beta2"
+kotlinxSerializationCore = "1.10.0"
+koin = "4.2.0-beta4"
 koin-annotation = "2.3.1"
 
 [libraries]
@@ -57,7 +57,7 @@ koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "k
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
 kotlin-coroutine-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlin-coroutine" }
-kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.9.0"
+kotlin-serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.10.0"
 
 
 [bundles]

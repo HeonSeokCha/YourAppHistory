@@ -92,8 +92,15 @@ class TotalSummaryViewModel(
                 changeDate(intent.page to _state.value.dateIdx.second)
             }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> changeDate(intent.idx)
-            TotalSummaryIntent.Error -> TODO()
-            is TotalSummaryIntent.ClickUsedAppList -> TODO()
+            TotalSummaryIntent.Error -> Unit
+            is TotalSummaryIntent.ClickUsedAppList -> {
+                _effect.trySend(
+                    NavigateUsedAppList(
+                        targetDate = intent.targetDate,
+                        sortType = intent.sortType
+                    )
+                )
+            }
         }
     }
 

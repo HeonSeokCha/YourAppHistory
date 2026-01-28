@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
                     when (backstack.last()) {
                         MainScreens.ScreenWelcome -> Unit
 
-                        is MainScreens.ScreenUsedAppList -> {
+                        is MainScreens.ScreenTotalSummary -> {
                             TopAppBar(
                                 title = {
                                     Text(text = getString(R.string.app_name))
@@ -56,15 +56,36 @@ class MainActivity : ComponentActivity() {
                         }
 
                         is MainScreens.ScreenAppUsageDetail -> {
-                            val a = backstack.last() as MainScreens.ScreenAppUsageDetail
+                            val backStack = backstack.last() as MainScreens.ScreenAppUsageDetail
                             TopAppBar(
                                 title = {
                                     Text(
-                                        text = a.targetLabelName,
+                                        text = backStack.targetLabelName,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Companion.Ellipsis
+                                        overflow = TextOverflow.Ellipsis
                                     )
                                 },
+                                navigationIcon = {
+                                    IconButton(
+                                        onClick = { backstack.removeLastOrNull() }
+                                    ) {
+                                        Icon(
+                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                            tint = MaterialTheme.colorScheme.primary,
+                                            contentDescription = null
+                                        )
+                                    }
+                                },
+                                colors = TopAppBarDefaults.topAppBarColors(
+                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                                    titleContentColor = MaterialTheme.colorScheme.primary,
+                                ),
+                            )
+                        }
+
+                        else -> {
+                            TopAppBar(
+                                title = {},
                                 navigationIcon = {
                                     IconButton(
                                         onClick = { backstack.removeLastOrNull() }

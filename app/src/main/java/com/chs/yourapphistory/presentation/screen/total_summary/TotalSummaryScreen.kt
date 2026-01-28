@@ -30,7 +30,7 @@ import java.time.LocalDate
 fun TotalSummaryScreenRoot(
     viewModel: TotalSummaryViewModel,
     onNavigateUsageDetail: (String, String, Long) -> Unit,
-    onNavigateUsedAppList: (SortType) -> Unit
+    onNavigateUsedAppList: (Long, SortType) -> Unit
 ) {
     val state: TotalSummaryState by viewModel.state.collectAsStateWithLifecycle()
     val pagingItems = viewModel.pagingList.collectAsLazyPagingItems()
@@ -45,7 +45,12 @@ fun TotalSummaryScreenRoot(
                         effect.targetDate
                     )
                 }
-                is TotalSummaryEffect.NavigateUsedAppList -> onNavigateUsedAppList(effect.sortType)
+                is TotalSummaryEffect.NavigateUsedAppList -> {
+                    onNavigateUsedAppList(
+                        effect.targetDate,
+                        effect.sortType
+                    )
+                }
             }
         }
     }

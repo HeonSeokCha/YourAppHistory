@@ -99,7 +99,12 @@ fun ItemTotalPaging(
                         )
                     },
                     onButtonClick = {
-
+                        onIntent(
+                            TotalSummaryIntent.ClickUsedAppList(
+                                targetDate = item[currentIdx].first.toMillis(),
+                                sortType = SortType.UsageEvent
+                            )
+                        )
                     }
                 )
             }
@@ -137,7 +142,12 @@ fun ItemTotalPaging(
                         )
                     },
                     onButtonClick = {
-
+                        onIntent(
+                            TotalSummaryIntent.ClickUsedAppList(
+                                targetDate = item[currentIdx].first.toMillis(),
+                                sortType = SortType.NotifyEvent
+                            )
+                        )
                     }
                 )
             }
@@ -175,7 +185,12 @@ fun ItemTotalPaging(
                         )
                     },
                     onButtonClick = {
-
+                        onIntent(
+                            TotalSummaryIntent.ClickUsedAppList(
+                                targetDate = item[currentIdx].first.toMillis(),
+                                sortType = SortType.LaunchEvent
+                            )
+                        )
                     }
                 )
             }
