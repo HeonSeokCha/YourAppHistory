@@ -82,7 +82,7 @@ fun ItemColorWeeklyChart(
     val textMeasurer = rememberTextMeasurer()
 
     val style1 = TextStyle(
-        fontSize = 10.sp,
+        fontSize = 11.sp,
         color = Color.Black
     )
 
@@ -106,7 +106,7 @@ fun ItemColorWeeklyChart(
         )
     }
 
-    var selectedBar: BarAreas? by remember { mutableStateOf(null) }
+    var selectedBar: BarAreas? by remember { mutableStateOf(barAreas.first()) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
 
 
@@ -153,8 +153,6 @@ fun ItemColorWeeklyChart(
 
         val chartAreaBottom = size.height - labelSectionHeight
 
-
-
         barAreas.forEachIndexed { idx, info ->
             val convertDateFormat = list[idx].first.toConvertDisplayDay()
             val sortedInfo = info.values.sortedDescending()
@@ -192,6 +190,18 @@ fun ItemColorWeeklyChart(
                 style = style1
             )
             val textRectPadding = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 3)
+
+            if (idx == selectedBar?.idx) {
+                drawCircle(
+                    center = Offset(
+                        x = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 4),
+                        y = size.height - (labelSectionHeight / 2)
+                    ),
+                    radius = 30f,
+                    color = Color.LightGray.copy(alpha = 0.9f)
+                )
+            }
+
             drawText(
                 textMeasurer = textMeasurer,
                 text = convertDateFormat,
