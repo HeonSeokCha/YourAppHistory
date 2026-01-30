@@ -7,7 +7,9 @@ import androidx.paging.PagingData
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.toConvertDayUsedTime
 import com.chs.yourapphistory.common.toLocalDate
+import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -16,16 +18,13 @@ import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import com.chs.yourapphistory.data.db.entity.AppInfoEntity
 import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
-import com.chs.yourapphistory.data.paging.GetPagingForegroundList
-import com.chs.yourapphistory.data.paging.GetPagingLaunchList
-import com.chs.yourapphistory.data.paging.GetPagingNotifyList
-import com.chs.yourapphistory.data.paging.GetPagingUsedList
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyTotalAppInfo
+import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.SortType
@@ -122,6 +121,49 @@ class AppRepositoryImpl(
 
         deleteUsageInfoFromPackageNames(removePackageList)
         chsLog("END insertInstallAppInfo")
+    }
+
+    override suspend fun getDayUsedAppInfoList(targetDateMilli: Long): List<Pair<AppInfo, Int>> {
+        val iconMap = getAppIconMap()
+        val targetDate = targetDateMilli.toLocalDate()
+        return appUsageDao.getDayAppUsedInfo(targetDateMilli).map {
+            it.key.toAppInfo(iconMap[it.key.packageName]) to it.value.toConvertDayUsedTime(
+                targetDate
+            )
+        }.sortedWith(compareBy({ -it.second }, { it.first.label }))
+    }
+
+    override suspend fun getDayForegroundUsedAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>> {
+        val iconMap = getAppIconMap()
+        val targetDate = targetDateMilli.toLocalDate()
+        return appForegroundUsageDao.getDayForegroundUsedList(targetDateMilli).map {
+            it.key.toAppInfo(icon = iconMap[it.key.packageName]) to
+                    it.value.toConvertDayUsedTime(targetDate)
+        }.sortedWith(
+            compareBy(
+                { -it.second },
+                { it.first.label }
+            )
+        )
+    }
+
+    override suspend fun getDayNotifyAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>> {
+        val iconMap = getAppIconMap()
+        return appNotifyInfoDao.getDayNotifyList(targetDateMilli).map {
+            it.key.toAppInfo(icon = iconMap[it.key.packageName]) to it.value
+        }.sortedWith(
+            compareBy(
+                { -it.second },
+                { it.first.label }
+            )
+        )
+    }
+
+    override suspend fun getDayLaunchAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>> {
+        val iconMap = getAppIconMap()
+        return appUsageDao.getDayAppLaunchInfo(targetDateMilli).map {
+            it.key.toAppInfo(icon = iconMap[it.key.packageName]) to it.value
+        }
     }
 
     override suspend fun insertAppUsageInfo() {
@@ -253,77 +295,6 @@ class AppRepositoryImpl(
         }
     }
 
-    override fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
-        flow {
-            emit(getMinDate() to getAppIconMap())
-        }.flatMapLatest {
-            Pager(
-                PagingConfig(
-                    pageSize = Constants.PAGING_DAY.toInt(),
-                    enablePlaceholders = false
-                ),
-            ) {
-                GetPagingUsedList(
-                    appUsageDao = appUsageDao,
-                    minDate = it.first,
-                    iconMap = it.second
-                )
-            }.flow
-        }
-
-    override fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
-        flow {
-            emit(getMinDate() to getAppIconMap())
-        }.flatMapLatest {
-            Pager(
-                PagingConfig(
-                    pageSize = Constants.PAGING_DAY.toInt(),
-                    enablePlaceholders = false
-                )
-            ) {
-                GetPagingForegroundList(
-                    appForegroundUsageDao = appForegroundUsageDao,
-                    minDate = it.first,
-                    iconMap = it.second
-                )
-            }.flow
-        }
-
-    override fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
-        flow {
-            emit(getMinDate() to getAppIconMap())
-        }.flatMapLatest {
-            Pager(
-                PagingConfig(
-                    pageSize = Constants.PAGING_DAY.toInt(),
-                    enablePlaceholders = false
-                )
-            ) {
-                GetPagingNotifyList(
-                    appNotifyInfoDao = appNotifyInfoDao,
-                    minDate = it.first,
-                    iconMap = it.second
-                )
-            }.flow
-        }
-
-    override fun getDayLaunchAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>> =
-        flow {
-            emit(getMinDate() to getAppIconMap())
-        }.flatMapLatest {
-            Pager(
-                PagingConfig(
-                    pageSize = Constants.PAGING_DAY.toInt(),
-                    enablePlaceholders = false
-                )
-            ) {
-                GetPagingLaunchList(
-                    appUsageDao = appUsageDao,
-                    minDate = it.first,
-                    iconMap = it.second
-                )
-            }.flow
-        }
 
     override fun getWeeklyPagingAppInfo(
         targetDate: LocalDate,

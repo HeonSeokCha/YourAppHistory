@@ -10,13 +10,16 @@ sealed interface MainScreens: NavKey {
     data object ScreenWelcome : MainScreens
 
     @Serializable
-    data class ScreenUsedAppList(val sortType: SortType) : MainScreens
+    data class ScreenUsedAppList(
+        val targetDateMilli: Long,
+        val sortType: SortType
+    ) : MainScreens
 
     @Serializable
     data class ScreenAppUsageDetail(
         val targetPackageName: String,
         val targetLabelName: String,
-        val targetDate: Long
+        val targetDateMilli: Long
     ) : MainScreens
 
     @Serializable

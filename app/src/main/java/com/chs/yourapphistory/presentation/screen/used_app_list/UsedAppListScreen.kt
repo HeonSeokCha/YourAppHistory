@@ -36,7 +36,6 @@ import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import com.chs.yourapphistory.presentation.screen.common.shimmer
-import java.time.LocalDate
 
 @Composable
 fun UsedAppListScreenScreenRoot(
@@ -45,7 +44,6 @@ fun UsedAppListScreenScreenRoot(
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val pagingItems = viewModel.pagingList.collectAsLazyPagingItems()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collect { effect ->
@@ -64,7 +62,6 @@ fun UsedAppListScreenScreenRoot(
 
     UsedAppListScreenScreen(
         state = state,
-        pagingItems = pagingItems,
         onIntent = viewModel::handleIntent
     )
 }
@@ -72,54 +69,8 @@ fun UsedAppListScreenScreenRoot(
 @Composable
 fun UsedAppListScreenScreen(
     state: UsedAppListState,
-    pagingItems: LazyPagingItems<Pair<LocalDate, List<Pair<AppInfo, Int>>>>,
     onIntent: (UsedAppIntent) -> Unit
 ) {
-    val pagerState = rememberPagerState(
-        pageCount = {
-            pagingItems.itemCount
-        }
-    )
-
-    val isEmpty by remember {
-        derivedStateOf {
-            pagingItems.loadState.refresh is LoadState.NotLoading
-                    && pagingItems.loadState.append.endOfPaginationReached
-                    && pagingItems.itemCount == 0
-        }
-    }
-
-    LaunchedEffect(pagingItems.loadState.refresh) {
-        when (pagingItems.loadState.refresh) {
-            is LoadState.Loading -> {
-                chsLog("START LOADING")
-                pagerState.scrollToPage(0)
-                onIntent(UsedAppIntent.Loading)
-            }
-
-            is LoadState.Error -> onIntent(UsedAppIntent.Error)
-
-            is LoadState.NotLoading -> onIntent(UsedAppIntent.LoadComplete)
-        }
-    }
-
-    LaunchedEffect(pagingItems.loadState.append) {
-        when (pagingItems.loadState.append) {
-            is LoadState.Loading -> onIntent(UsedAppIntent.Appending)
-
-            is LoadState.Error -> onIntent(UsedAppIntent.Error)
-
-            is LoadState.NotLoading -> onIntent(UsedAppIntent.AppendComplete)
-        }
-    }
-
-    LaunchedEffect(pagerState.currentPage) {
-        if (state.isLoading || pagingItems.itemCount == 0) return@LaunchedEffect
-        if (pagingItems[pagerState.currentPage]?.first == null) return@LaunchedEffect
-
-        onIntent(UsedAppIntent.ChangeDate(pagingItems[pagerState.currentPage]!!.first))
-    }
-
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -155,53 +106,21 @@ fun UsedAppListScreenScreen(
             fontSize = 18.sp
         )
 
-        when {
-            state.isLoading -> {
-                ItemLoading()
-            }
-
-            isEmpty -> {
-                ItemEmpty()
-            }
-
-            else -> {
-                HorizontalPager(
-                    modifier = Modifier.fillMaxSize(),
-                    state = pagerState,
-                    reverseLayout = true,
-                    userScrollEnabled = true,
-                    key = pagingItems.itemKey { it.first }
-                ) { page ->
-                    val item = pagingItems[page] ?: return@HorizontalPager
-
-                    if (state.isAppending) {
-                        ItemLoading()
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val packageList = item.second
-                            items(
-                                count = packageList.count(),
-                                key = { packageList[it].first.packageName }
-                            ) { idx ->
-                                val appInfo = packageList[idx]
-                                ItemAppInfoSmall(
-                                    usedAppInfo = appInfo,
-                                    icon = appInfo.first.icon,
-                                    sortOption = state.sortOption
-                                ) { appInfo ->
-                                    onIntent(
-                                        UsedAppIntent.ClickAppInfo(
-                                            appInfo = appInfo,
-                                            targetDate = item.first
-                                        )
-                                    )
-                                }
-                            }
-                        }
-                    }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            items(
+                count = state.list.count(),
+                key = { state.list[it].first.packageName }
+            ) { idx ->
+                val appInfo = state.list[idx]
+                ItemAppInfoSmall(
+                    usedAppInfo = appInfo,
+                    icon = appInfo.first.icon,
+                    sortOption = state.sortOption
+                ) { appInfo ->
+                    onIntent(UsedAppIntent.ClickAppInfo(appInfo = appInfo))
                 }
             }
         }

@@ -13,13 +13,13 @@ interface AppRepository {
 
     suspend fun insertInstallAppInfo()
 
-    fun getDayUsedAppInfoList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
+    suspend fun getDayUsedAppInfoList(targetDateMilli: Long): List<Pair<AppInfo, Int>>
 
-    fun getDayForegroundUsedAppList(): Flow<PagingData<Pair<LocalDate,List<Pair<AppInfo, Int>>>>>
+    suspend fun getDayForegroundUsedAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>>
 
-    fun getDayNotifyAppList(): Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
+    suspend fun getDayNotifyAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>>
 
-    fun getDayLaunchAppList():  Flow<PagingData<Pair<LocalDate, List<Pair<AppInfo, Int>>>>>
+    suspend fun getDayLaunchAppList(targetDateMilli: Long): List<Pair<AppInfo, Int>>
 
     fun getWeeklyPagingAppInfo(
         targetDate: LocalDate,

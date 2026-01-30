@@ -12,6 +12,7 @@ import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetai
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.total_summary.TotalSummaryScreenRoot
 import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListScreenScreenRoot
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppListViewModel
 import com.chs.yourapphistory.presentation.screen.welcome.WelcomeScreenRoot
 import org.koin.core.parameter.parametersOf
 import org.koin.androidx.compose.koinViewModel
@@ -41,15 +42,20 @@ fun NavigationRoot(
                 )
             }
 
-            entry<MainScreens.ScreenUsedAppList> {
+            entry<MainScreens.ScreenUsedAppList> { key ->
                 UsedAppListScreenScreenRoot(
-                    viewModel = koinViewModel(),
+                    viewModel = koinViewModel<UsedAppListViewModel> {
+                        parametersOf(
+                            key.sortType,
+                            key.targetDateMilli
+                        )
+                    },
                     onClickApp = { info, date ->
                         backStack.add(
                             MainScreens.ScreenAppUsageDetail(
                                 targetPackageName = info.packageName,
                                 targetLabelName = info.label,
-                                targetDate = date
+                                targetDateMilli = date
                             )
                         )
                     }
@@ -60,7 +66,7 @@ fun NavigationRoot(
                 val viewModel = koinViewModel<AppUsageDetailViewModel> {
                     parametersOf(
                         (key.targetPackageName to key.targetLabelName),
-                        key.targetDate
+                        key.targetDateMilli
                     )
                 }
                 AppUsageDetailScreenRoot(viewModel = viewModel)
@@ -74,13 +80,16 @@ fun NavigationRoot(
                             MainScreens.ScreenAppUsageDetail(
                                 targetPackageName = packageName,
                                 targetLabelName = label,
-                                targetDate = targetDate
+                                targetDateMilli = targetDate
                             )
                         )
                     },
-                    onNavigateUsedAppList = { targetDate, type ->
+                    onNavigateUsedAppList = { targetDateMilli, type ->
                         backStack.add(
-                            MainScreens.ScreenUsedAppList(type)
+                            MainScreens.ScreenUsedAppList(
+                                sortType = type,
+                                targetDateMilli = targetDateMilli
+                            )
                         )
                     }
                 )
