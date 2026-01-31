@@ -81,10 +81,7 @@ fun ItemAppInfoSmall(
                         modifier = Modifier
                             .size(32.dp)
                             .clip(RoundedCornerShape(8.dp))
-                            .placeholder(
-                                visible = true,
-                                highlight = PlaceholderHighlight.shimmer()
-                            ),
+                            .placeholder(visible = true),
                     )
                 }
 
@@ -93,10 +90,7 @@ fun ItemAppInfoSmall(
                 Column {
                     Text(
                         modifier = Modifier
-                            .placeholder(
-                                visible = appInfo == null,
-                                highlight = PlaceholderHighlight.shimmer()
-                            ),
+                            .placeholder(visible = appInfo == null),
                         text = appInfo?.label ?: Constants.TEXT_TITLE_PREVIEW,
                         fontSize = 18.sp,
                         overflow = TextOverflow.Ellipsis
@@ -106,10 +100,7 @@ fun ItemAppInfoSmall(
 
                     Text(
                         modifier = Modifier
-                            .placeholder(
-                                visible = appInfo == null,
-                                highlight = PlaceholderHighlight.shimmer()
-                            ),
+                            .placeholder(visible = appInfo == null),
                         text = if (sortOption == SortType.NotifyEvent || sortOption == SortType.LaunchEvent) {
                             "${value}회"
                         } else {

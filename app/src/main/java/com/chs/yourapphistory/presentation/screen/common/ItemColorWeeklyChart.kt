@@ -31,6 +31,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.toInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -66,6 +67,7 @@ import kotlin.time.Duration.Companion.hours
 fun ItemColorWeeklyChart(
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
     colorList: List<Color>,
+    selectIdx: Int,
     onClick: (Int) -> Unit
 ) {
     val density = LocalDensity.current
@@ -106,7 +108,7 @@ fun ItemColorWeeklyChart(
         )
     }
 
-    var selectedBar: BarAreas? by remember { mutableStateOf(barAreas.first()) }
+    var selectedBar: BarAreas? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
 
 
@@ -191,7 +193,7 @@ fun ItemColorWeeklyChart(
             )
             val textRectPadding = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 3)
 
-            if (idx == selectedBar?.idx) {
+            if (idx == selectIdx) {
                 drawCircle(
                     center = Offset(
                         x = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 4),
@@ -278,6 +280,7 @@ fun WeeklyColorUsageChart(
         ItemColorWeeklyChart(
             list = list,
             colorList = colorList,
+            selectIdx = selectIdx,
             onClick = onBarClick
         )
 
@@ -337,8 +340,11 @@ fun ItemDailyTotalInfo(
     ) {
         Box(
             modifier = Modifier
-                .size(16.dp)
-                .background(color)
+                .size(24.dp)
+                .background(
+                    color = color,
+                    shape = CircleShape
+                )
         )
 
         Text(

@@ -79,10 +79,7 @@ fun UsedAppListScreenScreen(
     ) {
         Text(
             modifier = Modifier
-                .placeholder(
-                    visible = state.isLoading,
-                    highlight = PlaceholderHighlight.shimmer()
-                ),
+                .placeholder(visible = state.isLoading),
             text = state.displayDate,
             textAlign = TextAlign.Center,
             fontSize = 24.sp,
@@ -97,10 +94,7 @@ fun UsedAppListScreenScreen(
                     if (state.isLoading) return@clickable
                     onIntent(UsedAppIntent.OnShowSortDialog(true))
                 }
-                .placeholder(
-                    visible = state.isLoading,
-                    highlight = PlaceholderHighlight.shimmer()
-                ),
+                .placeholder(visible = state.isLoading),
             text = state.sortOption.title,
             textAlign = TextAlign.Center,
             fontSize = 18.sp
@@ -135,27 +129,5 @@ fun UsedAppListScreenScreen(
                 onIntent(UsedAppIntent.OnChangeSort(selectSortType))
             }
         )
-    }
-}
-
-@Composable
-private fun ItemLoading() {
-    LazyColumn(
-        modifier = Modifier.fillMaxSize(),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        items(100) {
-            ItemAppInfoSmall(null, null) { }
-        }
-    }
-}
-
-@Composable
-fun ItemEmpty() {
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-    ) {
-        Text(text = stringResource(R.string.txt_no_item))
     }
 }
