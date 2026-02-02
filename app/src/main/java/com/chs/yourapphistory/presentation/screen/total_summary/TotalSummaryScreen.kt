@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -169,13 +170,22 @@ private fun ItemLoadingFromTotal() {
 
     Spacer(modifier = Modifier.height(16.dp))
 
-    Box(
+    Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(400.dp)
-            .placeholder(
-                visible = true,
-                shape = RoundedCornerShape(4.dp)
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+    ) {
+        repeat(3) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(400.dp)
+                    .padding(bottom = 16.dp)
+                    .placeholder(
+                        visible = true,
+                        shape = RoundedCornerShape(4.dp)
+                    )
             )
-    )
+        }
+    }
 }
