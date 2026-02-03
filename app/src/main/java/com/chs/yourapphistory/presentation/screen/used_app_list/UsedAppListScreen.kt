@@ -8,34 +8,21 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.paging.LoadState
-import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.collectAsLazyPagingItems
-import androidx.paging.compose.itemKey
-import com.chs.yourapphistory.R
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
-import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
-import com.chs.yourapphistory.presentation.screen.common.shimmer
 
 @Composable
 fun UsedAppListScreenScreenRoot(
@@ -104,17 +91,23 @@ fun UsedAppListScreenScreen(
             modifier = Modifier.fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            items(
-                count = state.list.count(),
-                key = { state.list[it].first.packageName }
-            ) { idx ->
-                val appInfo = state.list[idx]
-                ItemAppInfoSmall(
-                    usedAppInfo = appInfo,
-                    icon = appInfo.first.icon,
-                    sortOption = state.sortOption
-                ) { appInfo ->
-                    onIntent(UsedAppIntent.ClickAppInfo(appInfo = appInfo))
+            if (state.isLoading) {
+                items(20) {
+                    ItemAppInfoSmall(null, null) { }
+                }
+            } else {
+                items(
+                    count = state.list.count(),
+                    key = { state.list[it].first.packageName }
+                ) { idx ->
+                    val appInfo = state.list[idx]
+                    ItemAppInfoSmall(
+                        usedAppInfo = appInfo,
+                        icon = appInfo.first.icon,
+                        sortOption = state.sortOption
+                    ) { appInfo ->
+                        onIntent(UsedAppIntent.ClickAppInfo(appInfo = appInfo))
+                    }
                 }
             }
         }

@@ -31,9 +31,7 @@ import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.SortType
-import com.chs.yourapphistory.presentation.screen.common.PlaceholderHighlight
 import com.chs.yourapphistory.presentation.screen.common.placeholder
-import com.chs.yourapphistory.presentation.screen.common.shimmer
 
 @Composable
 fun ItemAppInfoSmall(

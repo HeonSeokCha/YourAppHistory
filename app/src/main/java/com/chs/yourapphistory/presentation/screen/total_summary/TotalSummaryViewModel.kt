@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.domain.usecase.GetMinimumTimeUseCase
 import com.chs.yourapphistory.domain.usecase.GetPagingWeeklyTotalInfoUseCase
@@ -14,8 +15,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
@@ -52,7 +51,7 @@ class TotalSummaryViewModel(
         .onStart { insertUsageInfo() }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Lazily,
             PagingData.empty()
         )
 
@@ -92,7 +91,9 @@ class TotalSummaryViewModel(
                 changeDate(intent.page to _state.value.dateIdx.second)
             }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> changeDate(intent.idx)
-            TotalSummaryIntent.Error -> Unit
+            TotalSummaryIntent.Error -> {
+                chsLog("ERROR")
+            }
             is TotalSummaryIntent.ClickUsedAppList -> {
                 _effect.trySend(
                     NavigateUsedAppList(
