@@ -61,7 +61,6 @@ class AppRepositoryImpl(
                 async { appUsageDao.getLastTime() },
                 async { appForegroundUsageDao.getLastTime() },
                 async { appNotifyInfoDao.getLastTime() },
-                async { inCompleteAppUsageDao.getMinBeginTime() }
             ).min()
         }.run {
             if (this == 0L) {

@@ -44,15 +44,15 @@ class YourAppHistoryApplication : Application(), Configuration.Provider {
         }
     }
 
-    private fun scheduleWorker() {
-        val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
-            .setInitialDelay(30, TimeUnit.MINUTES)
-            .build()
-
-        workManager.enqueueUniquePeriodicWork(
-            Constants.TAG_WORKER_NAME,
-            ExistingPeriodicWorkPolicy.KEEP,
-            request
-        )
-    }
+//    private fun scheduleWorker() {
+//        val request = PeriodicWorkRequestBuilder<AppWorker>(6, TimeUnit.HOURS)
+//            .setInitialDelay(30, TimeUnit.MINUTES)
+//            .build()
+//
+//        workManager.enqueueUniquePeriodicWork(
+//            Constants.TAG_WORKER_NAME,
+//            ExistingPeriodicWorkPolicy.KEEP,
+//            request
+//        )
+//    }
 }
