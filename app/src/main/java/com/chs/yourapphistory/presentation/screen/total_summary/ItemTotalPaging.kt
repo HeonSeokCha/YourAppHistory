@@ -12,8 +12,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
@@ -81,7 +86,11 @@ fun ItemTotalPaging(
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = item[currentIdx].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour(),
+                    title = buildAnnotatedString {
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(item[currentIdx].second.sumOf { it.totalUsedInfo.toInt() }.convertToRealUsageHour())
+                        }
+                    },
                     subTitle = "총 실제 실행 시간",
                     list = item,
                     usageType = SortType.UsageEvent,
@@ -124,8 +133,13 @@ fun ItemTotalPaging(
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = "${item[currentIdx].second.sumOf { it.totalUsedInfo}} 회",
-                    subTitle = "총 알림 횟수",
+                    title = buildAnnotatedString {
+                        append("알림 ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(item[currentIdx].second.sumOf { it.totalUsedInfo }.toString())
+                        }
+                        append("개")
+                    },
                     list = item,
                     usageType = SortType.NotifyEvent,
                     selectIdx = currentIdx,
@@ -167,8 +181,13 @@ fun ItemTotalPaging(
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
-                    title = "${item[currentIdx].second.sumOf { it.totalUsedInfo}} 번",
-                    subTitle = "총 실행 횟수",
+                    title = buildAnnotatedString {
+                        append("앱 실행횟수 ")
+                        withStyle(style = SpanStyle(fontWeight = FontWeight.Bold)) {
+                            append(item[currentIdx].second.sumOf { it.totalUsedInfo }.toString())
+                        }
+                        append("번")
+                    },
                     list = item,
                     usageType = SortType.LaunchEvent,
                     selectIdx = currentIdx,

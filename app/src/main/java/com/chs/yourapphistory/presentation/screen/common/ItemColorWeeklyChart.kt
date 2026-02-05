@@ -39,12 +39,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -226,7 +229,7 @@ fun ItemColorWeeklyChart(
 
 @Composable
 fun WeeklyColorUsageChart(
-    title: String,
+    title: AnnotatedString,
     subTitle: String? = null,
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
     usageType: SortType,
@@ -264,7 +267,6 @@ fun WeeklyColorUsageChart(
                 ),
             text = title,
             fontSize = 18.sp,
-            fontWeight = FontWeight.Bold
         )
 
         if (subTitle != null) {
@@ -275,7 +277,8 @@ fun WeeklyColorUsageChart(
                         start = 8.dp
                     ),
                 text = subTitle,
-                fontSize = 14.sp
+                fontSize = 14.sp,
+                color = Color.Gray
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -403,7 +406,8 @@ private fun PreViewUsageChart3() {
 
 
     WeeklyColorUsageChart(
-        title = "TEST",
+        title = buildAnnotatedString { append("TEST") },
+        subTitle = "SubTEst",
         list = usageMap,
         usageType = SortType.UsageEvent,
         selectIdx = 0,
