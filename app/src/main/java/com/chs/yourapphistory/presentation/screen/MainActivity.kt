@@ -40,70 +40,13 @@ class MainActivity : ComponentActivity() {
 
             Scaffold(
                 topBar = {
-                    when (backstack.last()) {
-                        MainScreens.ScreenWelcome -> Unit
+                    MainAppbar(
+                        screen = backstack.last(),
+                        onBack = { backstack.removeLastOrNull() },
+                        onSearch = {
 
-                        is MainScreens.ScreenTotalSummary -> {
-                            TopAppBar(
-                                title = {
-                                    Text(text = getString(R.string.app_name))
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    titleContentColor = MaterialTheme.colorScheme.primary,
-                                )
-                            )
                         }
-
-                        is MainScreens.ScreenAppUsageDetail -> {
-                            val backStack = backstack.last() as MainScreens.ScreenAppUsageDetail
-                            TopAppBar(
-                                title = {
-                                    Text(
-                                        text = backStack.targetLabelName,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                },
-                                navigationIcon = {
-                                    IconButton(
-                                        onClick = { backstack.removeLastOrNull() }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            contentDescription = null
-                                        )
-                                    }
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    titleContentColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            )
-                        }
-
-                        else -> {
-                            TopAppBar(
-                                title = {},
-                                navigationIcon = {
-                                    IconButton(
-                                        onClick = { backstack.removeLastOrNull() }
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            contentDescription = null
-                                        )
-                                    }
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(
-                                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                                    titleContentColor = MaterialTheme.colorScheme.primary,
-                                ),
-                            )
-                        }
-                    }
+                    )
                 },
                 modifier = Modifier
                     .fillMaxSize()
