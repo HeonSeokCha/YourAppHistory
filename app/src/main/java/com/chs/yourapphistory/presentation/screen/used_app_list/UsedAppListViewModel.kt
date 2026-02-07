@@ -12,6 +12,7 @@ import com.chs.yourapphistory.domain.usecase.GetDayForegroundListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayLaunchListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayNotifyListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayUsedListUseCase
+import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppEffect.*
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ class UsedAppListViewModel(
         }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Eagerly,
             _state.value
         )
 
@@ -57,7 +58,7 @@ class UsedAppListViewModel(
 
             is UsedAppIntent.ClickAppInfo -> {
                 _effect.trySend(
-                    UsedAppEffect.NavigateAppDetail(
+                    NavigateAppDetail(
                         appInfo = intent.appInfo,
                         targetDate = targetDateMilli
                     )
@@ -70,6 +71,7 @@ class UsedAppListViewModel(
             }
 
             is UsedAppIntent.OnShowSortDialog -> _state.update { it.copy(isShowFilterDialog = intent.value) }
+            is UsedAppIntent.ChangeSearchQuery -> _state.update { it.copy(searchQuery = intent.query) }
         }
     }
 

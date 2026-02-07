@@ -7,18 +7,18 @@ targetSdkVersion = "36"
 versionCode = "1"
 versionName = "1.0"
 
-activity = "1.12.2"
-compose-ui = "1.10.1"
+activity = "1.12.3"
+compose-ui = "1.10.2"
 lifecycle = "2.10.0"
 room = "2.8.4"
-kotlin = "2.3.0"
+kotlin = "2.3.10"
 ksp = "2.3.4"
 kotlin-coroutine = "1.10.2"
 desugar_jdk_libs = "2.1.5"
 nav3Core = "1.0.0"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinxSerializationCore = "1.10.0"
-koin = "4.2.0-beta4"
+koin = "4.2.0-RC1"
 koin-annotation = "2.3.1"
 
 [libraries]
@@ -37,12 +37,12 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 
-workmanager = "androidx.work:work-runtime-ktx:2.11.0"
+workmanager = "androidx.work:work-runtime-ktx:2.11.1"
 androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.2.0"
 androidX-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
 androidX-room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
-androidX-paging-paging-compose = "androidx.paging:paging-compose:3.4.0-rc01"
+androidX-paging-paging-compose = "androidx.paging:paging-compose:3.4.0"
 desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref = "desugar_jdk_libs" }
 lottie = "com.airbnb.android:lottie-compose:6.7.1"
 

@@ -43,9 +43,6 @@ class MainActivity : ComponentActivity() {
                     MainAppbar(
                         screen = backstack.last(),
                         onBack = { backstack.removeLastOrNull() },
-                        onSearch = {
-
-                        }
                     )
                 },
                 modifier = Modifier
