@@ -37,7 +37,11 @@ fun MainAppbar(
 
         is MainScreens.ScreenAppUsageDetail -> {
             TopAppBar(
-                title = {},
+                title = {
+                    Text(
+                        text = screen.targetLabelName
+                    )
+                },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
                         Icon(

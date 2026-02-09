@@ -5,5 +5,4 @@ import java.time.LocalDate
 
 sealed interface UsedAppEffect {
     data class NavigateAppDetail(val appInfo: AppInfo, val targetDate: Long) : UsedAppEffect
-    data object ShowPagingError : UsedAppEffect
 }

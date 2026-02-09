@@ -9,6 +9,6 @@ data class UsedAppListState(
     val isShowFilterDialog: Boolean = false,
     val displayDate: String = "오늘",
     val sortOption: SortType = SortType.UsageEvent,
-    val searchQuery: String = "",
+    val originList: List<Pair<AppInfo, Int>> = emptyList(),
     val list: List<Pair<AppInfo, Int>> = emptyList()
 )

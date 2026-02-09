@@ -57,13 +57,13 @@ fun UsedAppListScreenScreenRoot(
         viewModel.effect.collect { effect ->
             when (effect) {
                 is UsedAppEffect.NavigateAppDetail -> onClickApp(effect.appInfo, effect.targetDate)
-                is UsedAppEffect.ShowPagingError -> {
-                    Toast.makeText(
-                        context,
-                        "Something wrong load Used Info..",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                }
+//                is UsedAppEffect.ShowPagingError -> {
+//                    Toast.makeText(
+//                        context,
+//                        "Something wrong load Used Info..",
+//                        Toast.LENGTH_SHORT
+//                    ).show()
+//                }
             }
         }
     }
@@ -84,6 +84,7 @@ fun UsedAppListScreenScreen(
             .fillMaxSize()
             .imePadding(),
         floatingActionButton = {
+            if (state.isLoading) return@Scaffold
             AppSearchBar(onIntent = onIntent)
         },
         floatingActionButtonPosition = FabPosition.Center
@@ -92,7 +93,6 @@ fun UsedAppListScreenScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(paddingValues),
-//                .padding(vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
@@ -197,7 +197,6 @@ private fun AppSearchBar(
         ),
         onKeyboardAction = {
             keyboard?.hide()
-            if (state.text.isEmpty()) return@BasicTextField
             onIntent(UsedAppIntent.ChangeSearchQuery(state.text.toString()))
         }
     )
