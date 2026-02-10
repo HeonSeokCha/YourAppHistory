@@ -21,6 +21,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
@@ -44,7 +45,6 @@ class UsedAppListViewModel(
 
     private val _effect: Channel<UsedAppEffect> = Channel(Channel.BUFFERED)
     val effect = _effect.receiveAsFlow()
-    private val searchQueryState = MutableStateFlow("")
     private val _state = MutableStateFlow(UsedAppListState())
     val state = _state
         .onStart {
@@ -73,20 +73,22 @@ class UsedAppListViewModel(
             UsedAppIntent.Error -> Unit
             is UsedAppIntent.OnChangeSort -> getEventList(intent.sort)
             is UsedAppIntent.OnShowSortDialog -> _state.update { it.copy(isShowFilterDialog = intent.value) }
-            is UsedAppIntent.ChangeSearchQuery -> {
-                _state.update {
-                    if (intent.query.isEmpty()) {
-                        return@update it.copy(list = it.originList)
-                    }
+            is UsedAppIntent.ChangeSearchQuery -> filterList(intent.query)
+        }
+    }
 
-                    it.copy(list = it.originList.filter {
-                        it.first.label.contains(
-                            intent.query,
-                            ignoreCase = true
-                        )
-                    })
-                }
+    private fun filterList(query: String) {
+        _state.update {
+            if (query.isEmpty()) {
+                return@update it.copy(list = it.originList)
             }
+
+            it.copy(list = it.originList.filter {
+                it.first.label.contains(
+                    query,
+                    ignoreCase = true
+                )
+            })
         }
     }
 
@@ -94,7 +96,7 @@ class UsedAppListViewModel(
         _state.update { it.copy(isLoading = true, isShowFilterDialog = false) }
         viewModelScope.launch {
             _state.update {
-                val a = when (sortType) {
+                val list = when (sortType) {
                     SortType.UsageEvent -> getDayUsedListUseCase(targetDateMilli)
                     SortType.ForegroundUsageEvent -> getDayForegroundListUseCase(targetDateMilli)
                     SortType.NotifyEvent -> getDayNotifyListUseCase(targetDateMilli)
@@ -102,8 +104,8 @@ class UsedAppListViewModel(
                 }
                 it.copy(
                     sortOption = sortType,
-                    originList = a,
-                    list = a,
+                    originList = list,
+                    list = list,
                     isLoading = false
                 )
             }
