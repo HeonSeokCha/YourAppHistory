@@ -40,7 +40,7 @@ class AppUsageDetailViewModel(
         }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Eagerly,
             _state.value
         )
 

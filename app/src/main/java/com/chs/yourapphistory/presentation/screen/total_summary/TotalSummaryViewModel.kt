@@ -39,7 +39,7 @@ class TotalSummaryViewModel(
         .onStart { getDateRangeList() }
         .stateIn(
             viewModelScope,
-            SharingStarted.WhileSubscribed(5000L),
+            SharingStarted.Eagerly,
             _state.value
         )
 
