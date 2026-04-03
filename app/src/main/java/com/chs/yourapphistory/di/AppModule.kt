@@ -5,7 +5,6 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import androidx.work.WorkManager
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.YourAppHistoryDatabase
@@ -38,11 +37,6 @@ class AppModule {
         return PreferenceDataStoreFactory.create {
             context.preferencesDataStoreFile(Constants.PREF_NAME)
         }
-    }
-
-    @Single
-    fun provideWorkManager(context: Context): WorkManager {
-        return WorkManager.getInstance(context)
     }
 
     @Factory
