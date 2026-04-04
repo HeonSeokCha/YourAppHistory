@@ -16,13 +16,19 @@ class PackageEventReceiver : BroadcastReceiver(), KoinComponent {
     private val deleteUsageInfoUseCase: DeleteUsageInfoUseCase by inject()
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (intent == null || context == null) return
-        if (intent.action != Intent.ACTION_PACKAGE_FULLY_REMOVED) return
-        val data = intent.data?.schemeSpecificPart ?: return
-        chsLog("onReceive : $data")
+        val pendingResult = goAsync()
 
         CoroutineScope(Dispatchers.IO).launch {
-            deleteUsageInfoUseCase(data)
+            if (intent == null || context == null) return@launch
+            if (intent.action != Intent.ACTION_PACKAGE_FULLY_REMOVED) return@launch
+            val data = intent.data?.schemeSpecificPart ?: return@launch
+
+            try {
+                chsLog("onReceive : $data")
+                deleteUsageInfoUseCase(data)
+            } finally {
+                pendingResult.finish()
+            }
         }
     }
 }
