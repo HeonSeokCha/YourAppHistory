@@ -15,12 +15,14 @@ import com.chs.yourapphistory.data.db.dao.AppUsageDao
 import com.chs.yourapphistory.data.db.dao.UsageStateEventDao
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
+import org.koin.core.annotation.ComponentScan
 import org.koin.core.annotation.Factory
 import org.koin.core.annotation.Module
 import org.koin.core.annotation.Single
 
 @Module
-class AppModule {
+@ComponentScan("com.chs.yourapphistory.data")
+class DataModule {
 
     @Single
     fun provideAppUtilSource(context: Context): ApplicationInfoSource {

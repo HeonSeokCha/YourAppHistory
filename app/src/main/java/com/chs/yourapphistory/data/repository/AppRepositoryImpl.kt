@@ -41,7 +41,7 @@ import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
 import java.time.LocalDate
 
-@Single
+@Single(binds = [AppRepository::class])
 class AppRepositoryImpl(
     private val applicationInfoSource: ApplicationInfoSource,
     private val appUsageDao: AppUsageDao,

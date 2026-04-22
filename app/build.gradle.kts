@@ -14,8 +14,9 @@ room {
 }
 
 ksp {
-    arg("KOIN_CONFIG_CHECK","true")
-    arg("KOIN_DEFAULT_MODULE","true")
+    arg("KOIN_CONFIG_CHECK","false")
+    arg("KOIN_USE_COMPOSE_VIEWMODEL","true")
+    arg("KOIN_DEFAULT_MODULE","false")
 }
 
 android {
