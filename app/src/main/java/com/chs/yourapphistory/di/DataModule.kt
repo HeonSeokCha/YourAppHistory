@@ -25,11 +25,6 @@ import org.koin.core.annotation.Single
 class DataModule {
 
     @Single
-    fun provideAppUtilSource(context: Context): ApplicationInfoSource {
-        return ApplicationInfoSource(context)
-    }
-
-    @Single
     fun provideDatabase(context: Context): YourAppHistoryDatabase {
         return YourAppHistoryDatabase.getInstance(context)
     }
@@ -40,12 +35,6 @@ class DataModule {
             context.preferencesDataStoreFile(Constants.PREF_NAME)
         }
     }
-
-    @Factory
-    fun provideDataStoreSource(dataStorePref: DataStore<Preferences>): DataStoreSource {
-        return DataStoreSource(dataStorePref)
-    }
-
 
     @Factory
     fun provideAppUsageDao(db: YourAppHistoryDatabase): AppUsageDao {
@@ -76,5 +65,4 @@ class DataModule {
     fun provideIncompleteInfoDao(db: YourAppHistoryDatabase): InCompleteAppUsageDao {
         return db.inCompleteAppUsageDao
     }
-
 }
