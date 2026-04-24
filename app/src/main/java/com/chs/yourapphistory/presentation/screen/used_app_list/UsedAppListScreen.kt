@@ -189,12 +189,6 @@ private fun AppSearchBar(
                         .height(48.dp)
                         .padding(horizontal = 8.dp)
                         .background(color = Color.White, RoundedCornerShape(50)),
-//                    .shadow(
-//                        elevation = 16.dp,
-//                        shape = RoundedCornerShape(50.dp),
-//                        ambientColor = Color.Black.copy(alpha = 0.1f),
-//                        spotColor = Color.Black.copy(alpha = 0.2f)
-//                    ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Spacer(modifier = Modifier.width(8.dp))

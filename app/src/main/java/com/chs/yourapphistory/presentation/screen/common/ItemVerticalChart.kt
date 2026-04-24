@@ -41,9 +41,12 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
+import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.isZero
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -120,16 +123,32 @@ fun ItemDailyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
+        val a = NiceNumUtil.calculateTicks(
+            min = barAreas.minOf { it.value }.toDouble(),
+            max = barAreas.maxOf { it.value }.toDouble()
+        )
+
         if (size.height != 0f) {
             repeat(3) {
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
                     end = Offset(
-                        size.width - basePadding.div(2),
+                        size.width - basePadding,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
+                if (it != 0) {
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = a.convertToRealUsageMinutes(),
+                        topLeft = Offset(
+                            size.width - basePadding.div(2),
+                            ((size.height / 3) * it) + topBasePadding
+                        ),
+                        style = style1
+                    )
+                }
             }
         }
         val scale = calculateScale(
