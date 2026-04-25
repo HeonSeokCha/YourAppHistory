@@ -1,40 +1,37 @@
 package com.chs.yourapphistory.common
 
 import kotlin.math.ceil
-import kotlin.math.floor
-import kotlin.math.log10
-import kotlin.math.pow
 
 object NiceNumUtil {
-    fun niceNum(value: Double, round: Boolean): Double {
-        val exponent = floor(log10(value))
-        val fraction = value / 10.0.pow(exponent)
 
-        val niceFraction = if (round) {
-            when {
-                fraction < 1.5 -> 1.0
-                fraction < 3.0 -> 2.0
-                fraction < 7.0 -> 5.0
-                else -> 10.0
-            }
-        } else {
-            when {
-                fraction <= 1.0 -> 1.0
-                fraction <= 2.0 -> 2.0
-                fraction <= 5.0 -> 5.0
-                else -> 10.0
-            }
+    private val NICE_INTERVALS_MINUTES = listOf(1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 60, 120)
+    fun niceNum(value: Int): List<Int> {
+        val maxMinutes = (value / 1000.0 / 60.0).let {
+            if (it <= 0) 1.0 else it
         }
-        return niceFraction * 10.0.pow(exponent)
+
+        val interval = findNiceInterval(maxMinutes)
+
+        val niceMax = ceil(maxMinutes / interval) * interval
+
+        val ticks = mutableListOf<Int>()
+        var current = 0.0
+        while (current <= niceMax) {
+            ticks.add(current.toInt())
+            current += interval
+        }
+
+        chsLog(ticks.toString())
+
+        return ticks.map { it * 60 * 1000 }
     }
 
-    fun calculateTicks(min: Double, max: Double): Int {
-        val range = niceNum(max - min, false)
-        val tickSpacing = niceNum(range / (3 - 1), true)
+    private fun findNiceInterval(maxMinutes: Double): Double {
+        val roughInterval = maxMinutes / 2
+        val niceInterval = NICE_INTERVALS_MINUTES
+            .firstOrNull { it >= roughInterval }
+            ?: NICE_INTERVALS_MINUTES.last()
 
-        val niceMax = ceil(max / tickSpacing) * tickSpacing
-
-        chsLog("Range: $niceMax with spacing: $tickSpacing")
-        return niceMax.toInt()
+        return niceInterval.toDouble()
     }
 }

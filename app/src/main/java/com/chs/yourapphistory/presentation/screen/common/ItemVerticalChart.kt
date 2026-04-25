@@ -123,10 +123,7 @@ fun ItemDailyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
-        val a = NiceNumUtil.calculateTicks(
-            min = barAreas.minOf { it.value }.toDouble(),
-            max = barAreas.maxOf { it.value }.toDouble()
-        )
+        val a = NiceNumUtil.niceNum(barAreas.maxOf { it.value })
 
         if (size.height != 0f) {
             repeat(3) {
@@ -138,10 +135,10 @@ fun ItemDailyChart(
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
-                if (it != 0) {
+                if (it != 2) {
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = a.convertToRealUsageMinutes(),
+                        text = a[(2 - it)].convertToRealUsageMinutes(),
                         topLeft = Offset(
                             size.width - basePadding.div(2),
                             ((size.height / 3) * it) + topBasePadding
