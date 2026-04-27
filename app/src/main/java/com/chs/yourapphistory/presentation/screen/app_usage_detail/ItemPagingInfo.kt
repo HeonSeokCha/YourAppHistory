@@ -163,6 +163,7 @@ fun ItemDailyPagingInfo(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
                     subTitle = "${state.packageLabel} 사용 시간",
                     list = item,
+                    unitName = { it.convertToRealUsageMinutes() },
                     convertText = { it.convertToRealUsageMinutes() }
                 )
             }
@@ -170,66 +171,69 @@ fun ItemDailyPagingInfo(
 
         Spacer(modifier = Modifier.height(32.dp))
 
-//        HorizontalPager(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            pageSpacing = 8.dp,
-//            state = dailyForegroundUsagePager,
-//            reverseLayout = true,
-//            key = { it }
-//        ) {
-//            val item = dailyPagingItems[it]?.get(SortType.ForegroundUsageEvent)
-//            if (item != null) {
-//                DailyUsageChart(
-//                    title = item.sumOf { it.second }.convertToRealUsageTime(),
-//                    subTitle = "포그라운드 실행 시간 ",
-//                    list = item,
-//                    convertText = { it.convertToRealUsageMinutes() }
-//                )
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(32.dp))
-//
-//        HorizontalPager(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            pageSpacing = 8.dp,
-//            state = dailyNotifyPager,
-//            reverseLayout = true,
-//            key = { it }
-//        ) {
-//            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
-//            if (item != null) {
-//                DailyUsageChart(
-//                    title = "알림 ${item.sumOf { it.second }}개",
-//                    list = item,
-//                    convertText = { "${it}개" }
-//                )
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(32.dp))
-//
-//        HorizontalPager(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            pageSpacing = 8.dp,
-//            state = dailyLaunchPager,
-//            reverseLayout = true,
-//            key = { it }
-//        ) {
-//            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
-//            if (item != null) {
-//                DailyUsageChart(
-//                    title = "총 실행 횟수 ${item.sumOf { it.second }}회",
-//                    list = item,
-//                    convertText = { "${it}회" }
-//                )
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth(),
+            pageSpacing = 8.dp,
+            state = dailyForegroundUsagePager,
+            reverseLayout = true,
+            key = { it }
+        ) {
+            val item = dailyPagingItems[it]?.get(SortType.ForegroundUsageEvent)
+            if (item != null) {
+                DailyUsageChart(
+                    title = item.sumOf { it.second }.convertToRealUsageTime(),
+                    subTitle = "포그라운드 실행 시간 ",
+                    list = item,
+                    unitName = { it.convertToRealUsageMinutes() },
+                    convertText = { it.convertToRealUsageMinutes() }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth(),
+            pageSpacing = 8.dp,
+            state = dailyNotifyPager,
+            reverseLayout = true,
+            key = { it }
+        ) {
+            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
+            if (item != null) {
+                DailyUsageChart(
+                    title = "알림 ${item.sumOf { it.second }}개",
+                    list = item,
+                    unitName = { "${it}개" },
+                    convertText = { "${it}개" }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth(),
+            pageSpacing = 8.dp,
+            state = dailyLaunchPager,
+            reverseLayout = true,
+            key = { it }
+        ) {
+            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
+            if (item != null) {
+                DailyUsageChart(
+                    title = "총 실행 횟수 ${item.sumOf { it.second }}회",
+                    list = item,
+                    unitName = { "${it}회" },
+                    convertText = { "${it}회" }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 

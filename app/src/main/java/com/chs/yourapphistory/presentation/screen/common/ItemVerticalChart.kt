@@ -54,6 +54,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ItemDailyChart(
     hourUsageList: List<Pair<Int, Int>>,
+    unitName: (Int) -> String,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -138,7 +139,7 @@ fun ItemDailyChart(
                 if (it != 2) {
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = a[(2 - it)].convertToRealUsageMinutes(),
+                        text = unitName(a[(2 - it)]),
                         topLeft = Offset(
                             size.width - basePadding.div(2),
                             ((size.height / 3) * it) + topBasePadding
@@ -221,6 +222,7 @@ fun DailyUsageChart(
     title: String,
     subTitle: String? = null,
     list: List<Pair<Int, Int>>,
+    unitName: (Int) -> String,
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
@@ -231,8 +233,7 @@ fun DailyUsageChart(
         Text(
             modifier = Modifier
                 .padding(
-                    top = 8.dp,
-                    start = 8.dp
+                    top = 8.dp, start = 8.dp
                 ),
             text = title,
             fontSize = 16.sp,
@@ -255,7 +256,10 @@ fun DailyUsageChart(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ItemDailyChart(hourUsageList = list) { textMeasurer, selectedBar ->
+        ItemDailyChart(
+            hourUsageList = list,
+            unitName = unitName
+        ) { textMeasurer, selectedBar ->
 
 
             val selectValue = buildAnnotatedString {
@@ -347,6 +351,7 @@ private fun PreViewUsageChart() {
     DailyUsageChart(
         title = "TEST",
         list = usageMap,
+        unitName = { a -> "" },
         convertText = { a -> "$a 개" }
     )
 }
