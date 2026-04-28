@@ -126,6 +126,7 @@ fun ItemDailyChart(
     ) {
         val a = NiceNumUtil.niceNum(barAreas.maxOf { it.value })
 
+
         if (size.height != 0f) {
             repeat(3) {
                 drawLine(
@@ -136,13 +137,17 @@ fun ItemDailyChart(
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
-                if (it != 2) {
+                if (a.isNotEmpty() && it != 2) {
+                    val measure = textMeasurer.measure(
+                        text = unitName(a[(2 - it)]),
+                        style = style1
+                    )
                     drawText(
                         textMeasurer = textMeasurer,
                         text = unitName(a[(2 - it)]),
                         topLeft = Offset(
-                            size.width - basePadding.div(2),
-                            ((size.height / 3) * it) + topBasePadding
+                            size.width - basePadding.div(2) - measure.size.width,
+                            ((size.height / 3) * it) + topBasePadding - (measure.size.height / 2)
                         ),
                         style = style1
                     )
