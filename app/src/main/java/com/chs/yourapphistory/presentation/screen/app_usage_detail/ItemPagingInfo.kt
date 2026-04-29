@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.pager.HorizontalPager
-import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +23,7 @@ import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.common.toCalcDailyCount
 import com.chs.yourapphistory.common.toCalcDailyUsage
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
 import kotlinx.coroutines.async
@@ -35,7 +34,7 @@ import kotlin.collections.sumOf
 @Composable
 fun ItemDailyPagingInfo(
     state: AppUsageDetailState,
-    dailyPagingItems: LazyPagingItems<Map<SortType, List<Pair<Int, Int>>>>,
+    dailyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<Int, Int>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -157,13 +156,13 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
+            val item = dailyPagingItems[it]?.get(UsageEventType.UsageEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
                     subTitle = "${state.packageLabel} 사용 시간",
                     list = item,
-                    unitName = { it.convertToRealUsageMinutes() },
+                    usageEventType = UsageEventType.UsageEvent,
                     convertText = { it.convertToRealUsageMinutes() }
                 )
             }
@@ -179,68 +178,68 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(SortType.ForegroundUsageEvent)
+            val item = dailyPagingItems[it]?.get(UsageEventType.ForegroundUsageEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
                     subTitle = "포그라운드 실행 시간 ",
                     list = item,
-                    unitName = { it.convertToRealUsageMinutes() },
+                    usageEventType = UsageEventType.ForegroundUsageEvent,
                     convertText = { it.convertToRealUsageMinutes() }
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(32.dp))
-//
-//        HorizontalPager(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            pageSpacing = 8.dp,
-//            state = dailyNotifyPager,
-//            reverseLayout = true,
-//            key = { it }
-//        ) {
-//            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
-//            if (item != null) {
-//                DailyUsageChart(
-//                    title = "알림 ${item.sumOf { it.second }}개",
-//                    list = item,
-//                    unitName = { "${it}개" },
-//                    convertText = { "${it}개" }
-//                )
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(32.dp))
-//
-//        HorizontalPager(
-//            modifier = Modifier
-//                .fillMaxWidth(),
-//            pageSpacing = 8.dp,
-//            state = dailyLaunchPager,
-//            reverseLayout = true,
-//            key = { it }
-//        ) {
-//            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
-//            if (item != null) {
-//                DailyUsageChart(
-//                    title = "총 실행 횟수 ${item.sumOf { it.second }}회",
-//                    list = item,
-//                    unitName = { "${it}회" },
-//                    convertText = { "${it}회" }
-//                )
-//            }
-//        }
-//
-//        Spacer(modifier = Modifier.height(8.dp))
+
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth(),
+            pageSpacing = 8.dp,
+            state = dailyNotifyPager,
+            reverseLayout = true,
+            key = { it }
+        ) {
+            val item = dailyPagingItems[it]?.get(UsageEventType.NotifyEvent)
+            if (item != null) {
+                DailyUsageChart(
+                    title = "알림 ${item.sumOf { it.second }}개",
+                    list = item,
+                    usageEventType = UsageEventType.NotifyEvent,
+                    convertText = { "${it}개" }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(32.dp))
+
+        HorizontalPager(
+            modifier = Modifier
+                .fillMaxWidth(),
+            pageSpacing = 8.dp,
+            state = dailyLaunchPager,
+            reverseLayout = true,
+            key = { it }
+        ) {
+            val item = dailyPagingItems[it]?.get(UsageEventType.LaunchEvent)
+            if (item != null) {
+                DailyUsageChart(
+                    title = "총 실행 횟수 ${item.sumOf { it.second }}회",
+                    list = item,
+                    usageEventType = UsageEventType.LaunchEvent,
+                    convertText = { "${it}회" }
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
     }
 }
 
 @Composable
 fun ItemWeeklyPagingInfo(
     state: AppUsageDetailState,
-    weeklyPagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, Int>>>>,
+    weeklyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<LocalDate, Int>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -314,7 +313,7 @@ fun ItemWeeklyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = weeklyPagingItems[it]?.get(SortType.UsageEvent)
+            val item = weeklyPagingItems[it]?.get(UsageEventType.UsageEvent)
             if (item != null) {
                 WeeklyUsageChart(
                     title = "${item.toCalcDailyUsage()}/일",
@@ -340,7 +339,7 @@ fun ItemWeeklyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = weeklyPagingItems[it]?.get(SortType.ForegroundUsageEvent)
+            val item = weeklyPagingItems[it]?.get(UsageEventType.ForegroundUsageEvent)
             if (item != null) {
                 WeeklyUsageChart(
                     title = "${
@@ -368,7 +367,7 @@ fun ItemWeeklyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = weeklyPagingItems[it]?.get(SortType.NotifyEvent)
+            val item = weeklyPagingItems[it]?.get(UsageEventType.NotifyEvent)
             if (item != null) {
                 WeeklyUsageChart(
                     title = "알림 ${item.toCalcDailyCount()}개/일",
@@ -395,7 +394,7 @@ fun ItemWeeklyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = weeklyPagingItems[it]?.get(SortType.LaunchEvent)
+            val item = weeklyPagingItems[it]?.get(UsageEventType.LaunchEvent)
             if (item != null) {
                 WeeklyUsageChart(
                     title = "앱 실행 ${item.toCalcDailyCount()}회/일",

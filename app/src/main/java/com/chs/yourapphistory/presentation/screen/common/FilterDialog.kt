@@ -17,14 +17,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.chs.yourapphistory.domain.model.SortType
-import com.chs.yourapphistory.presentation.screen.used_app_list.UsedAppIntent
+import com.chs.yourapphistory.domain.model.UsageEventType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun FilterDialog(
-    list: List<SortType>,
-    onClick: (SortType) -> Unit,
+    list: List<UsageEventType>,
+    onClick: (UsageEventType) -> Unit,
     onDismiss: () -> Unit
 ) {
     BasicAlertDialog(

@@ -98,7 +98,7 @@ class TotalSummaryViewModel(
                 _effect.trySend(
                     NavigateUsedAppList(
                         targetDate = intent.targetDate,
-                        sortType = intent.sortType
+                        usageEventType = intent.usageEventType
                     )
                 )
             }

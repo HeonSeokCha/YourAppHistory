@@ -1,6 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.total_summary
 
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 
 sealed interface TotalSummaryEffect {
     data class NavigateUsageDetail(
@@ -11,6 +11,6 @@ sealed interface TotalSummaryEffect {
 
     data class NavigateUsedAppList(
         val targetDate: Long,
-        val sortType: SortType
+        val usageEventType: UsageEventType
     ) : TotalSummaryEffect
 }

@@ -43,18 +43,18 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
-import com.chs.yourapphistory.common.convertToRealUsageMinutes
+import com.chs.yourapphistory.common.convertUsageUnitText
 import com.chs.yourapphistory.common.isZero
+import com.chs.yourapphistory.domain.model.UsageEventType
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
 @Composable
 fun ItemDailyChart(
     hourUsageList: List<Pair<Int, Int>>,
-    unitName: (Int) -> String,
+    usageEventType: UsageEventType,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -124,8 +124,11 @@ fun ItemDailyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
-        val a = NiceNumUtil.niceNum(barAreas.maxOf { it.value })
 
+        val niceNumber: List<Int> = NiceNumUtil.niceNum(
+            value = barAreas.maxOf { it.value },
+            usageEventType = usageEventType
+        )
 
         if (size.height != 0f) {
             repeat(3) {
@@ -137,14 +140,14 @@ fun ItemDailyChart(
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
-                if (a.isNotEmpty() && it != 2) {
+                if (niceNumber.isNotEmpty() && it != 2) {
                     val measure = textMeasurer.measure(
-                        text = unitName(a[(2 - it)]),
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
                         style = style1
                     )
                     drawText(
                         textMeasurer = textMeasurer,
-                        text = unitName(a[(2 - it)]),
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
                         topLeft = Offset(
                             size.width - basePadding.div(2) - measure.size.width,
                             ((size.height / 3) * it) + topBasePadding - (measure.size.height / 2)
@@ -227,7 +230,7 @@ fun DailyUsageChart(
     title: String,
     subTitle: String? = null,
     list: List<Pair<Int, Int>>,
-    unitName: (Int) -> String,
+    usageEventType: UsageEventType,
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
@@ -263,7 +266,7 @@ fun DailyUsageChart(
 
         ItemDailyChart(
             hourUsageList = list,
-            unitName = unitName
+            usageEventType = usageEventType
         ) { textMeasurer, selectedBar ->
 
 
@@ -356,7 +359,7 @@ private fun PreViewUsageChart() {
     DailyUsageChart(
         title = "TEST",
         list = usageMap,
-        unitName = { a -> "" },
+        usageEventType = UsageEventType.UsageEvent,
         convertText = { a -> "$a 개" }
     )
 }

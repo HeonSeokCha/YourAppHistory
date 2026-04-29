@@ -3,7 +3,7 @@ package com.chs.yourapphistory.presentation.screen.used_app_list
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.domain.usecase.GetDayForegroundListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayLaunchListUseCase
 import com.chs.yourapphistory.domain.usecase.GetDayNotifyListUseCase
@@ -22,7 +22,7 @@ import java.time.LocalDate
 
 @KoinViewModel
 class UsedAppListViewModel(
-    sortType: SortType,
+    usageEventType: UsageEventType,
     private val targetDateMilli: Long,
     private val getDayUsedListUseCase: GetDayUsedListUseCase,
     private val getDayForegroundListUseCase: GetDayForegroundListUseCase,
@@ -36,7 +36,7 @@ class UsedAppListViewModel(
     val state = _state
         .onStart {
             changeDate(targetDateMilli.toLocalDate())
-            getEventList(sortType)
+            getEventList(usageEventType)
         }
         .stateIn(
             viewModelScope,
@@ -79,18 +79,18 @@ class UsedAppListViewModel(
         }
     }
 
-    private fun getEventList(sortType: SortType) {
+    private fun getEventList(usageEventType: UsageEventType) {
         _state.update { it.copy(isLoading = true, isShowFilterDialog = false) }
         viewModelScope.launch {
             _state.update {
-                val list = when (sortType) {
-                    SortType.UsageEvent -> getDayUsedListUseCase(targetDateMilli)
-                    SortType.ForegroundUsageEvent -> getDayForegroundListUseCase(targetDateMilli)
-                    SortType.NotifyEvent -> getDayNotifyListUseCase(targetDateMilli)
-                    SortType.LaunchEvent -> getDayLaunchListUseCase(targetDateMilli)
+                val list = when (usageEventType) {
+                    UsageEventType.UsageEvent -> getDayUsedListUseCase(targetDateMilli)
+                    UsageEventType.ForegroundUsageEvent -> getDayForegroundListUseCase(targetDateMilli)
+                    UsageEventType.NotifyEvent -> getDayNotifyListUseCase(targetDateMilli)
+                    UsageEventType.LaunchEvent -> getDayLaunchListUseCase(targetDateMilli)
                 }
                 it.copy(
-                    sortOption = sortType,
+                    sortOption = usageEventType,
                     originList = list,
                     list = list,
                     isLoading = false

@@ -42,7 +42,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.common.FilterDialog
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import kotlinx.coroutines.FlowPreview
@@ -146,7 +146,7 @@ fun UsedAppListScreenScreen(
 
     if (state.isShowFilterDialog) {
         FilterDialog(
-            list = SortType.entries.toList(),
+            list = UsageEventType.entries.toList(),
             onDismiss = {
                 onIntent(UsedAppIntent.OnShowSortDialog(false))
             }, onClick = { selectSortType ->

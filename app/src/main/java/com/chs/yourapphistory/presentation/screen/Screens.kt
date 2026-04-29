@@ -1,7 +1,7 @@
 package com.chs.yourapphistory.presentation.screen
 
 import androidx.navigation3.runtime.NavKey
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import kotlinx.serialization.Serializable
 
 @Serializable
@@ -12,7 +12,7 @@ sealed interface MainScreens: NavKey {
     @Serializable
     data class ScreenUsedAppList(
         val targetDateMilli: Long,
-        val sortType: SortType
+        val usageEventType: UsageEventType
     ) : MainScreens
 
     @Serializable

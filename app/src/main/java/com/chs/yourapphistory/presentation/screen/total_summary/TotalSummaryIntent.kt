@@ -1,6 +1,6 @@
 package com.chs.yourapphistory.presentation.screen.total_summary
 
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 
 
 sealed interface TotalSummaryIntent {
@@ -13,7 +13,7 @@ sealed interface TotalSummaryIntent {
     ) : TotalSummaryIntent
     data class ClickUsedAppList(
         val targetDate: Long,
-        val sortType: SortType
+        val usageEventType: UsageEventType
     ) : TotalSummaryIntent
 
     data object Loading : TotalSummaryIntent

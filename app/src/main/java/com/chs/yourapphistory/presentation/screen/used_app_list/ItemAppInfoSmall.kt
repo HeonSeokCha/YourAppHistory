@@ -30,14 +30,14 @@ import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.convertToRealUsageTime
 import com.chs.yourapphistory.domain.model.AppInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 
 @Composable
 fun ItemAppInfoSmall(
     usedAppInfo: Pair<AppInfo, Int>?,
     icon: Bitmap?,
-    sortOption: SortType = SortType.UsageEvent,
+    sortOption: UsageEventType = UsageEventType.UsageEvent,
     clickAble: (AppInfo) -> Unit
 ) {
     val appInfo = usedAppInfo?.first
@@ -99,7 +99,7 @@ fun ItemAppInfoSmall(
                     Text(
                         modifier = Modifier
                             .placeholder(visible = appInfo == null),
-                        text = if (sortOption == SortType.NotifyEvent || sortOption == SortType.LaunchEvent) {
+                        text = if (sortOption == UsageEventType.NotifyEvent || sortOption == UsageEventType.LaunchEvent) {
                             "${value}회"
                         } else {
                             value?.convertToRealUsageTime() ?: Constants.TEXT_TITLE_PREVIEW

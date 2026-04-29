@@ -11,7 +11,6 @@ import androidx.navigation3.runtime.NavKey
 import androidx.navigation3.runtime.entryProvider
 import androidx.navigation3.runtime.rememberSaveableStateHolderNavEntryDecorator
 import androidx.navigation3.ui.NavDisplay
-import androidx.navigation3.ui.defaultTransitionSpec
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailScreenRoot
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailViewModel
 import com.chs.yourapphistory.presentation.screen.total_summary.TotalSummaryScreenRoot
@@ -62,7 +61,7 @@ fun NavigationRoot(
                 UsedAppListScreenScreenRoot(
                     viewModel = koinViewModel<UsedAppListViewModel> {
                         parametersOf(
-                            key.sortType,
+                            key.usageEventType,
                             key.targetDateMilli
                         )
                     },
@@ -103,7 +102,7 @@ fun NavigationRoot(
                     onNavigateUsedAppList = { targetDateMilli, type ->
                         backStack.add(
                             MainScreens.ScreenUsedAppList(
-                                sortType = type,
+                                usageEventType = type,
                                 targetDateMilli = targetDateMilli
                             )
                         )

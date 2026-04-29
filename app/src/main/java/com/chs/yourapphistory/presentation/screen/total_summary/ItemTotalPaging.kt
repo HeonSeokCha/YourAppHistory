@@ -18,11 +18,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
-import androidx.paging.compose.itemKey
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.common.WeeklyColorUsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -31,7 +30,7 @@ import java.time.LocalDate
 @Composable
 fun ItemTotalPaging(
     state: TotalSummaryState,
-    dailyPagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
+    dailyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
     onIntent: (TotalSummaryIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -82,7 +81,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(SortType.UsageEvent)
+            val item = dailyPagingItems[it]?.get(UsageEventType.UsageEvent)
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
@@ -93,7 +92,7 @@ fun ItemTotalPaging(
                     },
                     subTitle = "총 실제 실행 시간",
                     list = item,
-                    usageType = SortType.UsageEvent,
+                    usageType = UsageEventType.UsageEvent,
                     selectIdx = currentIdx,
                     onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
@@ -111,7 +110,7 @@ fun ItemTotalPaging(
                         onIntent(
                             TotalSummaryIntent.ClickUsedAppList(
                                 targetDate = item[currentIdx].first.toMillis(),
-                                sortType = SortType.UsageEvent
+                                usageEventType = UsageEventType.UsageEvent
                             )
                         )
                     }
@@ -129,7 +128,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(SortType.NotifyEvent)
+            val item = dailyPagingItems[it]?.get(UsageEventType.NotifyEvent)
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
@@ -141,7 +140,7 @@ fun ItemTotalPaging(
                         append("개")
                     },
                     list = item,
-                    usageType = SortType.NotifyEvent,
+                    usageType = UsageEventType.NotifyEvent,
                     selectIdx = currentIdx,
                     onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
@@ -159,7 +158,7 @@ fun ItemTotalPaging(
                         onIntent(
                             TotalSummaryIntent.ClickUsedAppList(
                                 targetDate = item[currentIdx].first.toMillis(),
-                                sortType = SortType.NotifyEvent
+                                usageEventType = UsageEventType.NotifyEvent
                             )
                         )
                     }
@@ -177,7 +176,7 @@ fun ItemTotalPaging(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(SortType.LaunchEvent)
+            val item = dailyPagingItems[it]?.get(UsageEventType.LaunchEvent)
             if (item != null) {
                 val currentIdx = item.size - 1 - state.dateIdx.second
                 WeeklyColorUsageChart(
@@ -189,7 +188,7 @@ fun ItemTotalPaging(
                         append("번")
                     },
                     list = item,
-                    usageType = SortType.LaunchEvent,
+                    usageType = UsageEventType.LaunchEvent,
                     selectIdx = currentIdx,
                     onBarClick = {
                         onIntent(TotalSummaryIntent.OnChangeTargetDateIdx(state.dateIdx.first to item.size - 1 - it))
@@ -207,7 +206,7 @@ fun ItemTotalPaging(
                         onIntent(
                             TotalSummaryIntent.ClickUsedAppList(
                                 targetDate = item[currentIdx].first.toMillis(),
-                                sortType = SortType.LaunchEvent
+                                usageEventType = UsageEventType.LaunchEvent
                             )
                         )
                     }

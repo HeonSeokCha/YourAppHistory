@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.presentation.screen.total_summary
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -12,10 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,7 +27,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.toConvertDisplayYearDate
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.app_usage_detail.ItemDateList
 import com.chs.yourapphistory.presentation.screen.common.placeholder
 import java.time.LocalDate
@@ -39,7 +36,7 @@ import java.time.LocalDate
 fun TotalSummaryScreenRoot(
     viewModel: TotalSummaryViewModel,
     onNavigateUsageDetail: (String, String, Long) -> Unit,
-    onNavigateUsedAppList: (Long, SortType) -> Unit
+    onNavigateUsedAppList: (Long, UsageEventType) -> Unit
 ) {
     val state: TotalSummaryState by viewModel.state.collectAsStateWithLifecycle()
     val pagingItems = viewModel.pagingList.collectAsLazyPagingItems()
@@ -58,7 +55,7 @@ fun TotalSummaryScreenRoot(
                 is TotalSummaryEffect.NavigateUsedAppList -> {
                     onNavigateUsedAppList(
                         effect.targetDate,
-                        effect.sortType
+                        effect.usageEventType
                     )
                 }
             }
@@ -75,7 +72,7 @@ fun TotalSummaryScreenRoot(
 @Composable
 fun TotalSummaryScreen(
     state: TotalSummaryState,
-    pagingItems: LazyPagingItems<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
+    pagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
     onIntent: (TotalSummaryIntent) -> Unit
 ) {
     val datePagerState = if (state.dateList.isNotEmpty()) {

@@ -3,7 +3,7 @@ package com.chs.yourapphistory.domain.repository
 import androidx.paging.PagingData
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -24,14 +24,14 @@ interface AppRepository {
     fun getWeeklyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>>
+    ): Flow<PagingData<Map<UsageEventType, List<Pair<LocalDate, Int>>>>>
 
     fun getDailyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<SortType, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<Map<UsageEventType, List<Pair<Int, Int>>>>>
 
-    fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>>
+    fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>>
 
     suspend fun getMinDate(): LocalDate
 

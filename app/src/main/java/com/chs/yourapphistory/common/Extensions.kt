@@ -10,6 +10,7 @@ import android.util.Log
 import androidx.compose.runtime.snapshots.toInt
 import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.getSystemService
+import com.chs.yourapphistory.domain.model.UsageEventType
 import java.time.DayOfWeek
 import java.time.Instant
 import java.time.LocalDate
@@ -455,5 +456,13 @@ fun List<Pair<LocalDate, Int>>.toCalcDailyUsage(): String {
 fun List<Pair<LocalDate, Int>>.toCalcDailyCount(): Int {
     return this.sumOf { it.second }.run {
         this / this@toCalcDailyCount.count { it.first <= LocalDate.now() }
+    }
+}
+
+fun Int.convertUsageUnitText(usageEventType: UsageEventType): String {
+    return when (usageEventType) {
+        UsageEventType.UsageEvent, UsageEventType.ForegroundUsageEvent -> this.convertToRealUsageMinutes()
+        UsageEventType.NotifyEvent -> "${this}개"
+        UsageEventType.LaunchEvent -> "${this}회"
     }
 }

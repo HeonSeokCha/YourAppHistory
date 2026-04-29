@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,37 +16,29 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.toInt
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.layout.ModifierLocalBeyondBoundsLayout
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.AnnotatedString
-import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -55,7 +46,7 @@ import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.theme.RankBlue
 import com.chs.yourapphistory.presentation.theme.RankGreen
 import com.chs.yourapphistory.presentation.theme.RankGreen2
@@ -232,7 +223,7 @@ fun WeeklyColorUsageChart(
     title: AnnotatedString,
     subTitle: String? = null,
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
-    usageType: SortType,
+    usageType: UsageEventType,
     selectIdx: Int,
     onBarClick: (Int) -> Unit,
     onPackageClick: (String, String) -> Unit,
@@ -248,7 +239,7 @@ fun WeeklyColorUsageChart(
         list[selectIdx].second.sortedByDescending { it.totalUsedInfo }
             .take(3)
             .map {
-                if (usageType == SortType.UsageEvent) {
+                if (usageType == UsageEventType.UsageEvent) {
                     it to it.totalUsedInfo.toInt().convertToRealUsageHour()
                 } else {
                     it to "${it.totalUsedInfo}개"
@@ -409,7 +400,7 @@ private fun PreViewUsageChart3() {
         title = buildAnnotatedString { append("TEST") },
         subTitle = "SubTEst",
         list = usageMap,
-        usageType = SortType.UsageEvent,
+        usageType = UsageEventType.UsageEvent,
         selectIdx = 0,
         onBarClick = {},
         onPackageClick = { _, _ ->},

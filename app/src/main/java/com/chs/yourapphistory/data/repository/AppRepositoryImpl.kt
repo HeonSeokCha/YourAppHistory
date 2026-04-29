@@ -9,7 +9,6 @@ import com.chs.yourapphistory.common.atStartOfDayToMillis
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toConvertDayUsedTime
 import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.ApplicationInfoSource
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
@@ -27,7 +26,7 @@ import com.chs.yourapphistory.data.paging.GetPagingWeeklyTotalAppInfo
 import com.chs.yourapphistory.data.toAppInfo
 import com.chs.yourapphistory.domain.model.AppInfo
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.domain.repository.AppRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -298,7 +297,7 @@ class AppRepositoryImpl(
     override fun getWeeklyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<SortType, List<Pair<LocalDate, Int>>>>> = flow {
+    ): Flow<PagingData<Map<UsageEventType, List<Pair<LocalDate, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
@@ -321,7 +320,7 @@ class AppRepositoryImpl(
     override fun getDailyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<SortType, List<Pair<Int, Int>>>>> = flow {
+    ): Flow<PagingData<Map<UsageEventType, List<Pair<Int, Int>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
@@ -341,7 +340,7 @@ class AppRepositoryImpl(
         }.flow
     }
 
-    override fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<SortType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>> =
+    override fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>> =
         flow {
             emit(getMinDate())
         }.flatMapLatest {

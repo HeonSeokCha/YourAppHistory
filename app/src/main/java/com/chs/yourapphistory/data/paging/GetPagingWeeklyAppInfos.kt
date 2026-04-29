@@ -11,7 +11,7 @@ import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao
 import com.chs.yourapphistory.data.db.dao.AppUsageDao
-import com.chs.yourapphistory.domain.model.SortType
+import com.chs.yourapphistory.domain.model.UsageEventType
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -26,15 +26,15 @@ class GetPagingWeeklyAppInfos(
     private val appUsageDao: AppUsageDao,
     private val appForegroundDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
-) : PagingSource<LocalDate, Map<SortType, List<Pair<LocalDate, Int>>>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Map<SortType, List<Pair<LocalDate, Int>>>>): LocalDate? {
+) : PagingSource<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>>() {
+    override fun getRefreshKey(state: PagingState<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>>): LocalDate? {
         return state.anchorPosition?.let { position ->
             val page = state.closestPageToPosition(position)
             page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
         }
     }
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Map<SortType, List<Pair<LocalDate, Int>>>> {
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>> {
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
             if (params.key == null) {
                 targetDate
@@ -58,7 +58,7 @@ class GetPagingWeeklyAppInfos(
             .map {
                 withContext(Dispatchers.IO) {
                     val appUsage = async(Dispatchers.IO) {
-                        SortType.UsageEvent to calcDayUsedList(
+                        UsageEventType.UsageEvent to calcDayUsedList(
                             dateRangeList = it,
                             list = it.associateWith { date ->
                                 appUsageDao.getDayPackageUsageInfo(
@@ -69,7 +69,7 @@ class GetPagingWeeklyAppInfos(
                         )
                     }
                     val appForeground = async(Dispatchers.IO) {
-                        SortType.ForegroundUsageEvent to calcDayUsedList(
+                        UsageEventType.ForegroundUsageEvent to calcDayUsedList(
                             dateRangeList = it,
                             list = it.associateWith { date ->
                                 appForegroundDao.getForegroundUsageInfo(
@@ -80,7 +80,7 @@ class GetPagingWeeklyAppInfos(
                         )
                     }
                     val appNotify = async(Dispatchers.IO) {
-                        SortType.NotifyEvent to calcDayUsedList(
+                        UsageEventType.NotifyEvent to calcDayUsedList(
                             dateRangeList = it,
                             list = appNotifyInfoDao.getWeeklyNotifyCount(
                                 beginDate = it.min().toMillis(),
@@ -90,7 +90,7 @@ class GetPagingWeeklyAppInfos(
                         )
                     }
                     val appLaunch = async(Dispatchers.IO) {
-                        SortType.LaunchEvent to calcDayUsedList(
+                        UsageEventType.LaunchEvent to calcDayUsedList(
                             dateRangeList = it,
                             list = appUsageDao.getWeeklyAppLaunchInfo(
                                 beginDate = it.min().toMillis(),
