@@ -132,11 +132,15 @@ fun ItemDailyChart(
 
         if (size.height != 0f) {
             repeat(3) {
+                val lineMeasure = textMeasurer.measure(
+                    text = niceNumber.max().convertUsageUnitText(usageEventType),
+                    style = style1
+                )
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
                     end = Offset(
-                        size.width - basePadding,
+                        size.width - basePadding - lineMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
