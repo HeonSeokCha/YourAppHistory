@@ -37,9 +37,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.Constants
+import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.convertUsageUnitText
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toConvertDisplayDay
+import com.chs.yourapphistory.domain.model.UsageEventType
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -49,6 +52,7 @@ import kotlin.math.roundToInt
 @Composable
 fun ItemWeeklyChart(
     weekUsageList: List<Pair<LocalDate, Int>>,
+    usageEventType: UsageEventType,
     clickText: DrawScope.(
         TextMeasurer,
         BarArea,
@@ -115,21 +119,46 @@ fun ItemWeeklyChart(
             .height(150.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
-                onStart = { },
-                onCancel = { },
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
+
+        val niceNumber: List<Int> = NiceNumUtil.niceNum(
+            value = barAreas.maxOf { it.value },
+            usageEventType = usageEventType
+        )
+
         if (size.height != 0f) {
             repeat(3) {
+                val lineMeasure = textMeasurer.measure(
+                    text = niceNumber.max().convertUsageUnitText(usageEventType),
+                    style = style1
+                )
+
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
                     end = Offset(
-                        size.width - basePadding.div(2),
+                        size.width - basePadding - lineMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
+
+                if (niceNumber.isNotEmpty() && it != 2) {
+                    val measure = textMeasurer.measure(
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
+                        style = style1
+                    )
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
+                        topLeft = Offset(
+                            size.width - basePadding.div(2) - measure.size.width,
+                            ((size.height / 3) * it) + topBasePadding - (measure.size.height / 2)
+                        ),
+                        style = style1
+                    )
+                }
             }
         }
         val scale = calculateScale(
@@ -191,6 +220,7 @@ fun WeeklyUsageChart(
     title: String,
     subTitle: AnnotatedString,
     list: List<Pair<LocalDate, Int>>,
+    usageEventType: UsageEventType,
     convertText: (Int) -> String
 ) {
     val barColor = MaterialTheme.colorScheme.onTertiary
@@ -223,7 +253,10 @@ fun WeeklyUsageChart(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        ItemWeeklyChart(weekUsageList = list) { textMeasurer, selectedBar ->
+        ItemWeeklyChart(
+            weekUsageList = list,
+            usageEventType = usageEventType
+        ) { textMeasurer, selectedBar ->
             val selectDateValue = buildAnnotatedString {
                 withStyle(
                     style = SpanStyle(
@@ -296,6 +329,7 @@ private fun PreViewUsageChart2() {
         title = "TEST",
         subTitle = buildAnnotatedString { append("") },
         list = usageMap,
+        usageEventType = UsageEventType.UsageEvent,
         convertText = { a -> "$a 개" }
     )
 }

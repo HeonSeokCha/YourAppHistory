@@ -324,6 +324,7 @@ fun ItemWeeklyPagingInfo(
                         }
                     },
                     list = item,
+                    usageEventType = UsageEventType.UsageEvent,
                     convertText = { it.convertToRealUsageHour() }
                 )
             }
@@ -352,6 +353,7 @@ fun ItemWeeklyPagingInfo(
                         }
                     },
                     list = item,
+                    usageEventType = UsageEventType.ForegroundUsageEvent,
                     convertText = { it.convertToRealUsageHour() }
                 )
             }
@@ -379,6 +381,7 @@ fun ItemWeeklyPagingInfo(
                         append("개")
                     },
                     list = item,
+                    usageEventType = UsageEventType.NotifyEvent,
                     convertText = { "${it}개" }
                 )
             }
@@ -406,6 +409,7 @@ fun ItemWeeklyPagingInfo(
                         append("회")
                     },
                     list = item,
+                    usageEventType = UsageEventType.LaunchEvent,
                     convertText = { "${it}번" }
                 )
             }

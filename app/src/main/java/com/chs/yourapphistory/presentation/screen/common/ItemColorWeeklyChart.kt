@@ -129,8 +129,6 @@ fun ItemColorWeeklyChart(
             .height(150.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
-                onStart = { },
-                onCancel = { },
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {

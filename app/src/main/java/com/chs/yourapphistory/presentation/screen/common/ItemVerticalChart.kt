@@ -119,8 +119,6 @@ fun ItemDailyChart(
             .height(150.dp)
             .padding(horizontal = 4.dp)
             .tapOrPress(
-                onStart = { },
-                onCancel = { },
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
@@ -136,6 +134,7 @@ fun ItemDailyChart(
                     text = niceNumber.max().convertUsageUnitText(usageEventType),
                     style = style1
                 )
+
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
@@ -144,6 +143,7 @@ fun ItemDailyChart(
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
+
                 if (niceNumber.isNotEmpty() && it != 2) {
                     val measure = textMeasurer.measure(
                         text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
@@ -327,8 +327,6 @@ fun DailyUsageChart(
 }
 
 fun Modifier.tapOrPress(
-    onStart: (offsetX: Float) -> Unit,
-    onCancel: (offsetX: Float) -> Unit,
     onCompleted: (offsetX: Float) -> Unit
 ): Modifier = composed {
     val interactionSource = remember { MutableInteractionSource() }
@@ -336,11 +334,8 @@ fun Modifier.tapOrPress(
         awaitEachGesture {
             val tap = awaitFirstDown()
                 .also { if (it.pressed != it.previousPressed) it.consume() }
-            onStart(tap.position.x)
             val up = waitForUpOrCancellation()
-            if (up == null) {
-                onCancel(tap.position.x)
-            } else {
+            if (up != null) {
                 if (up.pressed != up.previousPressed) up.consume()
                 onCompleted(tap.position.x)
             }
