@@ -76,13 +76,13 @@ fun Int.convertToRealUsageMinutes(): String {
 }
 
 @SuppressLint("DefaultLocale")
-fun Int.convertToRealUsageHour(): String {
+fun Int.convertToRealUsageHour(isSkipMin: Boolean = false): String {
     val hour: Int = (this / 1000) / 60 / 60
     val minutes: Int = (this / 1000) / 60 % 60
 
     if (hour == 0) return this.convertToRealUsageMinutes()
 
-    return if (minutes == 0) {
+    return if (minutes == 0 || isSkipMin) {
         String.format("%d시간", hour, minutes)
     } else {
         String.format("%d시간 %d분", hour, minutes)
@@ -461,7 +461,7 @@ fun List<Pair<LocalDate, Int>>.toCalcDailyCount(): Int {
 
 fun Int.convertUsageUnitText(usageEventType: UsageEventType): String {
     return when (usageEventType) {
-        UsageEventType.UsageEvent, UsageEventType.ForegroundUsageEvent -> this.convertToRealUsageMinutes()
+        UsageEventType.UsageEvent, UsageEventType.ForegroundUsageEvent -> this.convertToRealUsageHour(isSkipMin = true)
         UsageEventType.NotifyEvent -> "${this}개"
         UsageEventType.LaunchEvent -> "${this}회"
     }

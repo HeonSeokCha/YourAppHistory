@@ -87,12 +87,22 @@ fun ItemDailyChart(
         .div(2)
         .toFloat()
 
+    val niceNumber: List<Int> = NiceNumUtil.niceNum(
+        value = hourUsageList.maxOf { it.second },
+        usageEventType = usageEventType
+    )
+
+    val lineMeasure = textMeasurer.measure(
+        text = niceNumber.max().convertUsageUnitText(usageEventType),
+        style = style1
+    )
+
     val barAreas = hourUsageList.mapIndexed { idx, pair ->
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = basePadding + smallPadding + distance.times(idx) - barWidth,
-            xEnd = basePadding + smallPadding + distance.times(idx) + barWidth
+            xStart = basePadding + smallPadding + distance.times(idx) - barWidth - lineMeasure.size.width,
+            xEnd = basePadding + smallPadding + distance.times(idx) + barWidth - lineMeasure.size.width
         )
     }
 
@@ -122,19 +132,8 @@ fun ItemDailyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
-
-        val niceNumber: List<Int> = NiceNumUtil.niceNum(
-            value = barAreas.maxOf { it.value },
-            usageEventType = usageEventType
-        )
-
         if (size.height != 0f) {
             repeat(3) {
-                val lineMeasure = textMeasurer.measure(
-                    text = niceNumber.max().convertUsageUnitText(usageEventType),
-                    style = style1
-                )
-
                 drawLine(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
@@ -161,6 +160,7 @@ fun ItemDailyChart(
                 }
             }
         }
+
         val scale = calculateScale(
             (size.height - smallPadding - topBasePadding).roundToInt(),
             hourUsageList.map { it.second }
@@ -172,7 +172,7 @@ fun ItemDailyChart(
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = basePadding + smallPadding + (distance).times(idx) - barWidth,
+                    x = basePadding + (distance).times(idx) - barWidth - lineMeasure.size.width,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
