@@ -5,7 +5,9 @@ import androidx.compose.foundation.gestures.awaitEachGesture
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -43,6 +45,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convert24HourString
 import com.chs.yourapphistory.common.convertBetweenHourString
 import com.chs.yourapphistory.common.convertUsageUnitText
@@ -66,9 +69,6 @@ fun ItemDailyChart(
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
     val barWidth = with(density) { 8.dp.toPx() }
-    val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 25).div(24).dp.toPx()
-    }
     val barColor = MaterialTheme.colorScheme.primary
 
     val textMeasurer = rememberTextMeasurer()
@@ -92,23 +92,17 @@ fun ItemDailyChart(
         usageEventType = usageEventType
     )
 
-    val lineMeasure = textMeasurer.measure(
+    val niceNumberMeasure = textMeasurer.measure(
         text = niceNumber.max().convertUsageUnitText(usageEventType),
         style = style1
     )
 
-    val barAreas = hourUsageList.mapIndexed { idx, pair ->
-        BarArea(
-            idx = idx,
-            value = pair.second,
-            xStart = basePadding + smallPadding + distance.times(idx) - barWidth - lineMeasure.size.width,
-            xEnd = basePadding + smallPadding + distance.times(idx) + barWidth - lineMeasure.size.width
-        )
-    }
+
+    val barAreas: MutableList<BarArea> = remember { mutableListOf() }
+
 
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
-
 
     LaunchedEffect(barAreas) {
         selectedBar = null
@@ -132,13 +126,14 @@ fun ItemDailyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
+        val distance = (size.width - 8.dp.toPx() - niceNumberMeasure.size.width).div(24)
         if (size.height != 0f) {
             repeat(3) {
                 drawLine(
                     color = Color.Gray,
-                    start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
+                    start = Offset(8.dp.toPx(), ((size.height / 3) * it) + topBasePadding),
                     end = Offset(
-                        size.width - basePadding - lineMeasure.size.width,
+                        size.width - 16.dp.toPx() - niceNumberMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
@@ -167,42 +162,35 @@ fun ItemDailyChart(
         )
         val chartAreaBottom = size.height - labelSectionHeight
 
-        barAreas.forEachIndexed { idx, info ->
-            val barHeight = info.value.times(scale).toFloat()
+        hourUsageList.forEachIndexed { idx, info ->
+            barAreas.add(
+                BarArea(
+                    idx = idx,
+                    value = info.second,
+                    xStart = distance.times(idx),
+                    xEnd = distance.times(idx) + barWidth
+                )
+            )
+
+            val barHeight = barAreas[idx].value.times(scale).toFloat()
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = basePadding + (distance).times(idx) - barWidth - lineMeasure.size.width,
+                    x = barAreas[idx].xStart,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
                 cornerRadius = CornerRadius(4.dp.toPx())
             )
 
-            if (info.idx % 6 == 0 || info.idx == 23) {
-                val time = if (info.idx == 23) "(시)" else info.idx.toString()
-
-                val textResult = textMeasurer.measure(
-                    text = time,
-                    style = style1
-                )
-
-                val textRectPadding = when (time) {
-                    "0" -> 42f
-                    "(시)" -> {
-                        size.width - (textResult.size.width + 42f)
-                    }
-
-                    else -> {
-                        size.width.div(4).times(time.toInt() / 6) - textResult.size.width.div(2)
-                    }
-                }
+            if (idx % 6 == 0 || idx == 23) {
+                val time = if (idx == 23) "24(시)" else idx.toString()
 
                 drawText(
                     textMeasurer = textMeasurer,
                     text = time,
                     topLeft = Offset(
-                        x = textRectPadding,
+                        x = barAreas[idx].xStart,
                         y = chartAreaBottom
                     ),
                     style = style1
@@ -348,17 +336,23 @@ fun Modifier.tapOrPress(
 private fun PreViewUsageChart() {
     val usageMap = object : HashMap<Int, Int>() {
         init {
-            for (i in 0..23) {
+            for (i in 1..24) {
                 put(i, i)
             }
         }
     }.toList()
 
 
-    DailyUsageChart(
-        title = "TEST",
-        list = usageMap,
-        usageEventType = UsageEventType.UsageEvent,
-        convertText = { a -> "$a 개" }
-    )
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 8.dp)
+    ) {
+        DailyUsageChart(
+            title = "TEST",
+            list = usageMap,
+            usageEventType = UsageEventType.UsageEvent,
+            convertText = { a -> "$a 개" }
+        )
+    }
 }

@@ -64,9 +64,6 @@ fun ItemWeeklyChart(
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
     val barWidth = with(density) { 16.dp.toPx() }
-    val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 25).div(7).dp.toPx()
-    }
     val barColor = MaterialTheme.colorScheme.primary
 
     val textMeasurer = rememberTextMeasurer()
@@ -92,23 +89,26 @@ fun ItemWeeklyChart(
         usageEventType = usageEventType
     )
 
-    val lineMeasure = textMeasurer.measure(
+    val niceNumberMeasure = textMeasurer.measure(
         text = niceNumber.max().convertUsageUnitText(usageEventType),
         style = style1
     )
+
+    val distance = with(density) {
+        (LocalConfiguration.current.screenWidthDp - niceNumberMeasure.size.width).div(7).dp.toPx()
+    }
 
     val barAreas = weekUsageList.mapIndexed { idx, pair ->
         BarArea(
             idx = idx,
             value = pair.second,
-            xStart = distance.times(idx) + barWidth + smallPadding.times(1) - lineMeasure.size.width,
-            xEnd = distance.times(idx) + barWidth + smallPadding.times(1) + barWidth - lineMeasure.size.width
+            xStart = distance.times(idx) + barWidth + smallPadding.times(1),
+            xEnd = distance.times(idx) + barWidth + smallPadding.times(1)
         )
     }
 
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
-
 
     LaunchedEffect(barAreas) {
         selectedBar = null
@@ -139,7 +139,7 @@ fun ItemWeeklyChart(
                     color = Color.Gray,
                     start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
                     end = Offset(
-                        size.width - basePadding - lineMeasure.size.width,
+                        size.width - basePadding - niceNumberMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
@@ -174,7 +174,7 @@ fun ItemWeeklyChart(
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = distance.times(idx) + barWidth + smallPadding.times(1) - (lineMeasure.size.width / 2),
+                    x = distance.times(idx) + barWidth + smallPadding.times(1),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -190,7 +190,7 @@ fun ItemWeeklyChart(
                 textMeasurer = textMeasurer,
                 text = weekUsageList[idx].first.toConvertDisplayDay(),
                 topLeft = Offset(
-                    x = textRectPadding - (lineMeasure.size.width / 2),
+                    x = textRectPadding,
                     y = chartAreaBottom
                 ),
                 style = style1

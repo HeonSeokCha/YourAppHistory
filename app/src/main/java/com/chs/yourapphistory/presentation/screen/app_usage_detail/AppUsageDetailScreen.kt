@@ -124,7 +124,6 @@ fun AppUsageDetailScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 8.dp)
     ) {
         Row(
             modifier = Modifier
