@@ -94,18 +94,7 @@ fun ItemWeeklyChart(
         style = style1
     )
 
-    val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - niceNumberMeasure.size.width).div(7).dp.toPx()
-    }
-
-    val barAreas = weekUsageList.mapIndexed { idx, pair ->
-        BarArea(
-            idx = idx,
-            value = pair.second,
-            xStart = distance.times(idx) + barWidth + smallPadding.times(1),
-            xEnd = distance.times(idx) + barWidth + smallPadding.times(1)
-        )
-    }
+    val barAreas: MutableList<BarArea> = remember { mutableListOf() }
 
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
@@ -132,14 +121,18 @@ fun ItemWeeklyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
+        val distance = (size.width - niceNumberMeasure.size.width).div(7)
+
         if (size.height != 0f) {
             repeat(3) {
-
                 drawLine(
                     color = Color.Gray,
-                    start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
+                    start = Offset(
+                        8.dp.toPx(),
+                        ((size.height / 3) * it) + topBasePadding
+                    ),
                     end = Offset(
-                        size.width - basePadding - niceNumberMeasure.size.width,
+                        size.width - 16.dp.toPx() - niceNumberMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
@@ -168,29 +161,32 @@ fun ItemWeeklyChart(
         )
         val chartAreaBottom = size.height - labelSectionHeight
 
-        barAreas.forEachIndexed { idx, info ->
-            val barHeight = info.value.times(scale).toFloat()
+        weekUsageList.forEachIndexed { idx, info ->
+            barAreas.add(
+                BarArea(
+                    idx = idx,
+                    value = info.second,
+                    xStart = distance.times(idx) + 16.dp.toPx(),
+                    xEnd = distance.times(idx) + barWidth
+                )
+            )
 
+            val barHeight = barAreas[idx].value.times(scale).toFloat()
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = distance.times(idx) + barWidth + smallPadding.times(1),
+                    x = barAreas[idx].xStart,
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
                 cornerRadius = CornerRadius(4.dp.toPx())
             )
 
-            val textResult = textMeasurer.measure(
-                text = weekUsageList[idx].first.toConvertDisplayDay(),
-                style = style1
-            )
-            val textRectPadding = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 3)
             drawText(
                 textMeasurer = textMeasurer,
                 text = weekUsageList[idx].first.toConvertDisplayDay(),
                 topLeft = Offset(
-                    x = textRectPadding,
+                    x = barAreas[idx].xStart + 3.dp.toPx(),
                     y = chartAreaBottom
                 ),
                 style = style1

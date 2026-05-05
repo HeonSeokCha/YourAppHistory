@@ -131,7 +131,10 @@ fun ItemDailyChart(
             repeat(3) {
                 drawLine(
                     color = Color.Gray,
-                    start = Offset(8.dp.toPx(), ((size.height / 3) * it) + topBasePadding),
+                    start = Offset(
+                        8.dp.toPx(),
+                        ((size.height / 3) * it) + topBasePadding
+                    ),
                     end = Offset(
                         size.width - 16.dp.toPx() - niceNumberMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
