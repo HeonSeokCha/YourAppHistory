@@ -5,7 +5,7 @@ import kotlin.math.ceil
 
 object NiceNumUtil {
 
-    private val NICE_INTERVALS = listOf(0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 60, 120, 180, 240, 360)
+    private val NICE_INTERVALS = listOf(0, 1, 2, 3, 4, 5, 10, 15, 20, 25, 30, 60, 100, 120, 180, 240, 300, 360)
     fun niceNum(
         value: Int,
         usageEventType: UsageEventType

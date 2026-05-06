@@ -42,8 +42,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
 import com.chs.yourapphistory.common.convertToRealUsageHour
+import com.chs.yourapphistory.common.convertUsageUnitText
+import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.UsageEventType
@@ -61,6 +64,7 @@ import kotlin.time.Duration.Companion.hours
 fun ItemColorWeeklyChart(
     list: List<Pair<LocalDate, List<AppTotalUsageInfo>>>,
     colorList: List<Color>,
+    usageEventType: UsageEventType,
     selectIdx: Int,
     onClick: (Int) -> Unit
 ) {
@@ -70,9 +74,6 @@ fun ItemColorWeeklyChart(
     val labelSectionHeight = smallPadding.times(2) + textSize
     val topBasePadding = with(density) { 14.sp.toPx() + 21f }
     val barWidth = with(density) { 16.dp.toPx() }
-    val distance = with(density) {
-        (LocalConfiguration.current.screenWidthDp - 25).div(7).dp.toPx()
-    }
     val barColor = Color.Gray
 
     val textMeasurer = rememberTextMeasurer()
@@ -93,18 +94,20 @@ fun ItemColorWeeklyChart(
         .width
         .toFloat()
 
-    val barAreas = list.mapIndexed { idx, pair ->
-        BarAreas(
-            idx = idx,
-            values = pair.second.map { it.totalUsedInfo.toInt() },
-            xStart = distance.times(idx) + barWidth + smallPadding.times(1),
-            xEnd = distance.times(idx) + barWidth + smallPadding.times(1) + barWidth
-        )
-    }
+    val niceNumber: List<Int> = NiceNumUtil.niceNum(
+        value = list.maxOf { it.second.sumOf { it.totalUsedInfo } }.toInt(),
+        usageEventType = usageEventType
+    )
+
+    val niceNumberMeasure = textMeasurer.measure(
+        text = niceNumber.max().convertUsageUnitText(usageEventType),
+        style = style1
+    )
+
+    val barAreas: MutableList<BarAreas> = remember { mutableListOf() }
 
     var selectedBar: BarAreas? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
-
 
     LaunchedEffect(barAreas) {
         selectedBar = null
@@ -132,18 +135,41 @@ fun ItemColorWeeklyChart(
                 onCompleted = { scope.launch { selectedPos = it } }
             )
     ) {
+        val distance = (size.width - niceNumberMeasure.size.width).div(7)
+
+
         if (size.height != 0f) {
             repeat(3) {
                 drawLine(
                     color = Color.Gray,
-                    start = Offset(basePadding.div(2), ((size.height / 3) * it) + topBasePadding),
+                    start = Offset(
+                        8.dp.toPx(),
+                        ((size.height / 3) * it) + topBasePadding
+                    ),
                     end = Offset(
-                        size.width - basePadding.div(2),
+                        size.width - 16.dp.toPx() - niceNumberMeasure.size.width,
                         ((size.height / 3) * it) + topBasePadding
                     )
                 )
+
+                if (niceNumber.isNotEmpty() && it != 2) {
+                    val measure = textMeasurer.measure(
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
+                        style = style1
+                    )
+                    drawText(
+                        textMeasurer = textMeasurer,
+                        text = niceNumber[(2 - it)].convertUsageUnitText(usageEventType),
+                        topLeft = Offset(
+                            size.width - basePadding.div(2) - measure.size.width,
+                            ((size.height / 3) * it) + topBasePadding - (measure.size.height / 2)
+                        ),
+                        style = style1
+                    )
+                }
             }
         }
+
         val scale = calculateScale(
             (size.height - smallPadding - topBasePadding).roundToInt(),
             list.map { it.second.sumOf { it.totalUsedInfo.toInt() } }
@@ -151,20 +177,29 @@ fun ItemColorWeeklyChart(
 
         val chartAreaBottom = size.height - labelSectionHeight
 
-        barAreas.forEachIndexed { idx, info ->
+
+        list.forEachIndexed { idx, info ->
+            barAreas.add(
+                BarAreas(
+                    idx = idx,
+                    values = info.second.map { it.totalUsedInfo.toInt() },
+                    xStart = distance.times(idx) + 16.dp.toPx(),
+                    xEnd = distance.times(idx) + barWidth
+                )
+            )
             val convertDateFormat = list[idx].first.toConvertDisplayDay()
-            val sortedInfo = info.values.sortedDescending()
-            if (info.values.isNotEmpty()) {
+            val sortedInfo = barAreas[idx].values.sortedDescending()
+            if (barAreas[idx].values.isNotEmpty()) {
                 var temp = 0f
                 val totalBarHeight = sortedInfo.drop(3).sum().times(scale).toFloat()
 
-                if (info.values.size > 3) {
+                if (barAreas[idx].values.size > 3) {
                     repeat(3) {
                         val barHeight = sortedInfo[it].times(scale).toFloat()
                         drawRoundRect(
                             color = colorList[it],
                             topLeft = Offset(
-                                x = distance.times(idx) + barWidth + smallPadding.times(1),
+                                x = barAreas[idx].xStart,
                                 y = size.height - barHeight - smallPadding - labelSectionHeight - temp
                             ),
                             size = Size(barWidth, barHeight)
@@ -176,23 +211,17 @@ fun ItemColorWeeklyChart(
                 drawRoundRect(
                     color = barColor,
                     topLeft = Offset(
-                        x = distance.times(idx) + barWidth + smallPadding.times(1),
+                        x = barAreas[idx].xStart,
                         y = size.height - totalBarHeight - smallPadding - labelSectionHeight - temp
                     ),
                     size = Size(barWidth, totalBarHeight)
                 )
             }
 
-            val textResult = textMeasurer.measure(
-                text = convertDateFormat,
-                style = style1
-            )
-            val textRectPadding = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 3)
-
             if (idx == selectIdx) {
                 drawCircle(
                     center = Offset(
-                        x = (distance.times(idx)) + (textResult.size.width) + (smallPadding * 4),
+                        x = barAreas[idx].xStart + 8.dp.toPx(),
                         y = size.height - (labelSectionHeight / 2)
                     ),
                     radius = 30f,
@@ -204,7 +233,7 @@ fun ItemColorWeeklyChart(
                 textMeasurer = textMeasurer,
                 text = convertDateFormat,
                 topLeft = Offset(
-                    x = textRectPadding,
+                    x = barAreas[idx].xStart + 3.dp.toPx(),
                     y = chartAreaBottom
                 ),
                 style = style1
@@ -277,6 +306,7 @@ fun WeeklyColorUsageChart(
             list = list,
             colorList = colorList,
             selectIdx = selectIdx,
+            usageEventType = usageType,
             onClick = onBarClick
         )
 
