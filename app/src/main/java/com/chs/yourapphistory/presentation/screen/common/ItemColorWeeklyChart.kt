@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.chs.yourapphistory.common.NiceNumUtil
 import com.chs.yourapphistory.common.calculateScale
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertUsageUnitText
 import com.chs.yourapphistory.common.isZero
@@ -119,6 +120,7 @@ fun ItemColorWeeklyChart(
 
     LaunchedEffect(selectedPos) {
         val findBar = barAreas.find { selectedPos in it.xStart..it.xEnd }
+        chsLog(selectedPos.toString())
         selectedBar = if (findBar?.values.isNullOrEmpty()) {
             null
         } else findBar
@@ -136,7 +138,6 @@ fun ItemColorWeeklyChart(
             )
     ) {
         val distance = (size.width - niceNumberMeasure.size.width).div(7)
-
 
         if (size.height != 0f) {
             repeat(3) {
@@ -184,7 +185,7 @@ fun ItemColorWeeklyChart(
                     idx = idx,
                     values = info.second.map { it.totalUsedInfo.toInt() },
                     xStart = distance.times(idx) + 16.dp.toPx(),
-                    xEnd = distance.times(idx) + barWidth
+                    xEnd = distance.times(idx) + 16.dp.toPx() + barWidth
                 )
             )
             val convertDateFormat = list[idx].first.toConvertDisplayDay()

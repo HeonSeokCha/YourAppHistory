@@ -40,8 +40,6 @@ object NiceNumUtil {
             ticks.add(ticks.last() * 2)
         }
 
-        chsLog(ticks.toString())
-
         return when (usageEventType) {
             UsageEventType.UsageEvent, UsageEventType.ForegroundUsageEvent -> {
                 ticks.map { it * 60 * 1000 }

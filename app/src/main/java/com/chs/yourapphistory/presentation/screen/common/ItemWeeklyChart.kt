@@ -167,7 +167,7 @@ fun ItemWeeklyChart(
                     idx = idx,
                     value = info.second,
                     xStart = distance.times(idx) + 16.dp.toPx(),
-                    xEnd = distance.times(idx) + barWidth
+                    xEnd = distance.times(idx) + 16.dp.toPx() + barWidth
                 )
             )
 

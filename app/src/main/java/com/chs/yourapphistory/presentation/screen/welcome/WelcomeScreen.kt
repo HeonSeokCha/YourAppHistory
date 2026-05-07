@@ -107,14 +107,14 @@ fun WelcomeScreen(
             state = pagerState,
             key = { it }
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top
-            ) {
+//            Column(
+//                modifier = Modifier
+//                    .fillMaxWidth(),
+//                horizontalAlignment = Alignment.CenterHorizontally,
+//                verticalArrangement = Arrangement.Top
+//            ) {
                 ContentItem(lottieRawId = state.tabList[it])
-            }
+//            }
         }
 
         Row(
@@ -140,6 +140,7 @@ fun WelcomeScreen(
             Button(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .padding(horizontal = 8.dp)
                     .align(Alignment.CenterHorizontally),
                 onClick = { onIntent(WelcomeIntent.ClickFinish) },
                 colors = ButtonDefaults.buttonColors(
