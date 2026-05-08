@@ -166,7 +166,6 @@ private fun AppSearchBar(
 
     LaunchedEffect(state.text) {
         snapshotFlow { state.text.toString() }
-            .filter { it.isNotEmpty() }
             .distinctUntilChanged()
             .debounce(Constants.DELAY_SEARCH)
             .collectLatest {

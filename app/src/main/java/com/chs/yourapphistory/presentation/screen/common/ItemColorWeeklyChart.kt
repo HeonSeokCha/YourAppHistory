@@ -120,7 +120,6 @@ fun ItemColorWeeklyChart(
 
     LaunchedEffect(selectedPos) {
         val findBar = barAreas.find { selectedPos in it.xStart..it.xEnd }
-        chsLog(selectedPos.toString())
         selectedBar = if (findBar?.values.isNullOrEmpty()) {
             null
         } else findBar

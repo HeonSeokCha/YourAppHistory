@@ -98,6 +98,9 @@ class AppUsageDetailViewModel(
                     dateList = splitList,
                     displayDate = targetDate,
                     dateIdx = (dateList.indexOf(targetDate) / 7).run {
+                        val a = (splitList[this].indexOf(targetDate) % 7)
+                        val b = targetDate
+                        val c = this to (splitList[this].indexOf(targetDate) % 7)
                         this to (splitList[this].indexOf(targetDate) % 7)
                     },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
