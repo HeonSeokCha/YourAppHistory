@@ -171,11 +171,11 @@ fun ItemWeeklyChart(
                 )
             )
 
-            val barHeight = barAreas[idx].value.times(scale).toFloat()
+            val barHeight = info.second.times(scale).toFloat()
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = barAreas[idx].xStart,
+                    x = distance.times(idx) + 16.dp.toPx(),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -184,9 +184,9 @@ fun ItemWeeklyChart(
 
             drawText(
                 textMeasurer = textMeasurer,
-                text = weekUsageList[idx].first.toConvertDisplayDay(),
+                text = info.first.toConvertDisplayDay(),
                 topLeft = Offset(
-                    x = barAreas[idx].xStart + 3.dp.toPx(),
+                    x = distance.times(idx) + 189.dp.toPx(),
                     y = chartAreaBottom
                 ),
                 style = style1

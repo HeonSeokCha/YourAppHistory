@@ -100,7 +100,6 @@ fun ItemDailyChart(
 
     val barAreas: MutableList<BarArea> = remember { mutableListOf() }
 
-
     var selectedBar: BarArea? by remember { mutableStateOf(null) }
     var selectedPos by remember { mutableFloatStateOf(0f) }
 
@@ -175,11 +174,11 @@ fun ItemDailyChart(
                 )
             )
 
-            val barHeight = barAreas[idx].value.times(scale).toFloat()
+            val barHeight = info.second.times(scale).toFloat()
             drawRoundRect(
                 color = barColor,
                 topLeft = Offset(
-                    x = barAreas[idx].xStart,
+                    x = distance.times(idx),
                     y = size.height - barHeight - smallPadding - labelSectionHeight
                 ),
                 size = Size(barWidth, barHeight),
@@ -193,7 +192,7 @@ fun ItemDailyChart(
                     textMeasurer = textMeasurer,
                     text = time,
                     topLeft = Offset(
-                        x = barAreas[idx].xStart,
+                        x = distance.times(idx),
                         y = chartAreaBottom
                     ),
                     style = style1

@@ -95,7 +95,7 @@ fun ItemDailyPagingInfo(
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(state.displayDate)
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
             ((initIdx + this) / 7) to (initIdx + this) % 7
         }
         onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
@@ -108,7 +108,7 @@ fun ItemDailyPagingInfo(
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyForegroundUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(state.displayDate)
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
             ((initIdx + this) / 7) to (initIdx + this) % 7
         }
         onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
@@ -118,7 +118,7 @@ fun ItemDailyPagingInfo(
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyNotifyPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(state.displayDate)
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
             ((initIdx + this) / 7) to (initIdx + this) % 7
         }
         onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
@@ -128,7 +128,7 @@ fun ItemDailyPagingInfo(
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
         val idx = dailyLaunchPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(state.displayDate)
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
             ((initIdx + this) / 7) to (initIdx + this) % 7
         }
         onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))

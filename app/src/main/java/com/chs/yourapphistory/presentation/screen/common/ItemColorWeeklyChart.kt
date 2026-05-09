@@ -187,19 +187,20 @@ fun ItemColorWeeklyChart(
                     xEnd = distance.times(idx) + 16.dp.toPx() + barWidth
                 )
             )
-            val convertDateFormat = list[idx].first.toConvertDisplayDay()
-            val sortedInfo = barAreas[idx].values.sortedDescending()
-            if (barAreas[idx].values.isNotEmpty()) {
+            val totalSecList = info.second.map { it.totalUsedInfo.toInt() }
+            val convertDateFormat = info.first.toConvertDisplayDay()
+            val sortedInfo = totalSecList.sortedDescending()
+            if (totalSecList.isNotEmpty()) {
                 var temp = 0f
                 val totalBarHeight = sortedInfo.drop(3).sum().times(scale).toFloat()
 
-                if (barAreas[idx].values.size > 3) {
+                if (totalSecList.size > 3) {
                     repeat(3) {
                         val barHeight = sortedInfo[it].times(scale).toFloat()
                         drawRoundRect(
                             color = colorList[it],
                             topLeft = Offset(
-                                x = barAreas[idx].xStart,
+                                x = distance.times(idx) + 16.dp.toPx(),
                                 y = size.height - barHeight - smallPadding - labelSectionHeight - temp
                             ),
                             size = Size(barWidth, barHeight)
@@ -211,7 +212,7 @@ fun ItemColorWeeklyChart(
                 drawRoundRect(
                     color = barColor,
                     topLeft = Offset(
-                        x = barAreas[idx].xStart,
+                        x = distance.times(idx) + 16.dp.toPx(),
                         y = size.height - totalBarHeight - smallPadding - labelSectionHeight - temp
                     ),
                     size = Size(barWidth, totalBarHeight)
