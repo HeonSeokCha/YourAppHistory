@@ -165,6 +165,12 @@ fun AppUsageDetailScreen(
                 item = state.weekList,
                 onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(it)) }
             )
+
+            ItemWeeklyPagingInfo(
+                state = state,
+                weeklyPagingItems = weeklyPagingItems,
+                onIntent = onIntent
+            )
         } else {
             ItemDateList(
                 state = datePagerState,
@@ -173,15 +179,7 @@ fun AppUsageDetailScreen(
                 item = state.dateList,
                 onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(it)) }
             )
-        }
 
-        if (state.isWeeklyMode) {
-            ItemWeeklyPagingInfo(
-                state = state,
-                weeklyPagingItems = weeklyPagingItems,
-                onIntent = onIntent
-            )
-        } else {
             ItemDailyPagingInfo(
                 state = state,
                 dailyPagingItems = dailyPagingItems,

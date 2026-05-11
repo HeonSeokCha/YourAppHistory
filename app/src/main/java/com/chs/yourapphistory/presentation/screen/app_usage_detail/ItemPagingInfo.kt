@@ -28,6 +28,7 @@ import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.collections.sumOf
 
@@ -91,56 +92,40 @@ fun ItemDailyPagingInfo(
         }
     }
 
-    LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
-    }
+    val allPagerStates = listOf(
+        dailyUsagePager,
+        dailyForegroundUsagePager,
+        dailyNotifyPager,
+        dailyLaunchPager
+    )
 
-    LaunchedEffect(
-        dailyForegroundUsagePager.currentPage,
-        dailyForegroundUsagePager.isScrollInProgress
-    ) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (dailyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyForegroundUsagePager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
-    }
+    allPagerStates.forEach { pagerState ->
+        LaunchedEffect(
+            pagerState.currentPage,
+            pagerState.isScrollInProgress
+        ) {
+            if (pagerState.isScrollInProgress) return@LaunchedEffect
+            val newPage = pagerState.currentPage
 
-    LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyNotifyPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
-        }
-        onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
-    }
+            if (state.dateCurrentPage != newPage) {
+                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
+                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+            }
 
-    LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
-        val idx = dailyLaunchPager.currentPage.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            ((initIdx + this) / 7) to (initIdx + this) % 7
+            allPagerStates
+                .filter { it !== pagerState }
+                .forEach { other ->
+                    if (other.currentPage == newPage) return@forEach
+                    launch { other.scrollToPage(newPage) }
+                }
         }
-        onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
     }
 
     LaunchedEffect(state.dateCurrentPage) {
-        awaitAll(
-            async { dailyForegroundUsagePager.scrollToPage(state.dateCurrentPage) },
-            async { dailyUsagePager.scrollToPage(state.dateCurrentPage) },
-            async { dailyNotifyPager.scrollToPage(state.dateCurrentPage) },
-            async { dailyLaunchPager.scrollToPage(state.dateCurrentPage) }
-        )
+        allPagerStates.forEach { pagerState ->
+            launch { pagerState.scrollToPage(state.dateCurrentPage) }
+        }
     }
 
     Column(
@@ -245,16 +230,24 @@ fun ItemWeeklyPagingInfo(
     val scrollState = rememberScrollState()
 
     val weeklyUsagePager =
-        rememberPagerState(initialPage = state.weekCurrentPage, pageCount = { weeklyPagingItems.itemCount })
+        rememberPagerState(
+            initialPage = state.weekCurrentPage,
+            pageCount = { weeklyPagingItems.itemCount })
 
     val weeklyForegroundUsagePager =
-        rememberPagerState(initialPage = state.weekCurrentPage, pageCount = { weeklyPagingItems.itemCount })
+        rememberPagerState(
+            initialPage = state.weekCurrentPage,
+            pageCount = { weeklyPagingItems.itemCount })
 
     val weeklyNotifyPager =
-        rememberPagerState(initialPage = state.weekCurrentPage, pageCount = { weeklyPagingItems.itemCount })
+        rememberPagerState(
+            initialPage = state.weekCurrentPage,
+            pageCount = { weeklyPagingItems.itemCount })
 
     val weeklyLaunchPager =
-        rememberPagerState(initialPage = state.weekCurrentPage, pageCount = { weeklyPagingItems.itemCount })
+        rememberPagerState(
+            initialPage = state.weekCurrentPage,
+            pageCount = { weeklyPagingItems.itemCount })
 
     LaunchedEffect(state.weekCurrentPage) {
         awaitAll(
@@ -280,7 +273,8 @@ fun ItemWeeklyPagingInfo(
         if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
         if (weeklyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
         if (weeklyForegroundUsagePager.currentPage == state.weekCurrentPage) return@LaunchedEffect
-        val idx = weeklyForegroundUsagePager.run { (this.currentPage / 5) to (this.currentPage % 5) }
+        val idx =
+            weeklyForegroundUsagePager.run { (this.currentPage / 5) to (this.currentPage % 5) }
         onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
     }
 
