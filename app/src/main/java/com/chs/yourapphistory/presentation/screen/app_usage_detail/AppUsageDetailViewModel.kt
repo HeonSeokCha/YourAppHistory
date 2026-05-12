@@ -102,7 +102,7 @@ class AppUsageDetailViewModel(
                     },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
-                    weekIdx = (dateList.indexOf(targetDate) / 7).run { 0 to this }
+                    weekIdx = (dateList.indexOf(targetDate) / 7).run { (this / 5) to this }
                 )
             }
         }
