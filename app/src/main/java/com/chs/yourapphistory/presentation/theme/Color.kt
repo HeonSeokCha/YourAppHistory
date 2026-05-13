@@ -13,3 +13,5 @@ val Pink40 = Color(0xFF7D5260)
 val RankBlue = Color(0xFF3478f9)
 val RankGreen = Color(0xFF3abdd2)
 val RankGreen2 = Color(0xFF56d684)
+
+val DashLineColor = Color(0xFF8E8E93)

@@ -19,6 +19,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.DrawScope
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
@@ -43,6 +44,7 @@ import com.chs.yourapphistory.common.convertUsageUnitText
 import com.chs.yourapphistory.common.isZero
 import com.chs.yourapphistory.common.toConvertDisplayDay
 import com.chs.yourapphistory.domain.model.UsageEventType
+import com.chs.yourapphistory.presentation.theme.DashLineColor
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -186,7 +188,7 @@ fun ItemWeeklyChart(
                 textMeasurer = textMeasurer,
                 text = info.first.toConvertDisplayDay(),
                 topLeft = Offset(
-                    x = distance.times(idx) + 189.dp.toPx(),
+                    x = distance.times(idx) + 16.dp.toPx(),
                     y = chartAreaBottom
                 ),
                 style = style1
@@ -198,10 +200,14 @@ fun ItemWeeklyChart(
                 .toFloat() - smallPadding - labelSectionHeight)
 
             drawLine(
-                color = Color.Black,
+                color = DashLineColor,
                 start = Offset(selectedBar!!.xStart + barWidth.div(2), 50f),
                 end = Offset(selectedBar!!.xStart + barWidth.div(2), barHeight),
-                strokeWidth = 4f
+                strokeWidth = 1.5.dp.toPx(),
+                pathEffect = PathEffect.dashPathEffect(
+                    intervals = floatArrayOf(6.dp.toPx(), 4.dp.toPx()),
+                    phase = 0f
+                )
             )
 
             clickText(

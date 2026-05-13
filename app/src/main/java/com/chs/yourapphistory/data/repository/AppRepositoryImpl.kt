@@ -302,7 +302,7 @@ class AppRepositoryImpl(
     }.flatMapLatest {
         Pager(
             PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
+                pageSize = Constants.PAGING_WEEK.toInt(),
                 enablePlaceholders = false
             )
         ) {
@@ -346,7 +346,7 @@ class AppRepositoryImpl(
         }.flatMapLatest {
             Pager(
                 PagingConfig(
-                    pageSize = Constants.PAGING_DAY.toInt(),
+                    pageSize = Constants.PAGING_WEEK.toInt(),
                     enablePlaceholders = false
                 )
             ) {

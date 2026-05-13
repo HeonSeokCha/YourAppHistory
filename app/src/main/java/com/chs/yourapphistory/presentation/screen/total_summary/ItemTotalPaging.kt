@@ -22,9 +22,11 @@ import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.domain.model.AppTotalUsageInfo
 import com.chs.yourapphistory.domain.model.UsageEventType
+import com.chs.yourapphistory.presentation.screen.app_usage_detail.AppUsageDetailIntent
 import com.chs.yourapphistory.presentation.screen.common.WeeklyColorUsageChart
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @Composable
@@ -41,30 +43,37 @@ fun ItemTotalPaging(
 
     val dailyLaunchPager = rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
 
-    LaunchedEffect(dailyUsagePager.currentPage, dailyUsagePager.isScrollInProgress) {
-        if (state.dateList.isEmpty()) return@LaunchedEffect
-        if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyUsagePager.currentPage))
-    }
+    val allPagerStates = listOf(
+        dailyUsagePager,
+        dailyNotifyPager,
+        dailyLaunchPager
+    )
 
-    LaunchedEffect(dailyNotifyPager.currentPage, dailyNotifyPager.isScrollInProgress) {
-        if (state.dateList.isEmpty()) return@LaunchedEffect
-        if (dailyNotifyPager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyNotifyPager.currentPage))
-    }
+    allPagerStates.forEach { pagerState ->
+        LaunchedEffect(
+            pagerState.currentPage,
+            pagerState.isScrollInProgress
+        ) {
+            if (pagerState.isScrollInProgress) return@LaunchedEffect
+            val newPage = pagerState.currentPage
 
-    LaunchedEffect(dailyLaunchPager.currentPage, dailyLaunchPager.isScrollInProgress) {
-        if (state.dateList.isEmpty()) return@LaunchedEffect
-        if (dailyLaunchPager.isScrollInProgress) return@LaunchedEffect
-        onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(dailyLaunchPager.currentPage))
+            if (state.dateCurrentPage != newPage) {
+                onIntent(TotalSummaryIntent.OnChangeDateCurrentPage(pagerState.currentPage))
+            }
+
+            allPagerStates
+                .filter { it !== pagerState }
+                .forEach { other ->
+                    if (other.currentPage == newPage) return@forEach
+                    launch { other.scrollToPage(newPage) }
+                }
+        }
     }
 
     LaunchedEffect(state.dateCurrentPage) {
-        awaitAll(
-            async { dailyUsagePager.scrollToPage(state.dateCurrentPage) },
-            async { dailyNotifyPager.scrollToPage(state.dateCurrentPage) },
-            async { dailyLaunchPager.scrollToPage(state.dateCurrentPage) }
-        )
+        allPagerStates.forEach { pagerState ->
+            launch { pagerState.scrollToPage(state.dateCurrentPage) }
+        }
     }
 
 

@@ -265,7 +265,7 @@ fun ItemWeeklyPagingInfo(
             val newPage = pagerState.currentPage
 
             if (state.weekCurrentPage != newPage) {
-                val idx = weeklyUsagePager.run { (newPage / 5) to (newPage % 5) }
+                val idx = pagerState.run { (newPage / 5) to (newPage % 5) }
                 onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
             }
 
