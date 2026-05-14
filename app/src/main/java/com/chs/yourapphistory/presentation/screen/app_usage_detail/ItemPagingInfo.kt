@@ -40,57 +40,25 @@ fun ItemDailyPagingInfo(
 ) {
     val scrollState = rememberScrollState()
 
-    val dailyUsagePager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyUsagePager = rememberPagerState(
+        initialPage = state.dateCurrentPage,
+        pageCount = { dailyPagingItems.itemCount }
+    )
 
-    val dailyForegroundUsagePager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyForegroundUsagePager = rememberPagerState(
+        initialPage = state.dateCurrentPage,
+        pageCount = { dailyPagingItems.itemCount }
+    )
 
-    val dailyNotifyPager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyNotifyPager = rememberPagerState(
+        initialPage = state.dateCurrentPage,
+        pageCount = { dailyPagingItems.itemCount }
+    )
 
-    val dailyLaunchPager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-    } else {
-        val initIdx = state.dateList.flatten().run {
-            this.indexOf(state.displayDate) - this.indexOf(LocalDate.now())
-        }
-        if (initIdx > dailyPagingItems.itemCount) {
-            rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
-        } else {
-            rememberPagerState(initialPage = initIdx, pageCount = { dailyPagingItems.itemCount })
-        }
-    }
+    val dailyLaunchPager = rememberPagerState(
+        initialPage = state.dateCurrentPage,
+        pageCount = { dailyPagingItems.itemCount }
+    )
 
     val allPagerStates = listOf(
         dailyUsagePager,
