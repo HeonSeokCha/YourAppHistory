@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.chs.yourapphistory.common.getYearOfWeek
@@ -70,6 +71,7 @@ fun ItemDateList(
                             horizontal =  if (date.dayOfMonth == 1) 8.dp else 12.dp,
                             vertical =  8.dp
                         ),
+                    fontWeight = if (targetDate == date) FontWeight.SemiBold else FontWeight.Normal,
                     color = if (date >= minDate && date <= LocalDate.now()) Color.Black else Color.LightGray
                 )
             }

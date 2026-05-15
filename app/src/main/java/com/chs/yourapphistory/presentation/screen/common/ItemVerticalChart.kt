@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -236,26 +238,23 @@ fun DailyUsageChart(
     val barColor = MaterialTheme.colorScheme.onTertiary
     Card(
         modifier = Modifier
-            .fillMaxWidth()
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
     ) {
         Text(
             modifier = Modifier
-                .padding(
-                    top = 8.dp, start = 8.dp
-                ),
+                .padding(top = 8.dp, start = 8.dp),
             text = title,
             fontSize = 16.sp,
-            fontWeight = FontWeight.Bold
+            fontWeight = FontWeight.Bold,
         )
 
         if (subTitle != null) {
 
             Text(
                 modifier = Modifier
-                    .padding(
-                        top = 8.dp,
-                        start = 8.dp
-                    ),
+                    .padding(top = 8.dp, start = 8.dp),
                 text = subTitle,
                 fontSize = 12.sp,
                 color = Color.DarkGray

@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -50,14 +51,10 @@ fun AppUsageDetailScreen(
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     /* date related variables */
-    val datePagerState = if (state.dateList.isNotEmpty()) {
-        rememberPagerState(
-            pageCount = { state.dateList.count() },
-            initialPage = state.dateIdx.first
-        )
-    } else {
-        rememberPagerState(pageCount = { 0 })
-    }
+    val datePagerState = rememberPagerState(
+        pageCount = { state.dateList.count() },
+        initialPage = state.dateIdx.first
+    )
 
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
@@ -91,11 +88,7 @@ fun AppUsageDetailScreen(
     /* date related variables end*/
 
     /* week related variables */
-    val weekPagerState = if (state.weekList.isNotEmpty()) {
-        rememberPagerState(pageCount = { state.weekList.count() })
-    } else {
-        rememberPagerState(pageCount = { 0 })
-    }
+    val weekPagerState = rememberPagerState(pageCount = { state.weekList.count() })
 
     LaunchedEffect(weeklyPagingItems.loadState.refresh) {
         when (weeklyPagingItems.loadState.refresh) {
@@ -112,8 +105,6 @@ fun AppUsageDetailScreen(
             AppUsageDetailIntent.OnChangeTargetWeekIdx(weekPagerState.currentPage to state.weekIdx.second)
         )
     }
-
-
     LaunchedEffect(state.weekIdx) {
         val page = state.weekIdx.run { (this.first * 5) + this.second }
 
@@ -126,37 +117,10 @@ fun AppUsageDetailScreen(
             .fillMaxSize()
             .padding(horizontal = 8.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 16.dp, horizontal = 8.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            Text(
-                modifier = Modifier.weight(0.7f),
-                text = if (state.isWeeklyMode) {
-                    state.displayWeek.toDisplayYearDate()
-                } else {
-                    state.displayDate.toConvertDisplayYearDate()
-                },
-                fontSize = 16.sp,
-                maxLines = 2
-            )
-
-            Spacer(modifier = Modifier.width(8.dp).weight(0.1f))
-
-            Text(
-                modifier = Modifier
-                    .weight(0.2f)
-                    .clickable { onIntent(AppUsageDetailIntent.OnChangeViewType) },
-                text = if (state.isWeeklyMode) {
-                    "일별 보기"
-                } else {
-                    "주별 보기"
-                },
-                fontSize = 16.sp
-            )
-        }
+        ItemDateHeader(
+            state = state,
+            onIntent = onIntent
+        )
 
         if (state.isWeeklyMode) {
             ItemWeekList(
