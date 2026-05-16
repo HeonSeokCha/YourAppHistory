@@ -93,6 +93,10 @@ class AppUsageDetailViewModel(
 
                 val weekList = splitList.chunked(5)
 
+                val initIdx = splitList.flatten().run {
+                    this.indexOf(targetDate) - this.indexOf(LocalDate.now())
+                }
+
                 it.copy(
                     minDate = minDate,
                     dateList = splitList,
@@ -100,6 +104,7 @@ class AppUsageDetailViewModel(
                     dateIdx = (dateList.indexOf(targetDate) / 7).run {
                         this to (splitList[this].indexOf(targetDate) % 7)
                     },
+                    datePagerInitIdx = initIdx,
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
                     weekIdx = (dateList.indexOf(targetDate) / 7).run { (this / 5) to this }

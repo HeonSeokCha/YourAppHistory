@@ -4,6 +4,7 @@ import androidx.paging.PagingSource
 import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calcHourUsageList
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -40,6 +41,8 @@ class GetPagingDailyAppInfos(
                 this
             }
         }
+
+        chsLog("$targetDate -> $pageDate")
 
 
         val data = pageDate.run {

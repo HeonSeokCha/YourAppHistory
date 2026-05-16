@@ -389,8 +389,8 @@ internal fun calcDailyTotalTime(
     }
 }
 
-fun chsLog(value: String) {
-    Log.e("CHS_456", value)
+fun chsLog(value: Any?) {
+    Log.e("CHS_456", value.toString())
 }
 
 fun LocalDate.toConvertDisplayYearDate(): String {
