@@ -39,8 +39,8 @@ fun ItemDailyPagingInfo(
 ) {
     val scrollState = rememberScrollState()
 
-    val dailyUsagePager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+    val dailyUsagePager = if (state.isDateLoading || dailyPagingItems.itemCount == 0) {
+        rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
             initialPage = state.datePagerInitIdx,
@@ -49,7 +49,7 @@ fun ItemDailyPagingInfo(
     }
 
     val dailyForegroundUsagePager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+        rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
             initialPage = state.datePagerInitIdx,
@@ -58,7 +58,7 @@ fun ItemDailyPagingInfo(
     }
 
     val dailyNotifyPager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+        rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
             initialPage = state.datePagerInitIdx,
@@ -67,7 +67,7 @@ fun ItemDailyPagingInfo(
     }
 
     val dailyLaunchPager = if (state.isDateLoading) {
-        rememberPagerState(initialPage = 0, pageCount = { dailyPagingItems.itemCount })
+        rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
             initialPage = state.datePagerInitIdx,
@@ -90,11 +90,11 @@ fun ItemDailyPagingInfo(
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
-            if (state.dateCurrentPage != newPage) {
-                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
-                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
-            }
+//            if (state.dateCurrentPage != newPage) {
+//                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+//                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
+//                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+//            }
 
             allPagerStates
                 .filter { it !== pagerState }

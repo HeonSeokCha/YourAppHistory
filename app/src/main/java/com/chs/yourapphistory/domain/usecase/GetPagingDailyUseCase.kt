@@ -14,7 +14,7 @@ class GetPagingDailyUseCase(
     operator fun invoke(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<UsageEventType, List<Pair<Int, Int>>>>> {
+    ): Flow<PagingData<Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>> {
         return repository.getDailyPagingAppInfo(
             targetDate = targetDate,
             packageName = packageName

@@ -320,7 +320,7 @@ class AppRepositoryImpl(
     override fun getDailyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<UsageEventType, List<Pair<Int, Int>>>>> = flow {
+    ): Flow<PagingData<Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>> = flow {
         emit(getMinDate())
     }.flatMapLatest {
         Pager(

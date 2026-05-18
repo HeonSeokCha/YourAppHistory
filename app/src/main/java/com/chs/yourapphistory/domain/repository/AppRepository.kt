@@ -29,7 +29,7 @@ interface AppRepository {
     fun getDailyPagingAppInfo(
         targetDate: LocalDate,
         packageName: String
-    ): Flow<PagingData<Map<UsageEventType, List<Pair<Int, Int>>>>>
+    ): Flow<PagingData<Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>>
 
     fun getWeeklyPagingTotalAppInfo(): Flow<PagingData<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>>
 

@@ -24,43 +24,29 @@ class GetPagingDailyAppInfos(
     private val appUsageDao: AppUsageDao,
     private val appForegroundDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
-) : PagingSource<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>() {
+) : PagingSource<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>() {
 
-    override fun getRefreshKey(state: PagingState<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>): LocalDate? {
-        return state.anchorPosition?.let { position ->
-            val page = state.closestPageToPosition(position)
-            page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
-        }
-    }
+    override fun getRefreshKey(
+        state: PagingState<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>
+    ): Int? = null
 
-    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>> {
-        val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
-            if (params.key == null) {
-                targetDate
+    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>> {
+        val page = params.key ?: 1
+
+        val data = if (targetDate == LocalDate.now()) {
+            if (targetDate.minusDays(Constants.PAGING_DAY * page) <= minDate) minDate
+            else targetDate.minusDays(Constants.PAGING_DAY * page)
+        } else {
+            if (targetDate.minusDays(Constants.PAGING_DAY * page) == LocalDate.now()) {
+                targetDate.plusDays(1L)
             } else {
-                this
+                if (targetDate.minusDays(Constants.PAGING_DAY * page) <= minDate) minDate
+                else targetDate.minusDays(Constants.PAGING_DAY * page)
             }
         }
-
-        chsLog("$targetDate -> $pageDate")
-
-
-        val data = pageDate.run {
-            if (targetDate == LocalDate.now()) {
-                if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
-                else this.minusDays(Constants.PAGING_DAY)
-            } else {
-                if (this == LocalDate.now()) {
-                    targetDate.plusDays(1L)
-                } else {
-                    if (this.minusDays(Constants.PAGING_DAY) <= minDate) minDate
-                    else this.minusDays(Constants.PAGING_DAY)
-                }
-            }
-        }
-            .reverseDateUntil(pageDate)
+            .reverseDateUntil(targetDate.minusDays(Constants.PAGING_DAY * page))
             .map {
-                withContext(Dispatchers.IO) {
+                it to withContext(Dispatchers.IO) {
                     val appUsage = async(Dispatchers.IO) {
                         UsageEventType.UsageEvent to calcHourUsageList(
                             list = appUsageDao.getDayPackageUsageInfo(
@@ -101,20 +87,13 @@ class GetPagingDailyAppInfos(
                 }.toMap()
             }
 
+
+        chsLog("$targetDate -> $page -> ${data.count()}")
+
         return LoadResult.Page(
             data = data,
-            prevKey = if (pageDate == LocalDate.now()) {
-                null
-            } else {
-                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
-                    LocalDate.now()
-                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
-            },
-            nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
-                null
-            } else {
-                pageDate.minusDays(Constants.PAGING_DAY + 1)
-            }
+            prevKey = null,
+            nextKey = null
         )
     }
 }
