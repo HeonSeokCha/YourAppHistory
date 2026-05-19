@@ -34,7 +34,7 @@ import kotlin.collections.sumOf
 @Composable
 fun ItemDailyPagingInfo(
     state: AppUsageDetailState,
-    dailyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<Int, Int>>>>,
+    dailyPagingItems: LazyPagingItems<Pair<LocalDate,Map<UsageEventType, List<Pair<Int, Int>>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
@@ -90,11 +90,11 @@ fun ItemDailyPagingInfo(
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
-//            if (state.dateCurrentPage != newPage) {
-//                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-//                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
+            if (state.dateCurrentPage != newPage) {
+                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
 //                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
-//            }
+            }
 
             allPagerStates
                 .filter { it !== pagerState }
@@ -124,7 +124,7 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(UsageEventType.UsageEvent)
+            val item = dailyPagingItems[it]?.second?.get(UsageEventType.UsageEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
@@ -146,7 +146,7 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(UsageEventType.ForegroundUsageEvent)
+            val item = dailyPagingItems[it]?.second?.get(UsageEventType.ForegroundUsageEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = item.sumOf { it.second }.convertToRealUsageTime(),
@@ -168,7 +168,7 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(UsageEventType.NotifyEvent)
+            val item = dailyPagingItems[it]?.second?.get(UsageEventType.NotifyEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = "알림 ${item.sumOf { it.second }}개",
@@ -189,7 +189,7 @@ fun ItemDailyPagingInfo(
             reverseLayout = true,
             key = { it }
         ) {
-            val item = dailyPagingItems[it]?.get(UsageEventType.LaunchEvent)
+            val item = dailyPagingItems[it]?.second?.get(UsageEventType.LaunchEvent)
             if (item != null) {
                 DailyUsageChart(
                     title = "총 실행 횟수 ${item.sumOf { it.second }}회",

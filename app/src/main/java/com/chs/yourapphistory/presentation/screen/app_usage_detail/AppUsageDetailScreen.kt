@@ -13,6 +13,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.domain.model.UsageEventType
 import java.time.LocalDate
 
@@ -35,7 +36,7 @@ fun AppUsageDetailScreenRoot(
 @Composable
 fun AppUsageDetailScreen(
     state: AppUsageDetailState,
-    dailyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<Int, Int>>>>,
+    dailyPagingItems: LazyPagingItems<Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>,
     weeklyPagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<LocalDate, Int>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
@@ -48,7 +49,14 @@ fun AppUsageDetailScreen(
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
             is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
-            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.DateLoadComplete)
+            is LoadState.NotLoading -> {
+                onIntent(
+                    AppUsageDetailIntent.DateLoadComplete(
+                        dailyPagingItems.itemSnapshotList.items.map { it.first }.indexOf(state.displayDate)
+                    )
+                )
+            }
+
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
         }
     }

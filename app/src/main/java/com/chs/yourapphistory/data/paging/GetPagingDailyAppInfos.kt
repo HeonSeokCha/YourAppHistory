@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.calcHourUsageList
 import com.chs.yourapphistory.common.chsLog
+import com.chs.yourapphistory.common.containsWeek
 import com.chs.yourapphistory.common.reverseDateUntil
 import com.chs.yourapphistory.common.toMillis
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
@@ -24,27 +25,32 @@ class GetPagingDailyAppInfos(
     private val appUsageDao: AppUsageDao,
     private val appForegroundDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
-) : PagingSource<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>() {
+) : PagingSource<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>() {
 
     override fun getRefreshKey(
-        state: PagingState<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>
-    ): Int? = null
+        state: PagingState<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>
+    ): LocalDate? = null
 
-    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>> {
-        val page = params.key ?: 1
-
-        val data = if (targetDate == LocalDate.now()) {
-            if (targetDate.minusDays(Constants.PAGING_DAY * page) <= minDate) minDate
-            else targetDate.minusDays(Constants.PAGING_DAY * page)
-        } else {
-            if (targetDate.minusDays(Constants.PAGING_DAY * page) == LocalDate.now()) {
-                targetDate.plusDays(1L)
+    override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>> {
+        val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
+            if (params.key == null) {
+                targetDate
             } else {
-                if (targetDate.minusDays(Constants.PAGING_DAY * page) <= minDate) minDate
-                else targetDate.minusDays(Constants.PAGING_DAY * page)
+                this
             }
         }
-            .reverseDateUntil(targetDate.minusDays(Constants.PAGING_DAY * page))
+
+        val data = pageDate.run {
+            if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
+            else {
+                if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+                    LocalDate.now()
+                } else {
+                    this.minusWeeks(Constants.PAGING_WEEK)
+                }
+            }
+        }
+            .reverseDateUntil(pageDate)
             .map {
                 it to withContext(Dispatchers.IO) {
                     val appUsage = async(Dispatchers.IO) {
@@ -88,12 +94,23 @@ class GetPagingDailyAppInfos(
             }
 
 
-        chsLog("$targetDate -> $page -> ${data.count()}")
+        chsLog("$targetDate -> $pageDate -> ${data.map { it.first }}")
 
         return LoadResult.Page(
             data = data,
             prevKey = null,
-            nextKey = null
+//            prevKey = if (pageDate == LocalDate.now()) {
+//                null
+//            } else {
+//                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+//                    LocalDate.now()
+//                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
+//            },
+            nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
+                null
+            } else {
+                pageDate.minusDays(Constants.PAGING_DAY + 1)
+            }
         )
     }
 }
