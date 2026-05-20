@@ -93,7 +93,7 @@ fun ItemDailyPagingInfo(
             if (state.dateCurrentPage != newPage) {
                 val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
                 val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
-//                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
             }
 
             allPagerStates

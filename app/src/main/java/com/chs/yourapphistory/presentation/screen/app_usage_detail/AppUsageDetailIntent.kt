@@ -10,7 +10,7 @@ sealed interface AppUsageDetailIntent {
 
     data object DateLoading : AppUsageDetailIntent
     data object WeekLoading : AppUsageDetailIntent
-    data class DateLoadComplete(val initIdx: Int) : AppUsageDetailIntent
+    data object DateLoadComplete : AppUsageDetailIntent
     data object WeekLoadComplete : AppUsageDetailIntent
     data object Error : AppUsageDetailIntent
 }

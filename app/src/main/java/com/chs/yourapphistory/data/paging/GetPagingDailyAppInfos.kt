@@ -41,71 +41,84 @@ class GetPagingDailyAppInfos(
         }
 
         val data = pageDate.run {
-            if (this.minusWeeks(Constants.PAGING_WEEK) <= minDate) minDate
-            else {
-                if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+            if (targetDate >= pageDate) {
+                if (this.minusDays(Constants.PAGING_DAY) <= minDate) {
+                    minDate
+                } else {
+                    if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+                        LocalDate.now()
+                    } else {
+                        this.minusDays(Constants.PAGING_DAY)
+                    }
+                }.run {
+                    chsLog("targetDate >= pageDate -> $this -> $pageDate")
+                    this.reverseDateUntil(pageDate)
+                }
+            } else {
+                if (this.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
                     LocalDate.now()
                 } else {
-                    this.minusWeeks(Constants.PAGING_WEEK)
+                    this.plusDays(Constants.PAGING_DAY)
+                }.run {
+                    chsLog("targetDate < pageDate -> $targetDate -> $this")
+                    targetDate.reverseDateUntil(this)
                 }
             }
+        }.map {
+            it to withContext(Dispatchers.IO) {
+                val appUsage = async(Dispatchers.IO) {
+                    UsageEventType.UsageEvent to calcHourUsageList(
+                        list = appUsageDao.getDayPackageUsageInfo(
+                            targetDate = it.toMillis(),
+                            packageName = packageName
+                        ),
+                        targetDate = it
+                    )
+                }
+                val appForeground = async(Dispatchers.IO) {
+                    UsageEventType.ForegroundUsageEvent to calcHourUsageList(
+                        list = appForegroundDao.getForegroundUsageInfo(
+                            targetDate = it.toMillis(),
+                            packageName = packageName
+                        ),
+                        targetDate = it
+                    )
+
+                }
+                val appNotify = async(Dispatchers.IO) {
+                    UsageEventType.NotifyEvent to calcHourUsageList(
+                        list = appNotifyInfoDao.getDayNotifyCount(
+                            targetDate = it.toMillis(),
+                            packageName = packageName
+                        )
+                    )
+                }
+                val appLaunch = async(Dispatchers.IO) {
+                    UsageEventType.LaunchEvent to calcHourUsageList(
+                        list = appUsageDao.getDayPackageLaunchInfo(
+                            targetDate = it.toMillis(),
+                            packageName = packageName
+                        )
+                    )
+                }
+
+                awaitAll(appUsage, appForeground, appNotify, appLaunch)
+            }.toMap()
         }
-            .reverseDateUntil(pageDate)
-            .map {
-                it to withContext(Dispatchers.IO) {
-                    val appUsage = async(Dispatchers.IO) {
-                        UsageEventType.UsageEvent to calcHourUsageList(
-                            list = appUsageDao.getDayPackageUsageInfo(
-                                targetDate = it.toMillis(),
-                                packageName = packageName
-                            ),
-                            targetDate = it
-                        )
-                    }
-                    val appForeground = async(Dispatchers.IO) {
-                        UsageEventType.ForegroundUsageEvent to calcHourUsageList(
-                            list = appForegroundDao.getForegroundUsageInfo(
-                                targetDate = it.toMillis(),
-                                packageName = packageName
-                            ),
-                            targetDate = it
-                        )
-
-                    }
-                    val appNotify = async(Dispatchers.IO) {
-                        UsageEventType.NotifyEvent to calcHourUsageList(
-                            list = appNotifyInfoDao.getDayNotifyCount(
-                                targetDate = it.toMillis(),
-                                packageName = packageName
-                            )
-                        )
-                    }
-                    val appLaunch = async(Dispatchers.IO) {
-                        UsageEventType.LaunchEvent to calcHourUsageList(
-                            list = appUsageDao.getDayPackageLaunchInfo(
-                                targetDate = it.toMillis(),
-                                packageName = packageName
-                            )
-                        )
-                    }
-
-                    awaitAll(appUsage, appForeground, appNotify, appLaunch)
-                }.toMap()
-            }
 
 
         chsLog("$targetDate -> $pageDate -> ${data.map { it.first }}")
 
         return LoadResult.Page(
             data = data,
-            prevKey = null,
-//            prevKey = if (pageDate == LocalDate.now()) {
-//                null
-//            } else {
-//                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
-//                    LocalDate.now()
-//                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
-//            },
+//            prevKey = null,
+            prevKey = if (pageDate >= LocalDate.now()) {
+                null
+            } else {
+                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+                    LocalDate.now()
+                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
+            },
             nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
                 null
             } else {

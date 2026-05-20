@@ -72,9 +72,8 @@ class AppUsageDetailViewModel(
                 _state.update { it.copy(isDateLoading = true) }
             }
 
-            is AppUsageDetailIntent.DateLoadComplete -> {
-                chsLog("INITIDX ${intent.initIdx}")
-                _state.update { it.copy(isDateLoading = false, datePagerInitIdx = intent.initIdx) }
+            AppUsageDetailIntent.DateLoadComplete -> {
+                _state.update { it.copy(isDateLoading = false) }
             }
 
             AppUsageDetailIntent.WeekLoading -> {
@@ -119,6 +118,7 @@ class AppUsageDetailViewModel(
                     dateIdx = (dateList.indexOf(targetDate) / 7).run {
                         this to (splitList[this].indexOf(targetDate) % 7)
                     },
+                    datePagerInitIdx = initIdx,
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
                     weekIdx = (dateList.indexOf(targetDate) / 7).run { (this / 5) to this }

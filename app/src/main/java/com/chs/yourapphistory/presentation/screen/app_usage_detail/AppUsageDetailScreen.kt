@@ -49,14 +49,7 @@ fun AppUsageDetailScreen(
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
             is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
-            is LoadState.NotLoading -> {
-                onIntent(
-                    AppUsageDetailIntent.DateLoadComplete(
-                        dailyPagingItems.itemSnapshotList.items.map { it.first }.indexOf(state.displayDate)
-                    )
-                )
-            }
-
+            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.DateLoadComplete)
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
         }
     }
