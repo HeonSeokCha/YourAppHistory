@@ -32,36 +32,45 @@ class GetPagingDailyAppInfos(
     ): LocalDate? = null
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>> {
-        val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
-            if (params.key == null) {
-                targetDate
-            } else {
-                this
-            }
-        }
+        val pageDate: LocalDate = params.key ?: targetDate
 
-        val data = pageDate.run {
-            if (targetDate >= pageDate) {
-                if (this.minusDays(Constants.PAGING_DAY) <= minDate) {
+        // 05/10
+
+        // 05/03 ~ 05/17
+
+        val data = if (pageDate == targetDate) {
+            if (targetDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+                LocalDate.now()
+            } else {
+                targetDate.plusDays(Constants.PAGING_DAY)
+            }.run {
+                val a = if (pageDate.minusDays(Constants.PAGING_DAY) <= minDate) {
                     minDate
                 } else {
-                    if (this == LocalDate.now() && targetDate != LocalDate.now()) {
+                    targetDate.minusDays(Constants.PAGING_DAY)
+                }
+                a.reverseDateUntil(this)
+            }
+        } else {
+            if (targetDate >= pageDate) {
+                if (pageDate.minusDays(Constants.PAGING_DAY) <= minDate) {
+                    minDate
+                } else {
+                    if (pageDate == LocalDate.now() && targetDate != LocalDate.now()) {
                         LocalDate.now()
                     } else {
-                        this.minusDays(Constants.PAGING_DAY)
+                        pageDate.minusDays(Constants.PAGING_DAY)
                     }
                 }.run {
-                    chsLog("targetDate >= pageDate -> $this -> $pageDate")
-                    this.reverseDateUntil(pageDate)
+                    pageDate.reverseDateUntil(pageDate)
                 }
             } else {
-                if (this.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
+                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
                     LocalDate.now()
                 } else {
-                    this.plusDays(Constants.PAGING_DAY)
+                    pageDate.plusDays(Constants.PAGING_DAY)
                 }.run {
-                    chsLog("targetDate < pageDate -> $targetDate -> $this")
-                    targetDate.reverseDateUntil(this)
+                    pageDate.reverseDateUntil(this)
                 }
             }
         }.map {
@@ -116,7 +125,7 @@ class GetPagingDailyAppInfos(
                 null
             } else {
                 if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
-                    LocalDate.now()
+                    null
                 } else pageDate.plusDays(Constants.PAGING_DAY + 1)
             },
             nextKey = if (pageDate.minusDays(Constants.PAGING_DAY + 1) < minDate) {
