@@ -72,8 +72,8 @@ class AppUsageDetailViewModel(
                 _state.update { it.copy(isDateLoading = true) }
             }
 
-            AppUsageDetailIntent.DateLoadComplete -> {
-                _state.update { it.copy(isDateLoading = false) }
+            is AppUsageDetailIntent.DateLoadComplete -> {
+                _state.update { it.copy(isDateLoading = false, datePagerInitIdx = intent.initIdx) }
             }
 
             AppUsageDetailIntent.WeekLoading -> {
@@ -118,7 +118,6 @@ class AppUsageDetailViewModel(
                     dateIdx = (dateList.indexOf(targetDate) / 7).run {
                         this to (splitList[this].indexOf(targetDate) % 7)
                     },
-                    datePagerInitIdx = initIdx,
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),
                     weekList = weekList,
                     weekIdx = (dateList.indexOf(targetDate) / 7).run { (this / 5) to this }

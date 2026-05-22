@@ -301,10 +301,7 @@ class AppRepositoryImpl(
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_WEEK.toInt(),
-                enablePlaceholders = false
-            )
+            PagingConfig(pageSize = Constants.PAGING_WEEK.toInt())
         ) {
             GetPagingWeeklyAppInfos(
                 minDate = it,
@@ -324,10 +321,7 @@ class AppRepositoryImpl(
         emit(getMinDate())
     }.flatMapLatest {
         Pager(
-            PagingConfig(
-                pageSize = Constants.PAGING_DAY.toInt(),
-                enablePlaceholders = false
-            )
+            PagingConfig(pageSize = Constants.PAGING_DAY.toInt())
         ) {
             GetPagingDailyAppInfos(
                 minDate = it,
@@ -345,10 +339,7 @@ class AppRepositoryImpl(
             emit(getMinDate())
         }.flatMapLatest {
             Pager(
-                PagingConfig(
-                    pageSize = Constants.PAGING_WEEK.toInt(),
-                    enablePlaceholders = false
-                )
+                PagingConfig(pageSize = Constants.PAGING_WEEK.toInt())
             ) {
                 GetPagingWeeklyTotalAppInfo(
                     minDate = it,

@@ -120,7 +120,6 @@ class GetPagingDailyAppInfos(
 
         return LoadResult.Page(
             data = data,
-//            prevKey = null,
             prevKey = if (pageDate >= LocalDate.now()) {
                 null
             } else {

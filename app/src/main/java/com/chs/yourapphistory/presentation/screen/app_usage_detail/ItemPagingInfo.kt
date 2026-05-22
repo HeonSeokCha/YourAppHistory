@@ -11,12 +11,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
@@ -102,6 +107,25 @@ fun ItemDailyPagingInfo(
                     if (other.currentPage == newPage) return@forEach
                     launch { other.scrollToPage(newPage) }
                 }
+        }
+    }
+
+    var countBeforePrepend by remember { mutableIntStateOf(0) }
+    val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
+
+    LaunchedEffect(isPrependLoading) {
+        if (isPrependLoading) {
+            countBeforePrepend = dailyPagingItems.itemCount
+        } else {
+            if (countBeforePrepend > 0) {
+                val prependedCount = dailyPagingItems.itemCount - countBeforePrepend
+                if (prependedCount > 0) {
+                    allPagerStates.forEach {
+                        it.scrollToPage(it.currentPage + prependedCount)
+                    }
+                }
+                countBeforePrepend = 0
+            }
         }
     }
 
