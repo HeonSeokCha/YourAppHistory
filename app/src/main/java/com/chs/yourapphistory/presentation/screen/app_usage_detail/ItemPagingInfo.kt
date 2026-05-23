@@ -53,7 +53,7 @@ fun ItemDailyPagingInfo(
         )
     }
 
-    val dailyForegroundUsagePager = if (state.isDateLoading) {
+    val dailyForegroundUsagePager = if (state.isDateLoading || dailyPagingItems.itemCount == 0) {
         rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
@@ -62,7 +62,7 @@ fun ItemDailyPagingInfo(
         )
     }
 
-    val dailyNotifyPager = if (state.isDateLoading) {
+    val dailyNotifyPager = if (state.isDateLoading || dailyPagingItems.itemCount == 0) {
         rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
@@ -71,7 +71,7 @@ fun ItemDailyPagingInfo(
         )
     }
 
-    val dailyLaunchPager = if (state.isDateLoading) {
+    val dailyLaunchPager = if (state.isDateLoading || dailyPagingItems.itemCount == 0) {
         rememberPagerState(pageCount = { dailyPagingItems.itemCount })
     } else {
         rememberPagerState(
@@ -110,21 +110,21 @@ fun ItemDailyPagingInfo(
         }
     }
 
-    var countBeforePrepend by remember { mutableIntStateOf(0) }
     val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
-
     LaunchedEffect(isPrependLoading) {
         if (isPrependLoading) {
-            countBeforePrepend = dailyPagingItems.itemCount
+            onIntent(AppUsageDetailIntent.OnChangeInitDateItemCount(dailyPagingItems.itemCount))
         } else {
-            if (countBeforePrepend > 0) {
-                val prependedCount = dailyPagingItems.itemCount - countBeforePrepend
+            if (state.datePageInitItemCount > 0) {
+                val prependedCount = dailyPagingItems.itemCount - state.datePageInitItemCount
                 if (prependedCount > 0) {
                     allPagerStates.forEach {
-                        it.scrollToPage(it.currentPage + prependedCount)
+                        launch {
+                            it.scrollToPage(it.currentPage + prependedCount)
+                        }
                     }
                 }
-                countBeforePrepend = 0
+                onIntent(AppUsageDetailIntent.OnChangeInitDateItemCount(0))
             }
         }
     }

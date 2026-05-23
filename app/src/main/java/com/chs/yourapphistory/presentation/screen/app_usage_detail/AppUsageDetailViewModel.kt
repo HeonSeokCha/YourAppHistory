@@ -93,6 +93,9 @@ class AppUsageDetailViewModel(
             }
 
             AppUsageDetailIntent.Error -> Unit
+            is AppUsageDetailIntent.OnChangeInitDateItemCount -> {
+                _state.update { it.copy(datePageInitItemCount = intent.count) }
+            }
         }
     }
 
@@ -106,10 +109,6 @@ class AppUsageDetailViewModel(
                 val splitList = dateList.chunked(7)
 
                 val weekList = splitList.chunked(5)
-
-                val initIdx = splitList.flatten().run {
-                    this.indexOf(targetDate) - this.indexOf(LocalDate.now())
-                }
 
                 it.copy(
                     minDate = minDate,

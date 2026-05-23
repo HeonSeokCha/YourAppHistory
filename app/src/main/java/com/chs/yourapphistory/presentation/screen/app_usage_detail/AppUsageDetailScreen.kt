@@ -58,17 +58,6 @@ fun AppUsageDetailScreen(
         }
     }
 
-    LaunchedEffect(dailyPagingItems.loadState.append) {
-        when (dailyPagingItems.loadState.append) {
-            is LoadState.Loading -> Unit
-            is LoadState.NotLoading -> {
-                val idx = dailyPagingItems.itemSnapshotList.items.map { it.first }
-                chsLog(idx)
-            }
-            is LoadState.Error -> Unit
-        }
-    }
-
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
         if (state.dateList.isEmpty()) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect

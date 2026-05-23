@@ -14,6 +14,7 @@ data class AppUsageDetailState(
     val dateIdx: Pair<Int, Int> = (0 to 0),
     val dateCurrentPage: Int = 0,
     val datePagerInitIdx: Int = 0,
+    val datePageInitItemCount: Int = 0,
     val weekList: List<List<List<LocalDate>>> = listOf(),
     val weekIdx: Pair<Int, Int> = (0 to 0),
     val weekCurrentPage: Int = 0
