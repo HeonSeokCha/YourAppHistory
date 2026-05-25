@@ -43,6 +43,7 @@ fun ItemDailyPagingInfo(
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
+    val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
 
     val dailyUsagePager = if (state.isDateLoading || dailyPagingItems.itemCount == 0) {
         rememberPagerState(pageCount = { dailyPagingItems.itemCount })
@@ -110,7 +111,6 @@ fun ItemDailyPagingInfo(
         }
     }
 
-    val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
     LaunchedEffect(isPrependLoading) {
         if (isPrependLoading) {
             onIntent(AppUsageDetailIntent.OnChangeInitDateItemCount(dailyPagingItems.itemCount))

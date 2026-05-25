@@ -49,12 +49,22 @@ fun AppUsageDetailScreen(
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
             is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
-            is LoadState.NotLoading -> {
-                val idx = dailyPagingItems.itemSnapshotList.items.map { it.first }.indexOf(state.displayDate)
-                chsLog("REFRESH INIT IDX $idx")
-                onIntent(AppUsageDetailIntent.DateLoadComplete(idx))
-            }
+            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.DateLoadComplete)
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
+        }
+    }
+
+    LaunchedEffect(dailyPagingItems.loadState.prepend) {
+        if (state.isDateLoading || dailyPagingItems.itemCount == 0) return@LaunchedEffect
+
+        when (dailyPagingItems.loadState.prepend) {
+            is LoadState.Loading -> {
+                chsLog("prepend is Loading")
+            }
+            is LoadState.NotLoading -> {
+                chsLog("prepend -> ${dailyPagingItems.itemSnapshotList.map { it?.first }}")
+            }
+            is LoadState.Error -> Unit
         }
     }
 
