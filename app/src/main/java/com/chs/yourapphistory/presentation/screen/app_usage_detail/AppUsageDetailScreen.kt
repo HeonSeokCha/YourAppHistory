@@ -41,15 +41,22 @@ fun AppUsageDetailScreen(
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     /* date related variables */
-    val datePagerState = rememberPagerState(
-        pageCount = { state.dateList.count() },
-        initialPage = state.dateIdx.first
-    )
+    val datePagerState = if (state.isDateLoading) {
+        rememberPagerState(pageCount = { state.dateList.count() })
+    } else {
+        rememberPagerState(
+            pageCount = { state.dateList.count() },
+            initialPage = state.dateIdx.first
+        )
+    }
 
     LaunchedEffect(dailyPagingItems.loadState.refresh) {
         when (dailyPagingItems.loadState.refresh) {
             is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
-            is LoadState.NotLoading -> onIntent(AppUsageDetailIntent.DateLoadComplete)
+            is LoadState.NotLoading -> {
+                val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
+                onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
+            }
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
         }
     }
@@ -78,18 +85,18 @@ fun AppUsageDetailScreen(
         )
     }
 
-    LaunchedEffect(state.dateIdx) {
-        if (state.dateList.isEmpty()) return@LaunchedEffect
-        val page = state.dateIdx.run {
-            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-            (this.first * 7 + this.second) - initIdx
-        }
-        if (datePagerState.currentPage != state.dateIdx.first) {
-            datePagerState.scrollToPage(state.dateIdx.first)
-        }
-        if (state.isDateLoading) return@LaunchedEffect
-        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
-    }
+//    LaunchedEffect(state.dateIdx) {
+//        if (state.dateList.isEmpty()) return@LaunchedEffect
+//        val page = state.dateIdx.run {
+//            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+//            (this.first * 7 + this.second) - initIdx
+//        }
+//        if (datePagerState.currentPage != state.dateIdx.first) {
+//            datePagerState.scrollToPage(state.dateIdx.first)
+//        }
+//        if (state.isDateLoading) return@LaunchedEffect
+//        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
+//    }
     /* date related variables end*/
 
     /* week related variables */

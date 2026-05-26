@@ -1,6 +1,5 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
