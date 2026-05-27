@@ -77,7 +77,7 @@ class GetPagingDailyAppInfos(
                         pageDate.minusDays(Constants.PAGING_DAY)
                     }
                 }.run {
-                    pageDate.reverseDateUntil(pageDate)
+                    this.reverseDateUntil(pageDate)
                 }
             } else {
                 if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {

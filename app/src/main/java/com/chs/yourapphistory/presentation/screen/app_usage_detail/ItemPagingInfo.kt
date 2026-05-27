@@ -66,6 +66,7 @@ fun ItemDailyPagingInfo(
             pagerState.currentPage,
             pagerState.isScrollInProgress
         ) {
+            if (state.isDateLoading) return@LaunchedEffect
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
@@ -73,7 +74,7 @@ fun ItemDailyPagingInfo(
                 val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
                 val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
                 chsLog("$newPage" + idx)
-//                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
             }
 
             allPagerStates

@@ -85,18 +85,18 @@ fun AppUsageDetailScreen(
         )
     }
 
-//    LaunchedEffect(state.dateIdx) {
-//        if (state.dateList.isEmpty()) return@LaunchedEffect
-//        val page = state.dateIdx.run {
-//            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-//            (this.first * 7 + this.second) - initIdx
-//        }
-//        if (datePagerState.currentPage != state.dateIdx.first) {
-//            datePagerState.scrollToPage(state.dateIdx.first)
-//        }
-//        if (state.isDateLoading) return@LaunchedEffect
-//        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
-//    }
+    LaunchedEffect(state.dateIdx) {
+        if (state.dateList.isEmpty()) return@LaunchedEffect
+        if (state.isDateLoading) return@LaunchedEffect
+        val page = state.dateIdx.run {
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+            (this.first * 7 + this.second) - initIdx
+        }
+        if (datePagerState.currentPage != state.dateIdx.first) {
+            datePagerState.scrollToPage(state.dateIdx.first)
+        }
+        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
+    }
     /* date related variables end*/
 
     /* week related variables */
