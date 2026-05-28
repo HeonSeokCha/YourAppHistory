@@ -73,8 +73,8 @@ fun ItemDailyPagingInfo(
             if (state.dateCurrentPage != newPage) {
                 val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
                 val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
-                chsLog("$newPage" + idx)
-                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+//                chsLog("$newPage" + idx)
+//                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
             }
 
             allPagerStates
@@ -116,11 +116,6 @@ fun ItemDailyPagingInfo(
         allPagerStates.forEach { pagerState ->
             launch { pagerState.scrollToPage(state.datePagerInitIdx) }
         }
-    }
-
-    LaunchedEffect(dailyUsagePager.currentPage) {
-        if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
-        chsLog(dailyPagingItems[dailyUsagePager.currentPage]?.first)
     }
 
     Column(

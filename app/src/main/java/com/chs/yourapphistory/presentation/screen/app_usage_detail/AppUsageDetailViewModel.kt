@@ -124,6 +124,7 @@ class AppUsageDetailViewModel(
     }
 
     private fun changeDate(idx: Pair<Int, Int>) {
+        chsLog("changeDate $idx")
         _state.update {
             val date = it.dateList[idx.first][idx.second]
             when {
