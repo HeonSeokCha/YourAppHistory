@@ -1,10 +1,12 @@
 package com.chs.yourapphistory.presentation.screen.app_usage_detail
 
+import java.time.LocalDate
+
 
 sealed interface AppUsageDetailIntent {
     data class OnChangeTargetDateIdx(val idx: Pair<Int, Int>) : AppUsageDetailIntent
     data class OnChangeTargetWeekIdx(val idx: Pair<Int, Int>) : AppUsageDetailIntent
-    data class OnChangeDateCurrentPage(val page: Int) : AppUsageDetailIntent
+    data class OnChangeDate(val date: LocalDate) : AppUsageDetailIntent
     data class OnChangeWeekCurrentPage(val page: Int) : AppUsageDetailIntent
     data object OnChangeViewType : AppUsageDetailIntent
 

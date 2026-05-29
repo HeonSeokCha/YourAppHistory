@@ -39,19 +39,19 @@ import kotlin.collections.sumOf
 @Composable
 fun ItemDailyPagingInfo(
     state: AppUsageDetailState,
-    dailyPagingItems: LazyPagingItems<Pair<LocalDate,Map<UsageEventType, List<Pair<Int, Int>>>>>,
+    dailyPagingItems: LazyPagingItems<Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>,
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
     val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
 
-    val dailyUsagePager = rememberPagerState(pageCount = { dailyPagingItems.itemCount } )
+    val dailyUsagePager = rememberPagerState(pageCount = { dailyPagingItems.itemCount })
 
-    val dailyForegroundUsagePager = rememberPagerState(pageCount = { dailyPagingItems.itemCount} )
+    val dailyForegroundUsagePager = rememberPagerState(pageCount = { dailyPagingItems.itemCount })
 
-    val dailyNotifyPager = rememberPagerState(pageCount = { dailyPagingItems.itemCount } )
+    val dailyNotifyPager = rememberPagerState(pageCount = { dailyPagingItems.itemCount })
 
-    val dailyLaunchPager = rememberPagerState(pageCount = { dailyPagingItems.itemCount } )
+    val dailyLaunchPager = rememberPagerState(pageCount = { dailyPagingItems.itemCount })
 
 
     val allPagerStates = listOf(
@@ -70,11 +70,10 @@ fun ItemDailyPagingInfo(
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
+
             if (state.dateCurrentPage != newPage) {
-                val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
-                val idx = ((initIdx + newPage) / 7) to (initIdx + newPage) % 7
-//                chsLog("$newPage" + idx)
-//                onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(idx))
+                chsLog(dailyPagingItems[pagerState.currentPage]?.first)
+                onIntent(AppUsageDetailIntent.OnChangeDate(dailyPagingItems[pagerState.currentPage]!!.first))
             }
 
             allPagerStates

@@ -84,15 +84,15 @@ class AppUsageDetailViewModel(
                 _state.update { it.copy(isWeekLoading = false) }
             }
 
-            is AppUsageDetailIntent.OnChangeDateCurrentPage -> {
-                _state.update { it.copy(dateCurrentPage = intent.page) }
-            }
-
             is AppUsageDetailIntent.OnChangeWeekCurrentPage -> {
                 _state.update { it.copy(weekCurrentPage = intent.page) }
             }
 
             AppUsageDetailIntent.Error -> Unit
+            is AppUsageDetailIntent.OnChangeDate -> {
+                val idx = _state.value.dateList.flatten().indexOf(intent.date)
+                _state.update { it.copy(dateIdx = idx / 7 to idx % 7, displayDate = intent.date) }
+            }
         }
     }
 
@@ -126,26 +126,35 @@ class AppUsageDetailViewModel(
     private fun changeDate(idx: Pair<Int, Int>) {
         chsLog("changeDate $idx")
         _state.update {
-            val date = it.dateList[idx.first][idx.second]
+            val idx2 = if (idx.second == -1 ||idx.second == 7) {
+                if (idx.second == -1) {
+                    idx.first - 1 to 6
+                } else {
+                    idx.first + 1 to 0
+                }
+            } else {
+                idx
+            }
+            val date = it.dateList[idx2.first][idx2.second]
             when {
                 date > dateNow -> {
                     it.copy(
                         displayDate = dateNow,
-                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow)
+                        dateIdx = idx2.first to it.dateList[0].indexOf(dateNow)
                     )
                 }
 
                 date < it.minDate -> {
                     it.copy(
                         displayDate = it.minDate,
-                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
+                        dateIdx = idx2.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
                     )
                 }
 
                 else -> {
                     it.copy(
                         displayDate = date,
-                        dateIdx = idx
+                        dateIdx = idx2
                     )
                 }
             }

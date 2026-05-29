@@ -85,6 +85,11 @@ fun AppUsageDetailScreen(
         )
     }
 
+    LaunchedEffect(state.dateIdx.first) {
+        if (state.dateIdx.first == datePagerState.currentPage) return@LaunchedEffect
+        datePagerState.scrollToPage(state.dateIdx.first)
+    }
+
     /* date related variables end*/
 
     /* week related variables */
