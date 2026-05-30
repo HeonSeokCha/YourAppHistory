@@ -73,7 +73,7 @@ class AppUsageDetailViewModel(
             }
 
             is AppUsageDetailIntent.DateLoadComplete -> {
-                _state.update { it.copy(isDateLoading = false, datePagerInitIdx = intent.initIdx) }
+                _state.update { it.copy(isDateLoading = false, dailyPagerPageIdx = intent.initIdx) }
             }
 
             AppUsageDetailIntent.WeekLoading -> {
@@ -135,6 +135,7 @@ class AppUsageDetailViewModel(
             } else {
                 idx
             }
+
             val date = it.dateList[idx2.first][idx2.second]
             when {
                 date > dateNow -> {

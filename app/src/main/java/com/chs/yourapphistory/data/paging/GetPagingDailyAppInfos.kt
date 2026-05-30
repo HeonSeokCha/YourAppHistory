@@ -27,8 +27,6 @@ class GetPagingDailyAppInfos(
     private val appNotifyInfoDao: AppNotifyInfoDao,
 ) : PagingSource<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>() {
 
-    private var isFirstLoad = true
-
     override fun getRefreshKey(
         state: PagingState<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>>
     ): LocalDate? = null
@@ -36,20 +34,15 @@ class GetPagingDailyAppInfos(
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Pair<LocalDate, Map<UsageEventType, List<Pair<Int, Int>>>>> {
         val pageDate: LocalDate = params.key ?: targetDate
 
-        val prevKey = if (isFirstLoad) {
-            isFirstLoad = false
+        val prevKey = if (params.key == targetDate) {
             null
         } else {
-            if (params.key == targetDate) {
+            if (pageDate >= LocalDate.now()) {
                 null
             } else {
-                if (pageDate >= LocalDate.now()) {
+                if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
                     null
-                } else {
-                    if (pageDate.plusDays(Constants.PAGING_DAY) >= LocalDate.now()) {
-                        null
-                    } else pageDate.plusDays(Constants.PAGING_DAY + 1)
-                }
+                } else pageDate.plusDays(Constants.PAGING_DAY + 1)
             }
         }
 

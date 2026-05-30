@@ -85,35 +85,21 @@ fun ItemDailyPagingInfo(
         }
     }
 
-    LaunchedEffect(isPrependLoading) {
-        if (isPrependLoading) {
-//            onIntent(AppUsageDetailIntent.OnChangeInitDateItemCount(dailyPagingItems.itemCount))
-        } else {
-            if (state.datePageInitItemCount > 0) {
-                val prependedCount = dailyPagingItems.itemCount - state.datePageInitItemCount
-                if (prependedCount > 0) {
-                    allPagerStates.forEach {
-                        launch {
-                            it.scrollToPage(it.currentPage + prependedCount)
-                        }
-                    }
-                }
-//                onIntent(AppUsageDetailIntent.OnChangeInitDateItemCount(0))
-            }
-        }
-    }
-
     LaunchedEffect(state.dateCurrentPage) {
+        dailyPagingItems.itemCount
         allPagerStates.forEach { pagerState ->
             launch { pagerState.scrollToPage(state.dateCurrentPage) }
         }
     }
 
-    LaunchedEffect(state.datePagerInitIdx) {
+    LaunchedEffect(state.dailyPagerPageIdx) {
         if (state.isDateLoading) return@LaunchedEffect
 
+        val a = dailyPagingItems.itemSnapshotList.map { it!!.first }.indexOf(state.displayDate)
+        chsLog("ASDASD $a")
+
         allPagerStates.forEach { pagerState ->
-            launch { pagerState.scrollToPage(state.datePagerInitIdx) }
+            launch { pagerState.scrollToPage(state.dailyPagerPageIdx) }
         }
     }
 

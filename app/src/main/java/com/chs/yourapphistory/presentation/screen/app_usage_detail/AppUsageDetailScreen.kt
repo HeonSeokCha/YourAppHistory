@@ -70,6 +70,8 @@ fun AppUsageDetailScreen(
             }
             is LoadState.NotLoading -> {
                 chsLog("prepend -> ${dailyPagingItems.itemSnapshotList.map { it?.first }}")
+                val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
+//                onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
             }
             is LoadState.Error -> Unit
         }
