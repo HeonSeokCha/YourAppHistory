@@ -50,30 +50,19 @@ fun AppUsageDetailScreen(
         )
     }
 
-    LaunchedEffect(dailyPagingItems.loadState.refresh) {
+    LaunchedEffect(dailyPagingItems.itemSnapshotList, dailyPagingItems.loadState.refresh) {
+        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) return@LaunchedEffect
+        if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
+        val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
+        chsLog("NotLoading $initIdx")
+        onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
         when (dailyPagingItems.loadState.refresh) {
             is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
             is LoadState.NotLoading -> {
-                val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
-                onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
+                if (!state.isDateLoading) return@LaunchedEffect
+
             }
             is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
-        }
-    }
-
-    LaunchedEffect(dailyPagingItems.loadState.prepend) {
-        if (state.isDateLoading || dailyPagingItems.itemCount == 0) return@LaunchedEffect
-
-        when (dailyPagingItems.loadState.prepend) {
-            is LoadState.Loading -> {
-                chsLog("prepend is Loading")
-            }
-            is LoadState.NotLoading -> {
-                chsLog("prepend -> ${dailyPagingItems.itemSnapshotList.map { it?.first }}")
-                val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
-//                onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
-            }
-            is LoadState.Error -> Unit
         }
     }
 

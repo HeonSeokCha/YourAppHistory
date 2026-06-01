@@ -67,14 +67,13 @@ fun ItemDailyPagingInfo(
             pagerState.isScrollInProgress
         ) {
             if (state.isDateLoading) return@LaunchedEffect
+            if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
 
-            if (state.dateCurrentPage != newPage) {
                 chsLog(dailyPagingItems[pagerState.currentPage]?.first)
                 onIntent(AppUsageDetailIntent.OnChangeDate(dailyPagingItems[pagerState.currentPage]!!.first))
-            }
 
             allPagerStates
                 .filter { it !== pagerState }
@@ -93,11 +92,8 @@ fun ItemDailyPagingInfo(
     }
 
     LaunchedEffect(state.dailyPagerPageIdx) {
-        if (state.isDateLoading) return@LaunchedEffect
-
-        val a = dailyPagingItems.itemSnapshotList.map { it!!.first }.indexOf(state.displayDate)
-        chsLog("ASDASD $a")
-
+        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) return@LaunchedEffect
+        chsLog("state.dailyPagerPageIdx ${state.dailyPagerPageIdx}")
         allPagerStates.forEach { pagerState ->
             launch { pagerState.scrollToPage(state.dailyPagerPageIdx) }
         }
