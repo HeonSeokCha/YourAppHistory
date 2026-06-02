@@ -141,7 +141,7 @@ fun TotalSummaryScreen(
 }
 
 @Composable
-private fun ItemLoadingFromTotal() {
+fun ItemLoadingFromTotal() {
     Row(
         modifier = Modifier
             .fillMaxWidth(),

@@ -71,9 +71,7 @@ fun ItemDailyPagingInfo(
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 
-
-                chsLog(dailyPagingItems[pagerState.currentPage]?.first)
-                onIntent(AppUsageDetailIntent.OnChangeDate(dailyPagingItems[pagerState.currentPage]!!.first))
+            onIntent(AppUsageDetailIntent.OnChangeDate(dailyPagingItems[pagerState.currentPage]!!.first))
 
             allPagerStates
                 .filter { it !== pagerState }

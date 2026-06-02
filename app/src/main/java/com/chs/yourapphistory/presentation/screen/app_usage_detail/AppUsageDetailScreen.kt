@@ -15,6 +15,7 @@ import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.collectAsLazyPagingItems
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.domain.model.UsageEventType
+import com.chs.yourapphistory.presentation.screen.total_summary.ItemLoadingFromTotal
 import java.time.LocalDate
 
 @Composable
@@ -51,25 +52,22 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(dailyPagingItems.itemSnapshotList, dailyPagingItems.loadState.refresh) {
-        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) return@LaunchedEffect
+        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) {
+            onIntent(AppUsageDetailIntent.DateLoading)
+            return@LaunchedEffect
+        }
         if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
         val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
         chsLog("NotLoading $initIdx")
         onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
-        when (dailyPagingItems.loadState.refresh) {
-            is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
-            is LoadState.NotLoading -> {
-                if (!state.isDateLoading) return@LaunchedEffect
-
-            }
-            is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
-        }
     }
 
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
+
+        chsLog("datePagerState.currentPage ${datePagerState.currentPage}")
 
         onIntent(
             AppUsageDetailIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
@@ -119,32 +117,40 @@ fun AppUsageDetailScreen(
         )
 
         if (state.isWeeklyMode) {
-            ItemWeekList(
-                state = weekPagerState,
-                targetWeek = state.displayWeek,
-                item = state.weekList,
-                onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(it)) }
-            )
+            if (state.isWeekLoading) {
+                ItemLoadingFromTotal()
+            } else {
+                ItemWeekList(
+                    state = weekPagerState,
+                    targetWeek = state.displayWeek,
+                    item = state.weekList,
+                    onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(it)) }
+                )
 
-            ItemWeeklyPagingInfo(
-                state = state,
-                weeklyPagingItems = weeklyPagingItems,
-                onIntent = onIntent
-            )
+                ItemWeeklyPagingInfo(
+                    state = state,
+                    weeklyPagingItems = weeklyPagingItems,
+                    onIntent = onIntent
+                )
+            }
         } else {
-            ItemDateList(
-                state = datePagerState,
-                minDate = state.minDate,
-                targetDate = state.displayDate,
-                item = state.dateList,
-                onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(it)) }
-            )
+            if (state.isDateLoading) {
+                ItemLoadingFromTotal()
+            } else {
+                ItemDateList(
+                    state = datePagerState,
+                    minDate = state.minDate,
+                    targetDate = state.displayDate,
+                    item = state.dateList,
+                    onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(it)) }
+                )
 
-            ItemDailyPagingInfo(
-                state = state,
-                dailyPagingItems = dailyPagingItems,
-                onIntent = onIntent
-            )
+                ItemDailyPagingInfo(
+                    state = state,
+                    dailyPagingItems = dailyPagingItems,
+                    onIntent = onIntent
+                )
+            }
         }
     }
 }
