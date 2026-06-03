@@ -112,7 +112,7 @@ class AppUsageDetailViewModel(
                     dateList = splitList,
                     displayDate = targetDate,
                     dateIdx = (dateList.indexOf(targetDate) / 7).run {
-                        chsLog(this to (splitList[this].indexOf(targetDate) % 7))
+                        chsLog("getDateRangeList " + this to (splitList[this].indexOf(targetDate) % 7))
                         this to (splitList[this].indexOf(targetDate) % 7)
                     },
                     displayWeek = targetDate.reverseDateUntilWeek(targetDate),

@@ -43,7 +43,6 @@ fun ItemDailyPagingInfo(
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     val scrollState = rememberScrollState()
-    val isPrependLoading = dailyPagingItems.loadState.prepend is LoadState.Loading
 
     val dailyUsagePager = rememberPagerState(pageCount = { dailyPagingItems.itemCount })
 
@@ -94,6 +93,13 @@ fun ItemDailyPagingInfo(
         chsLog("state.dailyPagerPageIdx ${state.dailyPagerPageIdx}")
         allPagerStates.forEach { pagerState ->
             launch { pagerState.scrollToPage(state.dailyPagerPageIdx) }
+        }
+    }
+
+    LaunchedEffect(state.dateIdx) {
+        val idx = state.dateIdx.first * 7 + state.dateIdx.second
+        allPagerStates.forEach { pagerState ->
+            launch { pagerState.scrollToPage(idx) }
         }
     }
 
@@ -198,25 +204,25 @@ fun ItemWeeklyPagingInfo(
 ) {
     val scrollState = rememberScrollState()
 
-    val weeklyUsagePager =
-        rememberPagerState(
-            initialPage = state.weekCurrentPage,
-            pageCount = { weeklyPagingItems.itemCount })
+    val weeklyUsagePager = rememberPagerState(
+        initialPage = state.weekCurrentPage,
+        pageCount = { weeklyPagingItems.itemCount }
+    )
 
-    val weeklyForegroundUsagePager =
-        rememberPagerState(
-            initialPage = state.weekCurrentPage,
-            pageCount = { weeklyPagingItems.itemCount })
+    val weeklyForegroundUsagePager = rememberPagerState(
+        initialPage = state.weekCurrentPage,
+        pageCount = { weeklyPagingItems.itemCount }
+    )
 
-    val weeklyNotifyPager =
-        rememberPagerState(
-            initialPage = state.weekCurrentPage,
-            pageCount = { weeklyPagingItems.itemCount })
+    val weeklyNotifyPager = rememberPagerState(
+        initialPage = state.weekCurrentPage,
+        pageCount = { weeklyPagingItems.itemCount }
+    )
 
-    val weeklyLaunchPager =
-        rememberPagerState(
-            initialPage = state.weekCurrentPage,
-            pageCount = { weeklyPagingItems.itemCount })
+    val weeklyLaunchPager = rememberPagerState(
+        initialPage = state.weekCurrentPage,
+        pageCount = { weeklyPagingItems.itemCount }
+    )
 
     val allPagerStates = listOf(
         weeklyUsagePager,

@@ -59,7 +59,7 @@ fun AppUsageDetailScreen(
         if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
         val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
         chsLog("NotLoading $initIdx")
-        onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
+//        onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
     }
 
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
@@ -134,9 +134,9 @@ fun AppUsageDetailScreen(
                 )
             }
         } else {
-            if (state.isDateLoading) {
-                ItemLoadingFromTotal()
-            } else {
+//            if (state.isDateLoading) {
+//                ItemLoadingFromTotal()
+//            } else {
                 ItemDateList(
                     state = datePagerState,
                     minDate = state.minDate,
@@ -150,7 +150,7 @@ fun AppUsageDetailScreen(
                     dailyPagingItems = dailyPagingItems,
                     onIntent = onIntent
                 )
-            }
+//            }
         }
     }
 }
