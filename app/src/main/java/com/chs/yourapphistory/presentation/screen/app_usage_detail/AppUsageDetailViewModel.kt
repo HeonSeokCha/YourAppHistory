@@ -56,8 +56,17 @@ class AppUsageDetailViewModel(
 
     fun handleIntent(intent: AppUsageDetailIntent) {
         when (intent) {
-            is AppUsageDetailIntent.OnChangeTargetDateIdx -> {
+            is AppUsageDetailIntent.OnClickDate -> {
+                chsLog("AppUsageDetailIntent.OnClickDate ${intent.idx}")
                 changeDate(intent.idx)
+            }
+
+            is AppUsageDetailIntent.OnDragPager -> {
+                chsLog("AppUsageDetailIntent.OnDragPager ${intent.idx}")
+                val idx = _state.value.dateList.flatten().indexOf(dateNow)
+
+                chsLog((intent.idx / 7) to (intent.idx % 7) + idx)
+                changeDate(((intent.idx + idx) / 7) to (intent.idx + idx) % 7)
             }
 
             is AppUsageDetailIntent.OnChangeTargetWeekIdx -> {
@@ -89,9 +98,10 @@ class AppUsageDetailViewModel(
             }
 
             AppUsageDetailIntent.Error -> Unit
-            is AppUsageDetailIntent.OnChangeDate -> {
-                val idx = _state.value.dateList.flatten().indexOf(intent.date)
-                _state.update { it.copy(dateIdx = idx / 7 to idx % 7, displayDate = intent.date) }
+
+            is AppUsageDetailIntent.OnChangeDateCurrentPage -> {
+                _state.update { it.copy(dateCurrentPage = intent.page) }
+                changeDate(intent.page to _state.value.dateIdx.second)
             }
         }
     }
@@ -126,36 +136,26 @@ class AppUsageDetailViewModel(
     private fun changeDate(idx: Pair<Int, Int>) {
         chsLog("changeDate $idx")
         _state.update {
-            val idx2 = if (idx.second == -1 ||idx.second == 7) {
-                if (idx.second == -1) {
-                    idx.first - 1 to 6
-                } else {
-                    idx.first + 1 to 0
-                }
-            } else {
-                idx
-            }
-
-            val date = it.dateList[idx2.first][idx2.second]
+            val date = it.dateList[idx.first][idx.second]
             when {
                 date > dateNow -> {
                     it.copy(
                         displayDate = dateNow,
-                        dateIdx = idx2.first to it.dateList[0].indexOf(dateNow)
+                        dateIdx = idx.first to it.dateList[0].indexOf(dateNow)
                     )
                 }
 
                 date < it.minDate -> {
                     it.copy(
                         displayDate = it.minDate,
-                        dateIdx = idx2.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
+                        dateIdx = idx.first to it.dateList[it.dateList.size - 1].indexOf(it.minDate)
                     )
                 }
 
                 else -> {
                     it.copy(
                         displayDate = date,
-                        dateIdx = idx2
+                        dateIdx = idx
                     )
                 }
             }

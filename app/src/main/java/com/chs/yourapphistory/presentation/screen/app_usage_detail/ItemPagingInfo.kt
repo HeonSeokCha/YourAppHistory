@@ -60,48 +60,26 @@ fun ItemDailyPagingInfo(
         dailyLaunchPager
     )
 
-    allPagerStates.forEach { pagerState ->
+//    allPagerStates.forEach { pagerState ->
         LaunchedEffect(
-            pagerState.currentPage,
-            pagerState.isScrollInProgress
+            dailyUsagePager.currentPage,
+            dailyUsagePager.isScrollInProgress
         ) {
             if (state.isDateLoading) return@LaunchedEffect
             if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
-            if (pagerState.isScrollInProgress) return@LaunchedEffect
-            val newPage = pagerState.currentPage
+            if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
+            val newPage = dailyUsagePager.currentPage
 
-            onIntent(AppUsageDetailIntent.OnChangeDate(dailyPagingItems[pagerState.currentPage]!!.first))
+            onIntent(AppUsageDetailIntent.OnDragPager(newPage))
 
             allPagerStates
-                .filter { it !== pagerState }
+                .filter { it !== dailyUsagePager }
                 .forEach { other ->
                     if (other.currentPage == newPage) return@forEach
                     launch { other.scrollToPage(newPage) }
                 }
         }
-    }
-
-    LaunchedEffect(state.dateCurrentPage) {
-        dailyPagingItems.itemCount
-        allPagerStates.forEach { pagerState ->
-            launch { pagerState.scrollToPage(state.dateCurrentPage) }
-        }
-    }
-
-    LaunchedEffect(state.dailyPagerPageIdx) {
-        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) return@LaunchedEffect
-        chsLog("state.dailyPagerPageIdx ${state.dailyPagerPageIdx}")
-        allPagerStates.forEach { pagerState ->
-            launch { pagerState.scrollToPage(state.dailyPagerPageIdx) }
-        }
-    }
-
-    LaunchedEffect(state.dateIdx) {
-        val idx = state.dateIdx.first * 7 + state.dateIdx.second
-        allPagerStates.forEach { pagerState ->
-            launch { pagerState.scrollToPage(idx) }
-        }
-    }
+//    }
 
     Column(
         modifier = Modifier

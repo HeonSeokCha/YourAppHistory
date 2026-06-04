@@ -75,7 +75,7 @@ fun TotalSummaryScreen(
     pagingItems: LazyPagingItems<Map<UsageEventType, List<Pair<LocalDate, List<AppTotalUsageInfo>>>>>,
     onIntent: (TotalSummaryIntent) -> Unit
 ) {
-    val datePagerState =rememberPagerState(pageCount = { state.dateList.count() })
+    val datePagerState = rememberPagerState(pageCount = { state.dateList.count() })
 
     LaunchedEffect(pagingItems.loadState.refresh) {
         when (pagingItems.loadState.refresh) {

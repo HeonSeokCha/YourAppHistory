@@ -54,6 +54,8 @@ fun ItemTotalPaging(
             pagerState.currentPage,
             pagerState.isScrollInProgress
         ) {
+            if (state.loading) return@LaunchedEffect
+            if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
             if (pagerState.isScrollInProgress) return@LaunchedEffect
             val newPage = pagerState.currentPage
 

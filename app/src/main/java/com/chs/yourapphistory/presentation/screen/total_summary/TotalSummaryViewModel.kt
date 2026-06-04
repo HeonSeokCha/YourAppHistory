@@ -91,9 +91,6 @@ class TotalSummaryViewModel(
                 changeDate(intent.page to _state.value.dateIdx.second)
             }
             is TotalSummaryIntent.OnChangeTargetDateIdx -> changeDate(intent.idx)
-            TotalSummaryIntent.Error -> {
-                chsLog("ERROR")
-            }
             is TotalSummaryIntent.ClickUsedAppList -> {
                 _effect.trySend(
                     NavigateUsedAppList(
@@ -102,6 +99,7 @@ class TotalSummaryViewModel(
                     )
                 )
             }
+            TotalSummaryIntent.Error -> chsLog("ERROR")
         }
     }
 

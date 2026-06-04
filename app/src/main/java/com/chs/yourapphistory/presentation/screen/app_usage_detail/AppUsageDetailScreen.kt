@@ -59,23 +59,18 @@ fun AppUsageDetailScreen(
         if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
         val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
         chsLog("NotLoading $initIdx")
-//        onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
+        onIntent(AppUsageDetailIntent.DateLoadComplete(initIdx))
     }
 
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
-
-        chsLog("datePagerState.currentPage ${datePagerState.currentPage}")
-
-        onIntent(
-            AppUsageDetailIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
-        )
+        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(datePagerState.currentPage))
     }
 
     LaunchedEffect(state.dateIdx.first) {
-        if (state.dateIdx.first == datePagerState.currentPage) return@LaunchedEffect
+        chsLog("dateIdx ${state.dateIdx}")
         datePagerState.scrollToPage(state.dateIdx.first)
     }
 
@@ -142,7 +137,7 @@ fun AppUsageDetailScreen(
                     minDate = state.minDate,
                     targetDate = state.displayDate,
                     item = state.dateList,
-                    onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(it)) }
+                    onClick = { onIntent(AppUsageDetailIntent.OnClickDate(it)) }
                 )
 
                 ItemDailyPagingInfo(
