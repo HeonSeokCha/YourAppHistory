@@ -66,12 +66,15 @@ fun AppUsageDetailScreen(
         if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
-        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(datePagerState.currentPage))
+        onIntent(AppUsageDetailIntent.OnClickDate(datePagerState.currentPage to state.dateIdx.second))
     }
 
-    LaunchedEffect(state.dateIdx.first) {
-        chsLog("dateIdx ${state.dateIdx}")
+    LaunchedEffect(state.dateIdx) {
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        val page = state.dateIdx.run { (this.first * 7) + this.second }
+        chsLog("dateIdx ${state.dateIdx} $page")
         datePagerState.scrollToPage(state.dateIdx.first)
+//        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
     }
 
     /* date related variables end*/

@@ -101,7 +101,7 @@ class AppUsageDetailViewModel(
 
             is AppUsageDetailIntent.OnChangeDateCurrentPage -> {
                 _state.update { it.copy(dateCurrentPage = intent.page) }
-                changeDate(intent.page to _state.value.dateIdx.second)
+//                changeDate(intent.page to _state.value.dateIdx.second)
             }
         }
     }

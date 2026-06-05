@@ -60,26 +60,33 @@ fun ItemDailyPagingInfo(
         dailyLaunchPager
     )
 
-//    allPagerStates.forEach { pagerState ->
+    allPagerStates.forEach { pagerState ->
         LaunchedEffect(
-            dailyUsagePager.currentPage,
-            dailyUsagePager.isScrollInProgress
+            pagerState.currentPage,
+            pagerState.isScrollInProgress
         ) {
             if (state.isDateLoading) return@LaunchedEffect
             if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
-            if (dailyUsagePager.isScrollInProgress) return@LaunchedEffect
-            val newPage = dailyUsagePager.currentPage
+            if (pagerState.isScrollInProgress) return@LaunchedEffect
+            val newPage = pagerState.currentPage
 
             onIntent(AppUsageDetailIntent.OnDragPager(newPage))
 
             allPagerStates
-                .filter { it !== dailyUsagePager }
+                .filter { it !== pagerState }
                 .forEach { other ->
                     if (other.currentPage == newPage) return@forEach
                     launch { other.scrollToPage(newPage) }
                 }
         }
-//    }
+    }
+
+    LaunchedEffect(state.dateCurrentPage) {
+        chsLog(state.dateCurrentPage)
+        allPagerStates.forEach { pagerState ->
+            launch { pagerState.scrollToPage(state.dateCurrentPage) }
+        }
+    }
 
     Column(
         modifier = Modifier
@@ -89,8 +96,7 @@ fun ItemDailyPagingInfo(
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth(),
-            pageSpacing = 8.dp,
-            state = dailyUsagePager,
+            pageSpacing = 8.dp, state = dailyUsagePager,
             reverseLayout = true,
             key = { it }
         ) {
