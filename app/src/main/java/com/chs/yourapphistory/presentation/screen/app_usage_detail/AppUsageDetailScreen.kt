@@ -74,7 +74,7 @@ fun AppUsageDetailScreen(
         val page = state.dateIdx.run { (this.first * 7) + this.second }
         chsLog("dateIdx ${state.dateIdx} $page")
         datePagerState.scrollToPage(state.dateIdx.first)
-//        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
+        onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
     }
 
     /* date related variables end*/

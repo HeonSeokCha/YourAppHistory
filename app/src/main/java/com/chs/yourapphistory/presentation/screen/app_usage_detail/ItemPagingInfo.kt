@@ -11,19 +11,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -32,6 +27,8 @@ import com.chs.yourapphistory.common.toCalcDailyUsage
 import com.chs.yourapphistory.domain.model.UsageEventType
 import com.chs.yourapphistory.presentation.screen.common.DailyUsageChart
 import com.chs.yourapphistory.presentation.screen.common.WeeklyUsageChart
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.collections.sumOf
@@ -60,29 +57,24 @@ fun ItemDailyPagingInfo(
         dailyLaunchPager
     )
 
-    allPagerStates.forEach { pagerState ->
-        LaunchedEffect(
-            pagerState.currentPage,
-            pagerState.isScrollInProgress
-        ) {
-            if (state.isDateLoading) return@LaunchedEffect
-            if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
-            if (pagerState.isScrollInProgress) return@LaunchedEffect
-            val newPage = pagerState.currentPage
-
-            onIntent(AppUsageDetailIntent.OnDragPager(newPage))
-
-            allPagerStates
-                .filter { it !== pagerState }
-                .forEach { other ->
-                    if (other.currentPage == newPage) return@forEach
-                    launch { other.scrollToPage(newPage) }
+    allPagerStates.forEachIndexed { sourceIndex, sourceState ->
+        LaunchedEffect(sourceState) {
+            snapshotFlow {
+                sourceState.currentPage to sourceState.currentPageOffsetFraction
+            }
+                .filter { sourceState.isScrollInProgress }
+                .collectLatest { (page, offset) ->
+                    allPagerStates.forEachIndexed { targetIndex, targetState ->
+                        if (targetIndex != sourceIndex && !targetState.isScrollInProgress) {
+                            onIntent(AppUsageDetailIntent.OnDragPager(page))
+                            targetState.scrollToPage(page, offset)
+                        }
+                    }
                 }
         }
     }
 
     LaunchedEffect(state.dateCurrentPage) {
-        chsLog(state.dateCurrentPage)
         allPagerStates.forEach { pagerState ->
             launch { pagerState.scrollToPage(state.dateCurrentPage) }
         }
@@ -96,7 +88,8 @@ fun ItemDailyPagingInfo(
         HorizontalPager(
             modifier = Modifier
                 .fillMaxWidth(),
-            pageSpacing = 8.dp, state = dailyUsagePager,
+            pageSpacing = 8.dp,
+            state = dailyUsagePager,
             reverseLayout = true,
             key = { it }
         ) {
