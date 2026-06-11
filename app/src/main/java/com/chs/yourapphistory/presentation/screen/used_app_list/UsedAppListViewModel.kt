@@ -17,13 +17,14 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import java.time.LocalDate
 
 @KoinViewModel
 class UsedAppListViewModel(
-    usageEventType: UsageEventType,
-    private val targetDateMilli: Long,
+    @InjectedParam private val usageEventType: UsageEventType,
+    @InjectedParam private val targetDateMilli: Long,
     private val getDayUsedListUseCase: GetDayUsedListUseCase,
     private val getDayForegroundListUseCase: GetDayForegroundListUseCase,
     private val getDayNotifyListUseCase: GetDayNotifyListUseCase,

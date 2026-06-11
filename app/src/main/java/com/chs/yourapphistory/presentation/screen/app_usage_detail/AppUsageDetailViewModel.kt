@@ -15,13 +15,14 @@ import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import org.koin.android.annotation.KoinViewModel
+import org.koin.core.annotation.InjectedParam
+import org.koin.core.annotation.KoinViewModel
 import java.time.LocalDate
 
 @KoinViewModel
 class AppUsageDetailViewModel(
-    targetPackageNameInfo: Pair<String, String>,
-    targetDateMilli: Long,
+    @InjectedParam private val targetPackageNameInfo: Pair<String, String>,
+    @InjectedParam private val targetDateMilli: Long,
     getPagingDailyUseCase: GetPagingDailyUseCase,
     getPagingWeeklyUseCase: GetPagingWeeklyUseCase,
     private val getMinimumTimeUseCase: GetMinimumTimeUseCase

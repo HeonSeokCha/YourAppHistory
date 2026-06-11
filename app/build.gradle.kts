@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.android.room)
+    alias(libs.plugins.koin.compiler)
 }
 
 room {
@@ -89,6 +90,5 @@ dependencies {
 
     implementation(libs.androidX.datastore.preferences)
 
-    ksp(libs.koin.ksp)
     ksp(libs.androidX.room.compiler)
 }

@@ -19,11 +19,10 @@ nav3Core = "1.1.2"
 lifecycleViewmodelNav3 = "2.10.0"
 kotlinxSerializationCore = "1.11.0"
 koin = "4.2.1"
-koin-annotation = "2.3.1"
 
 [libraries]
 # AndroidX
-androidX-core-ktx = "androidx.core:core-ktx:1.18.0"
+androidX-core-ktx = "androidx.core:core-ktx:1.19.0"
 androidX-compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose-ui" }
 androidX-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "activity" }
 androidX-compose-material-icon-extend = "androidx.compose.material:material-icons-extended:1.7.8"
@@ -47,12 +46,11 @@ desugar_jdk_libs = { module = "com.android.tools:desugar_jdk_libs", version.ref 
 lottie = "com.airbnb.android:lottie-compose:6.7.1"
 
 ## Koin
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
+koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
 #koin-workmananger = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
-koin-ksp = { module = "io.insert-koin:koin-ksp-compiler", version.ref = "koin-annotation" }
-koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "koin-annotation" }
 
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
@@ -84,7 +82,7 @@ kotlin = [
 ]
 
 koin = [
-    "koin-android",
+    "koin-core",
     "koin-androidx-compose",
     "koin-compose-viewmodel",
     "koin-annotation"
@@ -103,3 +101,4 @@ kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 android-room = { id = "androidx.room", version.ref = "room" }
+koin-compiler = "io.insert-koin.compiler.plugin:1.0.0"
