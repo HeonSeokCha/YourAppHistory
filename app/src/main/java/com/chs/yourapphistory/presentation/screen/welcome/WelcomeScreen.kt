@@ -45,7 +45,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun WelcomeScreenRoot(
-    viewModel: WelComeViewModel,
+    viewModel: WelcomeViewModel,
     onNavigateHome: () -> Unit
 ) {
     val state by viewModel.state.collectAsStateWithLifecycle()

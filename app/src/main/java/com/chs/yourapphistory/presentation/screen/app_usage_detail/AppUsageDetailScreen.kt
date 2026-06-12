@@ -42,20 +42,26 @@ fun AppUsageDetailScreen(
     onIntent: (AppUsageDetailIntent) -> Unit
 ) {
     /* date related variables */
-    val datePagerState = if (state.isDateLoading) {
-        rememberPagerState(pageCount = { state.dateList.count() })
-    } else {
+    val datePagerState = if (state.dateList.isNotEmpty()) {
         rememberPagerState(
             pageCount = { state.dateList.count() },
             initialPage = state.dateIdx.first
         )
+    } else {
+        rememberPagerState(pageCount = { 0 })
     }
 
-    LaunchedEffect(dailyPagingItems.itemSnapshotList, dailyPagingItems.loadState.refresh) {
-        if (dailyPagingItems.loadState.refresh !is LoadState.NotLoading) {
-            onIntent(AppUsageDetailIntent.DateLoading)
-            return@LaunchedEffect
+    LaunchedEffect(dailyPagingItems.loadState.refresh) {
+        when (dailyPagingItems.loadState.refresh) {
+            is LoadState.Loading -> onIntent(AppUsageDetailIntent.DateLoading)
+            is LoadState.NotLoading -> Unit
+            is LoadState.Error -> onIntent(AppUsageDetailIntent.Error)
         }
+    }
+
+    LaunchedEffect(dailyPagingItems.itemSnapshotList.count()) {
+        if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
+        if (dailyPagingItems.loadState.refresh is LoadState.Loading) return@LaunchedEffect
         if (dailyPagingItems.itemCount == 0) return@LaunchedEffect
         val initIdx = dailyPagingItems.itemSnapshotList.map { it?.first }.indexOf(state.displayDate)
         chsLog("NotLoading $initIdx")
@@ -63,20 +69,26 @@ fun AppUsageDetailScreen(
     }
 
     LaunchedEffect(datePagerState.currentPage, datePagerState.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        if (state.dateList.isEmpty()) return@LaunchedEffect
         if (datePagerState.currentPageOffsetFraction != 0f) return@LaunchedEffect
         if (datePagerState.isScrollInProgress) return@LaunchedEffect
-        onIntent(AppUsageDetailIntent.OnClickDate(datePagerState.currentPage to state.dateIdx.second))
+
+        onIntent(
+            AppUsageDetailIntent.OnChangeTargetDateIdx(datePagerState.currentPage to state.dateIdx.second)
+        )
     }
 
     LaunchedEffect(state.dateIdx) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        val page = state.dateIdx.run { (this.first * 7) + this.second }
-        chsLog("dateIdx ${state.dateIdx} $page")
-        datePagerState.scrollToPage(state.dateIdx.first)
+        val page = state.dateIdx.run {
+            val initIdx = state.dateList.flatten().indexOf(LocalDate.now())
+            (this.first * 7 + this.second) - initIdx
+        }
+        if (datePagerState.currentPage != state.dateIdx.first) {
+            datePagerState.scrollToPage(state.dateIdx.first)
+        }
+
         onIntent(AppUsageDetailIntent.OnChangeDateCurrentPage(page))
     }
-
     /* date related variables end*/
 
     /* week related variables */
@@ -132,23 +144,19 @@ fun AppUsageDetailScreen(
                 )
             }
         } else {
-//            if (state.isDateLoading) {
-//                ItemLoadingFromTotal()
-//            } else {
-                ItemDateList(
-                    state = datePagerState,
-                    minDate = state.minDate,
-                    targetDate = state.displayDate,
-                    item = state.dateList,
-                    onClick = { onIntent(AppUsageDetailIntent.OnClickDate(it)) }
-                )
+            ItemDateList(
+                state = datePagerState,
+                minDate = state.minDate,
+                targetDate = state.displayDate,
+                item = state.dateList,
+                onClick = { onIntent(AppUsageDetailIntent.OnChangeTargetDateIdx(it)) }
+            )
 
-                ItemDailyPagingInfo(
-                    state = state,
-                    dailyPagingItems = dailyPagingItems,
-                    onIntent = onIntent
-                )
-//            }
+            ItemDailyPagingInfo(
+                state = state,
+                dailyPagingItems = dailyPagingItems,
+                onIntent = onIntent
+            )
         }
     }
 }

@@ -9,7 +9,7 @@ import kotlinx.coroutines.flow.update
 import org.koin.core.annotation.KoinViewModel
 
 @KoinViewModel
-class WelComeViewModel : ViewModel() {
+class WelcomeViewModel : ViewModel() {
 
     private val _state = MutableStateFlow(WelcomeState())
     val state = _state.asStateFlow()

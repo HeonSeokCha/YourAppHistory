@@ -57,21 +57,6 @@ class AppUsageDetailViewModel(
 
     fun handleIntent(intent: AppUsageDetailIntent) {
         when (intent) {
-            is AppUsageDetailIntent.OnClickDate -> {
-                chsLog("AppUsageDetailIntent.OnClickDate ${intent.idx}")
-                changeDate(intent.idx)
-            }
-
-            is AppUsageDetailIntent.OnDragPager -> {
-                chsLog("AppUsageDetailIntent.OnDragPager ${intent.idx}")
-                val idx = _state.value.dateList.flatten().indexOf(dateNow).run {
-                    (intent.idx + this) / 7 to (intent.idx + this) % 7
-                }
-
-                chsLog(idx)
-                changeDate(idx)
-                _state.update { it.copy(dateCurrentPage = intent.idx) }
-            }
 
             is AppUsageDetailIntent.OnChangeTargetWeekIdx -> {
                 changeWeek(intent.idx)
@@ -105,7 +90,10 @@ class AppUsageDetailViewModel(
 
             is AppUsageDetailIntent.OnChangeDateCurrentPage -> {
                 _state.update { it.copy(dateCurrentPage = intent.page) }
-//                changeDate(intent.page to _state.value.dateIdx.second)
+            }
+
+            is AppUsageDetailIntent.OnChangeTargetDateIdx -> {
+                changeDate(intent.idx)
             }
         }
     }
