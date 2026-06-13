@@ -366,7 +366,7 @@ class ApplicationInfoSource(
                 UsageEvents.Event.DEVICE_SHUTDOWN -> {
                     inCompletedUsageList.replaceAll { key, value ->
                         value.copy(
-                            value.first.copy(
+                            first = value.first.copy(
                                 endUseTime = usageEvent.eventTime
                             )
                         )
@@ -393,7 +393,9 @@ class ApplicationInfoSource(
             IncompleteAppUsageEntity(
                 packageName = it.key,
                 beginUseTime = it.value.first.beginUseTime,
-                className = it.value.second.toString(),
+                className = it.value.second.run {
+                    if (this.isEmpty()) "" else this.first()
+                },
                 usageType = "FG"
             )
         }

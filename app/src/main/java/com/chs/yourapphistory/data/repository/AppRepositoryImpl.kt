@@ -57,9 +57,10 @@ class AppRepositoryImpl(
     private suspend fun getLastEventTime(): Long {
         return withContext(Dispatchers.IO) {
             awaitAll(
+                async { inCompleteAppUsageDao.getMinBeginTime() },
                 async { appUsageDao.getLastTime() },
                 async { appForegroundUsageDao.getLastTime() },
-                async { appNotifyInfoDao.getLastTime() },
+                async { appNotifyInfoDao.getLastTime() }
             ).min()
         }.run {
             if (this == 0L) {
@@ -165,8 +166,8 @@ class AppRepositoryImpl(
     }
 
     override suspend fun insertAppUsageInfo() {
-        mutex.withLock {
-            chsLog("START insertAppUsageInfo")
+//        mutex.withLock {
+        chsLog("START insertAppUsageInfo")
 //            withContext(Dispatchers.IO) {
 //                appUsageDao.deleteAll()
 //                appForegroundUsageDao.deleteAll()
@@ -175,8 +176,10 @@ class AppRepositoryImpl(
 //            }
 //            chsLog("DELETE ALL")
 
-            val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-            val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+        val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
+        val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
+
+        withContext(Dispatchers.IO) { inCompleteAppUsageDao.deleteAll() }
 
 //            val rangeList = usageStateEventDao.getAll().map {
 //                AppUsageEventRawInfo(
@@ -187,110 +190,114 @@ class AppRepositoryImpl(
 //                )
 //            }
 
-            withContext(Dispatchers.IO) {
-                val usageStateEvent = async(Dispatchers.IO) {
-                    usageStateEventDao.upsert(
-                        *rangeList.map {
-                            UsageStateEventEntity(
-                                packageName = it.packageName,
-                                className = it.className,
-                                eventTime = it.eventTime,
-                                eventType = it.eventType
-                            )
-                        }.toTypedArray()
-                    )
-                }
-
-                val appUsageInsert = async(Dispatchers.IO) {
-                    applicationInfoSource.getAppUsageInfoList(
-                        installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
-                    ).run {
-                        val usageList: List<AppUsageEntity> = this.first
-                        val incompList = this.second
-                        if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
-                            updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
-                        } else {
-                            inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
-                        }
-
-                        inCompleteAppUsageDao.delete(
-                            *inCompleteAppUsageDao.getListFromType("FG").filter {
-                                usageList.any { usage ->
-                                    usage.packageName == it.packageName
-                                            && usage.beginUseTime == it.beginUseTime
-                                }
-                            }.toTypedArray()
+        withContext(Dispatchers.IO) {
+            val usageStateEvent = async(Dispatchers.IO) {
+                usageStateEventDao.upsert(
+                    *rangeList.map {
+                        UsageStateEventEntity(
+                            packageName = it.packageName,
+                            className = it.className,
+                            eventTime = it.eventTime,
+                            eventType = it.eventType
                         )
-
-                        val a = usageList.groupBy { it.packageName }
-                            .map { it.key to it.value.maxOf { it.endUseTime } }
-
-                        a.forEach {
-                            appInfoDao.updateLastUsedTime(it.first, it.second)
-                        }
-
-                        appUsageDao.upsert(*usageList.toTypedArray())
-                    }
-                }
-
-                val appForegroundUsageInsert = async(Dispatchers.IO) {
-                    applicationInfoSource.getAppForeGroundUsageInfoList(
-                        installPackageNames = installPackageNames,
-                        usageEventList = rangeList.filter { rawInfo ->
-                            Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
-                        }
-                    ).run {
-                        val foregroundUsageList = this.first
-                        appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
-
-
-                        val a = foregroundUsageList.groupBy { it.packageName }
-                            .map { it.key to it.value.maxOf { it.endUseTime } }
-
-
-                        a.forEach {
-                            appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
-                        }
-
-                        if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
-
-                        inCompleteAppUsageDao.delete(
-                            *inCompleteAppUsageDao.getListFromType("BG").filter {
-                                foregroundUsageList.any { usage ->
-                                    usage.packageName == it.packageName
-                                            && usage.beginUseTime == it.beginUseTime
-                                }
-                            }.toTypedArray()
-                        )
-
-                        val incompList = this.second.ifEmpty { return@run }
-
-                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
-                    }
-                }
-
-                val appNotifyInfoUpsert = async(Dispatchers.IO) {
-                    appNotifyInfoDao.upsert(
-                        *applicationInfoSource.getAppNotifyInfoList(
-                            installPackageNames = installPackageNames,
-                            usageEventList = rangeList.filter { rawInfo ->
-                                Constants.APP_NOTIFY_EVENT_FILTER.any { it == rawInfo.eventType }
-                            }
-                        ).toTypedArray()
-                    )
-                }
-                awaitAll(
-                    usageStateEvent,
-                    appUsageInsert,
-                    appForegroundUsageInsert,
-                    appNotifyInfoUpsert
+                    }.toTypedArray()
                 )
             }
-            chsLog("END insertAppUsageInfo")
+
+            val appUsageInsert = async(Dispatchers.IO) {
+                applicationInfoSource.getAppUsageInfoList(
+                    installPackageNames = installPackageNames,
+                    usageEventList = rangeList.filter { rawInfo ->
+                        Constants.APP_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                    }
+                ).run {
+                    val usageList: List<AppUsageEntity> = this.first
+                    if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
+                        updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
+                    }
+//                    } else {
+//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+//                    }
+
+//                    inCompleteAppUsageDao.delete(
+//                        *inCompleteAppUsageDao.getListFromType("FG").filter {
+//                            usageList.any { usage ->
+//                                usage.packageName == it.packageName
+//                                        && usage.beginUseTime == it.beginUseTime
+//                            }
+//                        }.toTypedArray()
+//                    )
+
+//                    val a = usageList.groupBy { it.packageName }
+//                        .map { it.key to it.value.maxOf { it.endUseTime } }
+//
+//                    a.forEach {
+//                        appInfoDao.updateLastUsedTime(it.first, it.second)
+//                    }
+
+                    appUsageDao.upsert(*usageList.toTypedArray())
+
+                    val incompList = this.second.ifEmpty { return@run }
+
+                    inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+                }
+            }
+
+            val appForegroundUsageInsert = async(Dispatchers.IO) {
+                applicationInfoSource.getAppForeGroundUsageInfoList(
+                    installPackageNames = installPackageNames,
+                    usageEventList = rangeList.filter { rawInfo ->
+                        Constants.APP_FOREGROUND_USAGE_EVENT_FILTER.any { it == rawInfo.eventType }
+                    }
+                ).run {
+                    val foregroundUsageList = this.first
+                    appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
+
+
+                    val a = foregroundUsageList.groupBy { it.packageName }
+                        .map { it.key to it.value.maxOf { it.endUseTime } }
+
+
+                    a.forEach {
+                        appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
+                    }
+
+                    if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
+
+//                    inCompleteAppUsageDao.delete(
+//                        *inCompleteAppUsageDao.getListFromType("BG").filter {
+//                            foregroundUsageList.any { usage ->
+//                                usage.packageName == it.packageName
+//                                        && usage.beginUseTime == it.beginUseTime
+//                            }
+//                        }.toTypedArray()
+//                    )
+
+                    val incompList = this.second.ifEmpty { return@run }
+
+                    inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
+                }
+            }
+
+            val appNotifyInfoUpsert = async(Dispatchers.IO) {
+                appNotifyInfoDao.upsert(
+                    *applicationInfoSource.getAppNotifyInfoList(
+                        installPackageNames = installPackageNames,
+                        usageEventList = rangeList.filter { rawInfo ->
+                            Constants.APP_NOTIFY_EVENT_FILTER.any { it == rawInfo.eventType }
+                        }
+                    ).toTypedArray()
+                )
+            }
+            awaitAll(
+                usageStateEvent,
+                appUsageInsert,
+                appForegroundUsageInsert,
+                appNotifyInfoUpsert
+            )
         }
+        chsLog("END insertAppUsageInfo")
+//        }
     }
 
 
