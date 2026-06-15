@@ -55,13 +55,23 @@ class AppRepositoryImpl(
     private val mutex: Mutex by lazy { Mutex() }
 
     private suspend fun getLastEventTime(): Long {
+        val inCompleteMinBeginTime: Long = inCompleteAppUsageDao.getMinBeginTime()
+
         return withContext(Dispatchers.IO) {
-            awaitAll(
-                async { inCompleteAppUsageDao.getMinBeginTime() },
-                async { appUsageDao.getLastTime() },
-                async { appForegroundUsageDao.getLastTime() },
-                async { appNotifyInfoDao.getLastTime() }
-            ).min()
+            if (inCompleteMinBeginTime == 0L) {
+                awaitAll(
+                    async { appUsageDao.getLastTime() },
+                    async { appForegroundUsageDao.getLastTime() },
+                    async { appNotifyInfoDao.getLastTime() }
+                ).min()
+            } else {
+                awaitAll(
+                    async { inCompleteMinBeginTime },
+                    async { appUsageDao.getLastTime() },
+                    async { appForegroundUsageDao.getLastTime() },
+                    async { appNotifyInfoDao.getLastTime() }
+                ).min()
+            }
         }.run {
             if (this == 0L) {
                 LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).atStartOfDayToMillis()
@@ -228,12 +238,12 @@ class AppRepositoryImpl(
 //                        }.toTypedArray()
 //                    )
 
-//                    val a = usageList.groupBy { it.packageName }
-//                        .map { it.key to it.value.maxOf { it.endUseTime } }
-//
-//                    a.forEach {
-//                        appInfoDao.updateLastUsedTime(it.first, it.second)
-//                    }
+                    val a = usageList.groupBy { it.packageName }
+                        .map { it.key to it.value.maxOf { it.endUseTime } }
+
+                    a.forEach {
+                        appInfoDao.updateLastUsedTime(it.first, it.second)
+                    }
 
                     appUsageDao.upsert(*usageList.toTypedArray())
 
@@ -256,7 +266,6 @@ class AppRepositoryImpl(
 
                     val a = foregroundUsageList.groupBy { it.packageName }
                         .map { it.key to it.value.maxOf { it.endUseTime } }
-
 
                     a.forEach {
                         appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
