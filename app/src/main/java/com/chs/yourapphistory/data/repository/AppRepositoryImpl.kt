@@ -20,6 +20,7 @@ import com.chs.yourapphistory.data.db.entity.UsageStateEventEntity
 import com.chs.yourapphistory.data.DataStoreSource
 import com.chs.yourapphistory.data.db.dao.InCompleteAppUsageDao
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
+import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
 import com.chs.yourapphistory.data.paging.GetPagingDailyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyAppInfos
 import com.chs.yourapphistory.data.paging.GetPagingWeeklyTotalAppInfo
@@ -52,26 +53,16 @@ class AppRepositoryImpl(
     private val inCompleteAppUsageDao: InCompleteAppUsageDao
 ) : AppRepository {
 
-    private val mutex: Mutex by lazy { Mutex() }
+//    private val mutex: Mutex by lazy { Mutex() }
 
     private suspend fun getLastEventTime(): Long {
-        val inCompleteMinBeginTime: Long = inCompleteAppUsageDao.getMinBeginTime()
-
         return withContext(Dispatchers.IO) {
-            if (inCompleteMinBeginTime == 0L) {
-                awaitAll(
-                    async { appUsageDao.getLastTime() },
-                    async { appForegroundUsageDao.getLastTime() },
-                    async { appNotifyInfoDao.getLastTime() }
-                ).min()
-            } else {
-                awaitAll(
-                    async { inCompleteMinBeginTime },
-                    async { appUsageDao.getLastTime() },
-                    async { appForegroundUsageDao.getLastTime() },
-                    async { appNotifyInfoDao.getLastTime() }
-                ).min()
-            }
+            awaitAll(
+                async { inCompleteAppUsageDao.getMinBeginTime() },
+                async { appUsageDao.getLastTime() },
+                async { appForegroundUsageDao.getLastTime() },
+                async { appNotifyInfoDao.getLastTime() }
+            ).filter { it > 0L }.minOrNull() ?: 0L
         }.run {
             if (this == 0L) {
                 LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY).atStartOfDayToMillis()

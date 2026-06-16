@@ -185,17 +185,11 @@ class ApplicationInfoSource(
     ): Pair<List<AppUsageEntity>, List<IncompleteAppUsageEntity>> {
         var prevPackageName: String? = null
         var prevClassName: String? = null
-        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, ArrayList<String?>>> =
-            hashMapOf()
+        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, ArrayList<String?>>> = hashMapOf()
         var isScreenOff: Boolean = false
         val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
 
         for (usageEvent in usageEventList) {
-
-//            if (usageEvent.eventTime.toLocalDateTime().toString() == "2025-04-24T10:11:49.420") {
-//                Unit
-//            }
-
             when (usageEvent.eventType) {
                 UsageEvents.Event.ACTIVITY_RESUMED -> {
                     if (installPackageNames.any { it == usageEvent.packageName }) {
