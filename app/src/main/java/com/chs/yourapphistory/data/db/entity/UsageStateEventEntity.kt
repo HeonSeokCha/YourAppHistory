@@ -17,5 +17,6 @@ data class UsageStateEventEntity(
     val packageName: String,
     val className: String?,
     val eventTime: Long,
-    val eventType: Int
+    val eventType: Int,
+    val createTime: Long = System.currentTimeMillis()
 )

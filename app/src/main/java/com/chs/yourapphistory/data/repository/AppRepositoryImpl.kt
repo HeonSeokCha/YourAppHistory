@@ -236,7 +236,11 @@ class AppRepositoryImpl(
                         appInfoDao.updateLastUsedTime(it.first, it.second)
                     }
 
-                    appUsageDao.upsert(*usageList.toTypedArray())
+                    appUsageDao.upsert(
+                        *usageList.filter {
+                            it.beginUseTime > appUsageDao.getLastTime()
+                        }.toTypedArray()
+                    )
 
                     val incompList = this.second.ifEmpty { return@run }
 
@@ -252,8 +256,11 @@ class AppRepositoryImpl(
                     }
                 ).run {
                     val foregroundUsageList = this.first
-                    appForegroundUsageDao.upsert(*foregroundUsageList.toTypedArray())
-
+                    appForegroundUsageDao.upsert(
+                        *foregroundUsageList.filter {
+                            it.beginUseTime > appForegroundUsageDao.getLastTime()
+                        }.toTypedArray()
+                    )
 
                     val a = foregroundUsageList.groupBy { it.packageName }
                         .map { it.key to it.value.maxOf { it.endUseTime } }

@@ -8,5 +8,6 @@ import androidx.room.Entity
 )
 data class AppNotifyInfoEntity(
     val packageName: String,
-    val notifyTime: Long
+    val notifyTime: Long,
+    val createTime: Long = System.currentTimeMillis()
 )
