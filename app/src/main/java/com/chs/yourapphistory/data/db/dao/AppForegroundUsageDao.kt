@@ -16,6 +16,9 @@ abstract class AppForegroundUsageDao : BaseDao<AppForegroundUsageEntity> {
     @Query("DELETE FROM appForegroundUsage WHERE packageName IN(:packageNames)")
     abstract suspend fun deleteFromPackageName(packageNames: List<String>)
 
+    @Query("SELECT * FROM appForegroundUsage WHERE beginUseTime >= :incompleteTime")
+    abstract suspend fun getLastestIncompleteList(incompleteTime: Long): List<AppForegroundUsageEntity>
+
     @Query("""
         SELECT appInfo.packageName,
                appInfo.label,

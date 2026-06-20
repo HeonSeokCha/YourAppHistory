@@ -10,6 +10,7 @@ import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.toLocalDate
 import com.chs.yourapphistory.common.toLocalDateTime
@@ -157,7 +158,7 @@ class ApplicationInfoSource(
                 packageName = it.value.packageName,
                 beginUseTime = it.value.beginUseTime,
                 className = it.key.second,
-                usageType = "BG"
+                usageType = Constants.TYPE_FOREGROUND_USAGE
             )
         }
 
@@ -390,7 +391,7 @@ class ApplicationInfoSource(
                 className = it.value.second.run {
                     if (this.isEmpty()) "" else this.first()
                 },
-                usageType = "FG"
+                usageType = Constants.TYPE_USAGE
             )
         }
 

@@ -179,7 +179,8 @@ class AppRepositoryImpl(
 
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
         val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
-
+        val usageIncompleteTime: Long = inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_USAGE)
+        val foregroundIncompleteTime: Long = inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_FOREGROUND_USAGE)
         withContext(Dispatchers.IO) { inCompleteAppUsageDao.deleteAll() }
 
 //            val rangeList = usageStateEventDao.getAll().map {
@@ -237,8 +238,12 @@ class AppRepositoryImpl(
                     }
 
                     appUsageDao.upsert(
-                        *usageList.filter {
-                            it.beginUseTime > appUsageDao.getLastTime()
+                        *usageList.filter { result ->
+                            result.beginUseTime >= usageIncompleteTime
+                                    && appUsageDao.getLastestIncompleteList(usageIncompleteTime).any {
+                                        result.packageName == it.packageName
+                                                && result.beginUseTime !in it.beginUseTime .. it.endUseTime
+                            }
                         }.toTypedArray()
                     )
 
@@ -257,8 +262,12 @@ class AppRepositoryImpl(
                 ).run {
                     val foregroundUsageList = this.first
                     appForegroundUsageDao.upsert(
-                        *foregroundUsageList.filter {
-                            it.beginUseTime > appForegroundUsageDao.getLastTime()
+                        *foregroundUsageList.filter { result ->
+                            result.beginUseTime >= foregroundIncompleteTime
+                                    && appForegroundUsageDao.getLastestIncompleteList(foregroundIncompleteTime).any {
+                                result.packageName == it.packageName
+                                        && result.beginUseTime !in it.beginUseTime .. it.endUseTime
+                            }
                         }.toTypedArray()
                     )
 

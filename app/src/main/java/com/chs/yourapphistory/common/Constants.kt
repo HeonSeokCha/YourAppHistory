@@ -18,6 +18,9 @@ object Constants {
     val YEAR_DATE_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("yyyy년 M월 d일")
 
     const val TEXT_TITLE_PREVIEW: String = "Title Preview"
+    const val TYPE_FOREGROUND_USAGE: String = "BG"
+    const val TYPE_USAGE: String = "FG"
+
     const val NUMBER_LOADING_COUNT: Int = 1
     const val TAG_WORKER_NAME: String = "app_worker"
     const val PREF_NAME: String = "YourAppPref"
