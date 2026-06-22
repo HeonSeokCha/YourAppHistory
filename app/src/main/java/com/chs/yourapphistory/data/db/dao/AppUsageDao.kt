@@ -94,6 +94,6 @@ abstract class AppUsageDao : BaseDao<AppUsageEntity> {
     @Query("SELECT IFNULL(MAX(endUseTime), 0) FROM appUsage")
     abstract suspend fun getLastTime(): Long
 
-    @Query("SELECT * FROM appUsage WHERE beginUseTime >= :incompleteTime")
+    @Query("SELECT * FROM appUsage WHERE endUseTime >= :incompleteTime")
     abstract suspend fun getLastestIncompleteList(incompleteTime: Long): List<AppUsageEntity>
 }

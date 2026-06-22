@@ -178,9 +178,9 @@ class AppRepositoryImpl(
 //            chsLog("DELETE ALL")
 
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-        val rangeList = applicationInfoSource.getUsageEvent(getLastEventTime())
-        val usageIncompleteTime: Long = inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_USAGE)
-        val foregroundIncompleteTime: Long = inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_FOREGROUND_USAGE)
+        val rangeList = withContext(Dispatchers.IO) { applicationInfoSource.getUsageEvent(getLastEventTime()) }
+        val usageIncompleteTime: Long = withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_USAGE) }
+        val foregroundIncompleteTime: Long = withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_FOREGROUND_USAGE) }
         withContext(Dispatchers.IO) { inCompleteAppUsageDao.deleteAll() }
 
 //            val rangeList = usageStateEventDao.getAll().map {
@@ -217,18 +217,6 @@ class AppRepositoryImpl(
                     if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) {
                         updateFirstCollectDate(usageList.minBy { it.beginUseTime }.beginUseTime)
                     }
-//                    } else {
-//                        inCompleteAppUsageDao.upsert(*incompList.toTypedArray())
-//                    }
-
-//                    inCompleteAppUsageDao.delete(
-//                        *inCompleteAppUsageDao.getListFromType("FG").filter {
-//                            usageList.any { usage ->
-//                                usage.packageName == it.packageName
-//                                        && usage.beginUseTime == it.beginUseTime
-//                            }
-//                        }.toTypedArray()
-//                    )
 
                     val a = usageList.groupBy { it.packageName }
                         .map { it.key to it.value.maxOf { it.endUseTime } }
@@ -279,15 +267,6 @@ class AppRepositoryImpl(
                     }
 
                     if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
-
-//                    inCompleteAppUsageDao.delete(
-//                        *inCompleteAppUsageDao.getListFromType("BG").filter {
-//                            foregroundUsageList.any { usage ->
-//                                usage.packageName == it.packageName
-//                                        && usage.beginUseTime == it.beginUseTime
-//                            }
-//                        }.toTypedArray()
-//                    )
 
                     val incompList = this.second.ifEmpty { return@run }
 
