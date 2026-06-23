@@ -178,10 +178,16 @@ class AppRepositoryImpl(
 //            chsLog("DELETE ALL")
 
         val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
-        val rangeList = withContext(Dispatchers.IO) { applicationInfoSource.getUsageEvent(getLastEventTime()) }
-        val usageIncompleteTime: Long = withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_USAGE) }
-        val foregroundIncompleteTime: Long = withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_FOREGROUND_USAGE) }
+        val rangeList =
+            withContext(Dispatchers.IO) { applicationInfoSource.getUsageEvent(getLastEventTime()) }
+        val usageIncompleteTime: Long =
+            withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_USAGE) }
+        val foregroundIncompleteTime: Long =
+            withContext(Dispatchers.IO) { inCompleteAppUsageDao.getMinBeginTimeFromType(Constants.TYPE_FOREGROUND_USAGE) }
         withContext(Dispatchers.IO) { inCompleteAppUsageDao.deleteAll() }
+
+        chsLog(usageIncompleteTime)
+        chsLog(foregroundIncompleteTime)
 
 //            val rangeList = usageStateEventDao.getAll().map {
 //                AppUsageEventRawInfo(
@@ -225,12 +231,17 @@ class AppRepositoryImpl(
                         appInfoDao.updateLastUsedTime(it.first, it.second)
                     }
 
+                    val b = appUsageDao.getLastestIncompleteList(usageIncompleteTime)
+
+                    chsLog(b.toString())
                     appUsageDao.upsert(
                         *usageList.filter { result ->
                             result.beginUseTime >= usageIncompleteTime
-                                    && appUsageDao.getLastestIncompleteList(usageIncompleteTime).any {
-                                        result.packageName == it.packageName
-                                                && result.beginUseTime !in it.beginUseTime .. it.endUseTime
+                                    && if (b.isEmpty()) true else {
+                                b.any {
+                                    result.packageName == it.packageName
+                                            && result.beginUseTime !in it.beginUseTime..it.endUseTime
+                                }
                             }
                         }.toTypedArray()
                     )
@@ -249,15 +260,6 @@ class AppRepositoryImpl(
                     }
                 ).run {
                     val foregroundUsageList = this.first
-                    appForegroundUsageDao.upsert(
-                        *foregroundUsageList.filter { result ->
-                            result.beginUseTime >= foregroundIncompleteTime
-                                    && appForegroundUsageDao.getLastestIncompleteList(foregroundIncompleteTime).any {
-                                result.packageName == it.packageName
-                                        && result.beginUseTime !in it.beginUseTime .. it.endUseTime
-                            }
-                        }.toTypedArray()
-                    )
 
                     val a = foregroundUsageList.groupBy { it.packageName }
                         .map { it.key to it.value.maxOf { it.endUseTime } }
@@ -265,6 +267,20 @@ class AppRepositoryImpl(
                     a.forEach {
                         appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
                     }
+
+                    val b = appForegroundUsageDao.getLastestIncompleteList(foregroundIncompleteTime)
+
+                    appForegroundUsageDao.upsert(
+                        *foregroundUsageList.filter { result ->
+                            result.beginUseTime >= foregroundIncompleteTime
+                                    && if (b.isEmpty()) true else {
+                                       b.any {
+                                           result.packageName == it.packageName
+                                                   && result.beginUseTime !in it.beginUseTime .. it.endUseTime
+                                       }
+                            }
+                        }.toTypedArray()
+                    )
 
                     if (dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE) == null) return@run
 
