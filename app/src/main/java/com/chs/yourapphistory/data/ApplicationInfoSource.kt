@@ -213,8 +213,8 @@ class ApplicationInfoSource(
                                     },
                                     second = value.second.apply {
                                         if (isScreenOff
-                                            || (value.first.endUseTime == 0L
-                                                    && value.second.any { it == usageEvent.className })
+//                                            || (value.first.endUseTime == 0L
+//                                                    && value.second.any { it == usageEvent.className })
                                         ) {
                                             return@apply
                                         } else {
@@ -271,7 +271,7 @@ class ApplicationInfoSource(
                                 && value.second.count { it == usageEvent.className } > 1
                             ) {
                                 value.second.apply { this.remove((usageEvent.className)) }
-                            } else value.second.apply { this.removeIf { it != usageEvent.className } }
+                            } else value.second
                         )
                     }
                 }

@@ -375,7 +375,7 @@ class AppRepositoryImpl(
 
     override suspend fun getMinDate(): LocalDate {
         return dataStoreSource.getData(Constants.PREF_KEY_FIRST_DATE)?.toLocalDate()
-            ?: LocalDate.now()
+            ?: LocalDate.now().minusDays(Constants.FIRST_COLLECT_DAY)
     }
 
     override suspend fun deleteUsageInfo(packageName: String) {
