@@ -10,14 +10,24 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Scaffold
 import androidx.compose.ui.Modifier
 import androidx.navigation3.runtime.rememberNavBackStack
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
+import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.getUsagePermission
+import com.chs.yourapphistory.presentation.worker.AppWorker
+import org.koin.android.ext.android.inject
+import java.util.concurrent.TimeUnit
 
 class MainActivity : ComponentActivity() {
+
+    private val workManager: WorkManager by inject()
 
     @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        executeWorker()
 
         setContent {
             val backstack = rememberNavBackStack().apply {
@@ -43,5 +53,17 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    private fun executeWorker() {
+        val request = PeriodicWorkRequestBuilder<AppWorker>(15, TimeUnit.MINUTES)
+            .setInitialDelay(1, TimeUnit.MINUTES)
+            .build()
+
+        workManager.enqueueUniquePeriodicWork(
+            Constants.TAG_WORKER_NAME,
+            ExistingPeriodicWorkPolicy.KEEP,
+            request
+        )
     }
 }

@@ -85,6 +85,7 @@ dependencies {
     implementation(libs.bundles.koin)
     implementation(libs.bundles.kotlin)
 
+    implementation(libs.workmanager)
     implementation(libs.lottie)
     implementation(libs.kotlin.serialization)
 

@@ -36,7 +36,7 @@ androidx-navigation3-ui = { module = "androidx.navigation3:navigation3-ui", vers
 androidx-lifecycle-viewmodel-navigation3 = { module = "androidx.lifecycle:lifecycle-viewmodel-navigation3", version.ref = "lifecycleViewmodelNav3" }
 kotlinx-serialization-core = { module = "org.jetbrains.kotlinx:kotlinx-serialization-core", version.ref = "kotlinxSerializationCore" }
 
-#workmanager = "androidx.work:work-runtime-ktx:2.11.2"
+workmanager = "androidx.work:work-runtime-ktx:2.11.2"
 androidX-datastore-preferences = "androidx.datastore:datastore-preferences:1.2.1"
 androidX-room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 androidX-room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
@@ -50,7 +50,7 @@ koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koin" }
 koin-annotation = { module = "io.insert-koin:koin-annotations", version.ref = "koin" }
-#koin-workmananger = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
+koin-workmananger = { module = "io.insert-koin:koin-androidx-workmanager", version.ref = "koin" }
 
 ## Kotlin
 kotlin-coroutine-core = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "kotlin-coroutine" }
@@ -85,7 +85,8 @@ koin = [
     "koin-core",
     "koin-androidx-compose",
     "koin-compose-viewmodel",
-    "koin-annotation"
+    "koin-annotation",
+    "koin-workmananger"
 ]
 
 room = [
