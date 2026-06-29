@@ -12,13 +12,10 @@ import android.os.Build
 import androidx.core.graphics.drawable.toBitmap
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.chsLog
-import com.chs.yourapphistory.common.toLocalDate
-import com.chs.yourapphistory.common.toLocalDateTime
-import com.chs.yourapphistory.data.db.entity.AppForegroundUsageEntity
 import com.chs.yourapphistory.data.db.entity.AppNotifyInfoEntity
-import com.chs.yourapphistory.data.db.entity.AppUsageEntity
-import com.chs.yourapphistory.data.db.entity.IncompleteAppUsageEntity
 import com.chs.yourapphistory.data.model.AppUsageEventRawInfo
+import com.chs.yourapphistory.domain.model.AppUsageInfo
+import com.chs.yourapphistory.domain.model.InCompleteAppUsageInfo
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.koin.core.annotation.Single
@@ -109,17 +106,17 @@ class ApplicationInfoSource(
     fun getAppForeGroundUsageInfoList(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventRawInfo>
-    ): Pair<List<AppForegroundUsageEntity>, List<IncompleteAppUsageEntity>> {
-        val inCompletedUsageList: HashMap<Pair<String, String?>, AppForegroundUsageEntity> =
+    ): Pair<List<AppUsageInfo>, List<InCompleteAppUsageInfo>> {
+        val inCompletedUsageList: HashMap<Pair<String, String?>, AppUsageInfo> =
             hashMapOf()
-        val completedUsageList: ArrayList<AppForegroundUsageEntity> = arrayListOf()
+        val completedUsageList: ArrayList<AppUsageInfo> = arrayListOf()
 
         usageEventList.forEach {
             when (it.eventType) {
                 UsageEvents.Event.FOREGROUND_SERVICE_START -> {
                     if (!installPackageNames.contains(it.packageName)) return@forEach
 
-                    inCompletedUsageList[it.packageName to it.className] = AppForegroundUsageEntity(
+                    inCompletedUsageList[it.packageName to it.className] = AppUsageInfo(
                         packageName = it.packageName,
                         beginUseTime = it.eventTime
                     )
@@ -154,7 +151,7 @@ class ApplicationInfoSource(
 
         val incompUsageEntityList = inCompletedUsageList.map {
             chsLog("${it.key.first} - ${it.value.beginUseTime} : ${it.key.second}")
-            IncompleteAppUsageEntity(
+            InCompleteAppUsageInfo(
                 packageName = it.value.packageName,
                 beginUseTime = it.value.beginUseTime,
                 className = it.key.second,
@@ -183,12 +180,12 @@ class ApplicationInfoSource(
     fun getAppUsageInfoList(
         installPackageNames: List<String>,
         usageEventList: List<AppUsageEventRawInfo>
-    ): Pair<List<AppUsageEntity>, List<IncompleteAppUsageEntity>> {
+    ): Pair<List<AppUsageInfo>, List<InCompleteAppUsageInfo>> {
         var prevPackageName: String? = null
         var prevClassName: String? = null
-        val inCompletedUsageList: HashMap<String, Pair<AppUsageEntity, ArrayList<String?>>> = hashMapOf()
+        val inCompletedUsageList: HashMap<String, Pair<AppUsageInfo, ArrayList<String?>>> = hashMapOf()
         var isScreenOff: Boolean = false
-        val completedUsageList: ArrayList<AppUsageEntity> = arrayListOf()
+        val completedUsageList: ArrayList<AppUsageInfo> = arrayListOf()
 
         for (usageEvent in usageEventList) {
             when (usageEvent.eventType) {
@@ -196,7 +193,7 @@ class ApplicationInfoSource(
                     if (installPackageNames.any { it == usageEvent.packageName }) {
                         if (inCompletedUsageList[usageEvent.packageName] == null) {
                             inCompletedUsageList[usageEvent.packageName] =
-                                AppUsageEntity(
+                                AppUsageInfo(
                                     packageName = usageEvent.packageName,
                                     beginUseTime = usageEvent.eventTime
                                 ) to arrayListOf(usageEvent.className)
@@ -245,7 +242,7 @@ class ApplicationInfoSource(
                         if (installPackageNames.none { it == usageEvent.packageName }) continue
 
                         inCompletedUsageList[usageEvent.packageName] =
-                            AppUsageEntity(
+                            AppUsageInfo(
                                 packageName = usageEvent.packageName,
                                 beginUseTime = usageEvent.eventTime
                             ) to arrayListOf()
@@ -385,7 +382,7 @@ class ApplicationInfoSource(
 
         val incompUsageEntityList = inCompletedUsageList.map {
 //            chsLog("${it.key} - ${it.value.first.beginUseTime} : ${it.value.second}")
-            IncompleteAppUsageEntity(
+            InCompleteAppUsageInfo(
                 packageName = it.key,
                 beginUseTime = it.value.first.beginUseTime,
                 className = it.value.second.run {

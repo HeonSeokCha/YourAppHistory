@@ -15,5 +15,5 @@ data class IncompleteAppUsageEntity(
     val usageType: String,
     val beginUseTime: Long,
     val className: String?,
-    val createTime: Long = System.currentTimeMillis()
+    val createTime: Long
 )

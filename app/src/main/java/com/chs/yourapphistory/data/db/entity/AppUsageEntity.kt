@@ -16,6 +16,7 @@ import androidx.room.Index
 data class AppUsageEntity(
     val packageName: String,
     val beginUseTime: Long,
-    val endUseTime: Long = 0L,
-    val createTime: Long = System.currentTimeMillis()
+    val endUseTime: Long,
+    val beginQueryTime: Long,
+    val createTime: Long
 )
