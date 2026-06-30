@@ -183,20 +183,22 @@ class AppRepositoryImpl(
 
             val installPackageNames = applicationInfoSource.getInstalledLauncherPackageNameList()
             val lastEventTime = getLastEventTime()
-            val rangeList =
-                withContext(Dispatchers.IO) { applicationInfoSource.getUsageEvent(lastEventTime) }
-            val usageIncompleteTime: Long =
-                withContext(Dispatchers.IO) {
-                    inCompleteAppUsageDao.getMinBeginTimeFromType(
-                        Constants.TYPE_USAGE
-                    )
-                }
-            val foregroundIncompleteTime: Long =
-                withContext(Dispatchers.IO) {
-                    inCompleteAppUsageDao.getMinBeginTimeFromType(
-                        Constants.TYPE_FOREGROUND_USAGE
-                    )
-                }
+            val rangeList = withContext(Dispatchers.IO) {
+                applicationInfoSource.getUsageEvent(lastEventTime)
+            }
+
+            val usageIncompleteTime: Long = withContext(Dispatchers.IO) {
+                inCompleteAppUsageDao.getMinBeginTimeFromType(
+                    Constants.TYPE_USAGE
+                ).takeIf { it > 0L } ?: appUsageDao.getLastTime()
+            }
+
+            val foregroundIncompleteTime: Long = withContext(Dispatchers.IO) {
+                inCompleteAppUsageDao.getMinBeginTimeFromType(
+                    Constants.TYPE_FOREGROUND_USAGE
+                ).takeIf { it > 0L } ?: appForegroundUsageDao.getLastTime()
+            }
+
             withContext(Dispatchers.IO) { inCompleteAppUsageDao.deleteAll() }
 
             chsLog(usageIncompleteTime)
@@ -251,19 +253,17 @@ class AppRepositoryImpl(
                         appUsageDao.upsert(
                             *usageList.filter { result ->
                                 result.beginUseTime >= usageIncompleteTime
-                                        && if (b.isEmpty()) true else {
-                                    b.any {
+                                        && b.takeIf { it.isNotEmpty() }
+                                    ?.none {
                                         result.packageName == it.packageName
-                                                && result.beginUseTime !in it.beginUseTime..it.endUseTime
-                                    }
-                                }
-                            }
-                                .map {
-                                    it.toAppUsageEntity(
-                                        beginQueryTime = lastEventTime,
-                                        System.currentTimeMillis()
-                                    )
-                                }.toTypedArray()
+                                                && result.beginUseTime in it.beginUseTime..it.endUseTime
+                                    } ?: true
+                            }.map {
+                                it.toAppUsageEntity(
+                                    beginQueryTime = lastEventTime,
+                                    System.currentTimeMillis()
+                                )
+                            }.toTypedArray()
                         )
 
                         val incompList = this.second.ifEmpty { return@run }
@@ -292,18 +292,16 @@ class AppRepositoryImpl(
                             appInfoDao.updateLastForegroundUsedTime(it.first, it.second)
                         }
 
-                        val b =
-                            appForegroundUsageDao.getLastestIncompleteList(foregroundIncompleteTime)
+                        val b = appForegroundUsageDao.getLastestIncompleteList(foregroundIncompleteTime)
 
                         appForegroundUsageDao.upsert(
                             *foregroundUsageList.filter { result ->
                                 result.beginUseTime >= foregroundIncompleteTime
-                                        && if (b.isEmpty()) true else {
-                                    b.any {
+                                        && b.takeIf { it.isNotEmpty() }
+                                    ?.none {
                                         result.packageName == it.packageName
-                                                && result.beginUseTime !in it.beginUseTime..it.endUseTime
-                                    }
-                                }
+                                                && result.beginUseTime in it.beginUseTime..it.endUseTime
+                                    } ?: true
                             }.map {
                                 it.toAppForegroundUsageEntity(
                                     beginQueryTime = lastEventTime,
