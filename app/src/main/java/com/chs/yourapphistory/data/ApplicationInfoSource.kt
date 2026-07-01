@@ -385,9 +385,7 @@ class ApplicationInfoSource(
             InCompleteAppUsageInfo(
                 packageName = it.key,
                 beginUseTime = it.value.first.beginUseTime,
-                className = it.value.second.run {
-                    if (this.isEmpty()) "" else this.first()
-                },
+                className = it.value.second.takeIf { it.isNotEmpty() }?.first() ?: "",
                 usageType = Constants.TYPE_USAGE
             )
         }

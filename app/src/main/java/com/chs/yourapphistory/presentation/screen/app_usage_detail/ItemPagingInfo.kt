@@ -268,39 +268,41 @@ fun ItemWeeklyPagingInfo(
         pageCount = { weeklyPagingItems.itemCount }
     )
 
-    val allPagerStates = listOf(
-        weeklyUsagePager,
-        weeklyForegroundUsagePager,
-        weeklyNotifyPager,
-        weeklyLaunchPager
-    )
+    LaunchedEffect(weeklyUsagePager.currentPage, weeklyUsagePager.isScrollInProgress) {
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        if (weeklyUsagePager.isScrollInProgress) return@LaunchedEffect
+        val idx = (weeklyUsagePager.currentPage / 5) to (weeklyUsagePager.currentPage % 5)
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
 
-    allPagerStates.forEach { pagerState ->
-        LaunchedEffect(
-            pagerState.currentPage,
-            pagerState.isScrollInProgress
-        ) {
-            if (pagerState.isScrollInProgress) return@LaunchedEffect
-            val newPage = pagerState.currentPage
+    LaunchedEffect(weeklyForegroundUsagePager.currentPage, weeklyForegroundUsagePager.isScrollInProgress) {
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        if (weeklyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
+        val idx = (weeklyForegroundUsagePager.currentPage / 5) to (weeklyForegroundUsagePager.currentPage % 5)
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
 
-            if (state.weekCurrentPage != newPage) {
-                val idx = pagerState.run { (newPage / 5) to (newPage % 5) }
-                onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
-            }
+    LaunchedEffect(weeklyNotifyPager.currentPage, weeklyNotifyPager.isScrollInProgress) {
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        if (weeklyNotifyPager.isScrollInProgress) return@LaunchedEffect
+        val idx = (weeklyNotifyPager.currentPage / 5) to (weeklyNotifyPager.currentPage % 5)
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
 
-            allPagerStates
-                .filter { it !== pagerState }
-                .forEach { other ->
-                    if (other.currentPage == newPage) return@forEach
-                    launch { other.scrollToPage(newPage) }
-                }
-        }
+    LaunchedEffect(weeklyLaunchPager.currentPage, weeklyLaunchPager.isScrollInProgress) {
+        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
+        if (weeklyLaunchPager.isScrollInProgress) return@LaunchedEffect
+        val idx = (weeklyLaunchPager.currentPage / 5) to (weeklyLaunchPager.currentPage % 5)
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
     }
 
     LaunchedEffect(state.weekCurrentPage) {
-        allPagerStates.forEach { pagerState ->
-            launch { pagerState.scrollToPage(state.weekCurrentPage) }
-        }
+        awaitAll(
+            async { weeklyUsagePager.scrollToPage(state.weekCurrentPage) },
+            async { weeklyForegroundUsagePager.scrollToPage(state.weekCurrentPage) },
+            async { weeklyNotifyPager.scrollToPage(state.weekCurrentPage) },
+            async { weeklyLaunchPager.scrollToPage(state.weekCurrentPage) }
+        )
     }
 
     Column(

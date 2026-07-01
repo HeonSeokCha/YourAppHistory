@@ -105,10 +105,11 @@ fun AppUsageDetailScreen(
     LaunchedEffect(weekPagerState.currentPage, weekPagerState.isScrollInProgress) {
         if (state.weekList.isEmpty()) return@LaunchedEffect
         if (weekPagerState.isScrollInProgress) return@LaunchedEffect
-        onIntent(
-            AppUsageDetailIntent.OnChangeTargetWeekIdx(weekPagerState.currentPage to state.weekIdx.second)
-        )
+//        onIntent(
+//            AppUsageDetailIntent.OnChangeTargetWeekIdx(weekPagerState.currentPage to state.weekIdx.second)
+//        )
     }
+
     LaunchedEffect(state.weekIdx) {
         val page = state.weekIdx.run { (this.first * 5) + this.second }
 
