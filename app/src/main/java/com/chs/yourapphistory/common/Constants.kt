@@ -8,7 +8,7 @@ import java.time.format.DateTimeFormatter
 object Constants {
     const val FIRST_COLLECT_DAY: Long = 8L
     const val PAGING_DAY: Long = 7L
-    const val PAGING_WEEK: Long = 3L
+    const val PAGING_WEEK: Long = 1L
     const val DELAY_SEARCH: Long = 500L
     val SIMPLE_HOUR_FORMAT: DateTimeFormatter = DateTimeFormatter.ofPattern("a h")
     val SIMPLE_HOUR_FORMAT_SIMPLE: DateTimeFormatter = DateTimeFormatter.ofPattern("h시")

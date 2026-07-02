@@ -19,6 +19,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.paging.compose.LazyPagingItems
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.convertToRealUsageHour
 import com.chs.yourapphistory.common.convertToRealUsageMinutes
 import com.chs.yourapphistory.common.convertToRealUsageTime
@@ -268,34 +269,6 @@ fun ItemWeeklyPagingInfo(
         pageCount = { weeklyPagingItems.itemCount }
     )
 
-    LaunchedEffect(weeklyUsagePager.currentPage, weeklyUsagePager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (weeklyUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = (weeklyUsagePager.currentPage / 5) to (weeklyUsagePager.currentPage % 5)
-        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
-    }
-
-    LaunchedEffect(weeklyForegroundUsagePager.currentPage, weeklyForegroundUsagePager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (weeklyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
-        val idx = (weeklyForegroundUsagePager.currentPage / 5) to (weeklyForegroundUsagePager.currentPage % 5)
-        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
-    }
-
-    LaunchedEffect(weeklyNotifyPager.currentPage, weeklyNotifyPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (weeklyNotifyPager.isScrollInProgress) return@LaunchedEffect
-        val idx = (weeklyNotifyPager.currentPage / 5) to (weeklyNotifyPager.currentPage % 5)
-        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
-    }
-
-    LaunchedEffect(weeklyLaunchPager.currentPage, weeklyLaunchPager.isScrollInProgress) {
-        if (state.dateList.isEmpty() || state.isDateLoading) return@LaunchedEffect
-        if (weeklyLaunchPager.isScrollInProgress) return@LaunchedEffect
-        val idx = (weeklyLaunchPager.currentPage / 5) to (weeklyLaunchPager.currentPage % 5)
-        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
-    }
-
     LaunchedEffect(state.weekCurrentPage) {
         awaitAll(
             async { weeklyUsagePager.scrollToPage(state.weekCurrentPage) },
@@ -303,6 +276,41 @@ fun ItemWeeklyPagingInfo(
             async { weeklyNotifyPager.scrollToPage(state.weekCurrentPage) },
             async { weeklyLaunchPager.scrollToPage(state.weekCurrentPage) }
         )
+    }
+
+    LaunchedEffect(weeklyUsagePager.currentPage, weeklyUsagePager.isScrollInProgress) {
+        if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
+        if (weeklyUsagePager.isScrollInProgress) return@LaunchedEffect
+        if (weeklyUsagePager.currentPage == state.weekCurrentPage) return@LaunchedEffect
+        val idx = weeklyUsagePager.run { (this.currentPage / 5) to (this.currentPage % 5) }
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
+
+    LaunchedEffect(
+        weeklyForegroundUsagePager.currentPage,
+        weeklyForegroundUsagePager.isScrollInProgress
+    ) {
+        if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
+        if (weeklyForegroundUsagePager.isScrollInProgress) return@LaunchedEffect
+        if (weeklyForegroundUsagePager.currentPage == state.weekCurrentPage) return@LaunchedEffect
+        val idx = weeklyForegroundUsagePager.run { (this.currentPage / 5) to (this.currentPage % 5) }
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
+
+    LaunchedEffect(weeklyNotifyPager.currentPage, weeklyNotifyPager.isScrollInProgress) {
+        if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
+        if (weeklyNotifyPager.isScrollInProgress) return@LaunchedEffect
+        if (weeklyNotifyPager.currentPage == state.weekCurrentPage) return@LaunchedEffect
+        val idx = weeklyNotifyPager.run { (this.currentPage / 5) to (this.currentPage % 5) }
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
+    }
+
+    LaunchedEffect(weeklyLaunchPager.currentPage, weeklyLaunchPager.isScrollInProgress) {
+        if (state.weekList.isEmpty() || state.isWeekLoading) return@LaunchedEffect
+        if (weeklyLaunchPager.isScrollInProgress) return@LaunchedEffect
+        if (weeklyLaunchPager.currentPage == state.weekCurrentPage) return@LaunchedEffect
+        val idx = weeklyLaunchPager.run { (this.currentPage / 5) to (this.currentPage % 5) }
+        onIntent(AppUsageDetailIntent.OnChangeTargetWeekIdx(idx))
     }
 
     Column(

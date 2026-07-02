@@ -5,6 +5,7 @@ import androidx.paging.PagingState
 import com.chs.yourapphistory.common.Constants
 import com.chs.yourapphistory.common.atEndOfDayToMillis
 import com.chs.yourapphistory.common.calcDayUsedList
+import com.chs.yourapphistory.common.chsLog
 import com.chs.yourapphistory.common.containsWeek
 import com.chs.yourapphistory.common.reverseDateUntilWeek
 import com.chs.yourapphistory.common.toMillis
@@ -27,12 +28,7 @@ class GetPagingWeeklyAppInfos(
     private val appForegroundDao: AppForegroundUsageDao,
     private val appNotifyInfoDao: AppNotifyInfoDao,
 ) : PagingSource<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>>() {
-    override fun getRefreshKey(state: PagingState<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>>): LocalDate? {
-        return state.anchorPosition?.let { position ->
-            val page = state.closestPageToPosition(position)
-            page?.prevKey?.minusDays(1) ?: page?.nextKey?.plusDays(1)
-        }
-    }
+    override fun getRefreshKey(state: PagingState<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>>): LocalDate? = null
 
     override suspend fun load(params: LoadParams<LocalDate>): LoadResult<LocalDate, Map<UsageEventType, List<Pair<LocalDate, Int>>>> {
         val pageDate: LocalDate = (params.key ?: LocalDate.now()).run {
