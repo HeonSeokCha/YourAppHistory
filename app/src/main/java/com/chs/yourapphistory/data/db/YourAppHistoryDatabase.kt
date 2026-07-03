@@ -1,10 +1,9 @@
 package com.chs.yourapphistory.data.db
 
 import android.content.Context
-import androidx.room.AutoMigration
-import androidx.room.Database
-import androidx.room.Room
-import androidx.room.RoomDatabase
+import androidx.room3.Database
+import androidx.room3.Room
+import androidx.room3.RoomDatabase
 import com.chs.yourapphistory.data.db.dao.AppForegroundUsageDao
 import com.chs.yourapphistory.data.db.dao.AppInfoDao
 import com.chs.yourapphistory.data.db.dao.AppNotifyInfoDao

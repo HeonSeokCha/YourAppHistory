@@ -1,8 +1,8 @@
 package com.chs.yourapphistory.data.db.dao
 
-import androidx.room.Dao
-import androidx.room.MapColumn
-import androidx.room.Query
+import androidx.room3.Dao
+import androidx.room3.MapColumn
+import androidx.room3.Query
 import com.chs.yourapphistory.data.db.entity.AppUsageEntity
 import com.chs.yourapphistory.data.model.AppInfoData
 

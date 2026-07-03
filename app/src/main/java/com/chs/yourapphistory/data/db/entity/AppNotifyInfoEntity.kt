@@ -1,6 +1,6 @@
 package com.chs.yourapphistory.data.db.entity
 
-import androidx.room.Entity
+import androidx.room3.Entity
 
 @Entity(
     tableName = "appNotifyInfo",

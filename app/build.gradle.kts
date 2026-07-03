@@ -10,7 +10,7 @@ plugins {
     alias(libs.plugins.koin.compiler)
 }
 
-room {
+room3 {
     schemaDirectory("$projectDir/schemas")
 }
 
@@ -81,7 +81,7 @@ kotlin {
 dependencies {
     coreLibraryDesugaring(libs.desugar.jdk.libs)
     implementation(libs.bundles.compose)
-    implementation(libs.bundles.room)
+    implementation(libs.androidX.room.runtime)
     implementation(libs.bundles.koin)
     implementation(libs.bundles.kotlin)
 
